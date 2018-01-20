@@ -601,7 +601,10 @@ public class ActionProcessor {
 		return result;
 	}
 	
+	
+	
 	public String getFrontPageMessage(Hashtable<String, String[]> args){
+		
 		Gson json = new Gson();
 		ChbDBridge chbdb = new ChbDBridge();
 		String result = "";
@@ -615,7 +618,10 @@ public class ActionProcessor {
 		try {
 			ic = new InitialContext();
 			String rf = (String) ic.lookup("root-folder");
+			
+			
 			File frontPageFile = new File(rf+System.getProperty("file.separator")+"config"+System.getProperty("file.separator")+"frontpage.config");
+			
 			if(!frontPageFile.exists()){
 				frontPageFile.createNewFile();
 			}
