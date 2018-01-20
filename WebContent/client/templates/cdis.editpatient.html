@@ -246,19 +246,19 @@ patientObj = prepareData(patientObj);
 //$("#radio-deceased").buttonset();
 $("#dob-value").datepicker({
     changeMonth: true,
-    yearRange: "1900:2016",
+    yearRange: "1900:"+moment().year(),
     dateFormat: "yy-mm-dd",
     changeYear: true
   });
 $("#dod-value").datepicker({
     changeMonth: true,
-    yearRange: "1900:2016",
+    yearRange: "1900:"+moment().year(),
     dateFormat: "yy-mm-dd",
     changeYear: true
   });
 $("#ddate-value").datepicker({
     changeMonth: true,
-    yearRange: "1900:2016",
+    yearRange: "1900:"+moment().year(),
     dateFormat: "yy-mm-dd",
     changeYear: true
   });
