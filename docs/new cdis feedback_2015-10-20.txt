@@ -1,0 +1,84 @@
+Todos CDIS
+
+1 first page the same
+2  use logo cree\
+search cdis 
+criteria in column
+buttons to left 
+rule bqnd or jbnqa  exists =? is cree 
+
+bigger buttons
+
+non cree = cree leaving outside
+leqve outside all non cree patienys
+
+
+dashboard 
+reports
+1 patients per comunity
+new patients per year per commiunity
+diabetes and Eeeyou Isgi
+
+add current date in number of patients (as of = -)
+Total (only tm1 and tm2)
+precentage from population (data)
+david send population data
+no ratio for m f
+just m and f
+first table total and percentage
+second table male female total percentage
+
+
+2. table 
+
+ of male female 
+ add total of number and percentage of population
+ 
+ 2 table a1c 
+ per community and tottal
+
+  less 7.0  0.07 percentage from total of community
+  7.0 8.5
+  more then 8.5
+  bar or pie chart
+  
+ distribution age
+ less than 20 
+ 20 - 40
+ 40 60
+  >60
+per community and all
+
+total   and percentage out of total population (david provide population data)
+
+settings page population data entry
+
+
+patient dashboad date of diag
+
+change name sectons like old ones
+
+take out icons
+
+abc 
+a1c
+red yellow green on a1c
+lipids
+ac ratio
+data button more obvious
+ogtt not show  only in reports
+open a1c detail open
+open graphs in acordion
+
+november 6 tentative
+
+
+
+
+  
+ 
+ 
+ 
+ 
+ 
+ 3 age table 

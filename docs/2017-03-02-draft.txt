@@ -1,0 +1,21 @@
+import table
+
+idimport
+dateimport
+location
+nopatients
+noupdates
+noinserts
+
+reports
+
+{
+	"id":"REP1",
+	"type":"graph",
+	"title":"Report 1",
+	"generated":"2015-10-09 14:34:23",
+	"owner":"System",
+	"graphtype":"bar",
+	"subcriteria":[],
+	"criteria":[]
+}

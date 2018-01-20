@@ -1,0 +1,136 @@
+Jan 27, 2017
+
+CDIS changes suggestions:  
+
+1- Add text of disclaimer to “notes”
+
+   “The Notes section in CDIS is provided to share information between HCPs.   The CDIS Patient 
+
+Notes does not replace documentation in the chart.  The CDIS is not a medicolegal document.”
+
+
+
+2- Add a pop up option  if a note is written, to ensure the receiver sees it.   And a “file” option 
+
+when the note has been seen.  
+
+
+
+
+3-  Make top window with demographics smaller, to create increase focus and space on graphs.  Or 
+
+readjust GUI to make graphs wider…  
+
+
+
+4- In Glu section– have table open  as default  for both A1C and glu – check w Charlie 
+
+
+
+
+5- Cramped dates on graphs, make dates hard to read.   Either make max of 5 yrs data,   or   change 
+
+format of dates (to two lines   01-             instead of one line that is cramped   (01-2017)
+
+                                                     2017 
+
+
+
+6- When search for patient,  no order of charts when searching by chart #.   i.e  chart 27 (RAMQ 
+
+FLOO)  hard to find,  shows up after multiple other charts.      Chart start with the lowest chart # 
+
+to the highest ,   if possible) 
+
+
+
+7- In the large graph of all Glu results ,  the target and normal values are reversed..
+
+
+
+8- In all the glu graphs,  the highest value at the top of the graph ,  the value is often not included.
+
+     (i.e.  chart # 686)  - solutioin – add 10% padding on top value
+
+
+
+9- How is PCR upload doing?  Please send David email on who contacted and when,  
+
+
+
+10- Edit patient page -  medic to MD 
+
+
+
+
+Predefined reports: 
+
+In number of pt per type: 
+
+        Remove “diabetes”,   change diabetes type preDM to   PreDM,  and type GDM to   previous 
+
+GDM.  
+
+Remove @patients per gender, both of them.
+
+Option to choose by region or community.
+
+
+Option to choose whole CDIS or DM1+2
+--All diabetes patients or Diabetes Patients with Type1 and Type 2
+
+
+
+Prevalence 
+
+
+Report
+Prevalance of diabetes by ages group
+Choose type of Diabetes " all ot 1+2
+Choose Comunity or all comunities
+
+
+Report by age, and  age groups (column)( 0-9, 10-19,  20 – 29,  30- 39, 40-49, 50-59, 60-69,  >70y 
+
+)
+
+Report by A1C   and A1C groups   (0.00 – 0.065,   0.066- 0.070,    0.071- 0.085,  0.086 – 0.100, > 
+
+0.100) 
+
+
+Report by duration of diabetes (date today to date of last diagnosis) and duration groups.   (0-
+
+0.99 yr,   1-4.99 yrs,  5-9.99 yrs,   10- 15 yrs,  15-20,   > 20  )
+
+  
+
+Report on RENAL – GFR   and by GFR group  (>60  stage 1or2,   45-60 stage 3B , 30-44 stage 3A,   
+
+15-29  stage 4,    < 15  stage 5  )
+
+
+
+Report on Albuminuria -  by ACR and PCR ,  and groups ( 
+
+
+ACR < 2.0 or PCR < 3.0 mg/mmol   = normal ,   
+ACR 2.0-20  or  PCR 3.0 – 30     = microalbuminuria ,    
+ACR 20.1 – 70 ,   PCR 30 – 100   = overt proteinuria,   
+ACR > 70,   PCR > 100    nephrotic syndrome. 
+
+
+
+Report on lipids     all LDL,  by groups.   ( LDL <2.0,    LDL  2.1-2.5,     2.6 –4.9,   > 5.0 )   
+
+
+
+The  groups can be in a column graph. 
+
+
+When chose a specific community,    provide comparison to regional data as well (Is this hard?)
+
+
+Thanks!  
+
+David

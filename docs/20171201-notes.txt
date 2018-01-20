@@ -1,0 +1,101 @@
+CLIENT REQUESTS
+
+Reunion 08-11-2017
+
+subscribe cdis   - add new user   DONE
+
+md acces to all communities
+
+expand button on abc graphs   DONE
+
+send users list to david and helen  DONE
+
+button printer for graphs in reports  DONE
+
+
+patient record  = patient summary  DONE
+
+add button menus on abc graphs  DONE
+add EGFR graph DONE
+
+blood presure as table beside egfr  DONE
+
+
+whit full cdis option DONE
+blood presure new form to add values sbp/dbp  + date. DONE
+
+Clinical visits = clinical / screening  DONE
+
+in md value = unit ex:  episodes per month  for hypo glicemia
+
+neuropathy : normal () - abnormal ()    delete old data   with dates default is nothing no selection
+dafault to today DONE
+
+when abnormal  add date to any neuropathy (first abnormal) – complications
+
+2 guides clinical visits (receive from david)
+witht itles
+
+visual foot  – value = result
+
+Complications = Existing complications
+Phisical =spell wrong
+
+
+blood pressure
+
+weght 
+height
+neuropathy screening – group  visual foot + 10 g monofin  change to any DONE
+retinopathy   normal abnormal      + date  if abnormal - -any retinopathi n in conplications - date DONE
+
+
+and bp  
+smoker
+phisical
+
+
+Complications group1 = rethinopathy DONE
+gr 2 = nephropathy
+gr 3 = neuropathy 
+gr4 = macro vascular
+
+erctile goes to gr 4 DONE
+all dates
+
+
+Depression screen = dstress/ depression screening DONE
+happyness skill as guides DONE
+
+A1C conversion table - glucose section
+
+direct users requests to helen 
+
+
+####################################################
+TODOS
+####################################################
+
+1. do widgets  engine and arrage them on page 3 resolutions 1366 1600 1920 (most used worldwide - 90%)
+2. integrate bootstrap
+3. 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

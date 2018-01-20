@@ -1,0 +1,678 @@
+<div class="pagebody">
+	<div class="cdisbody_addpatient uss">
+		<div class="section-header">
+			<span class="section-title">Add New Patient</span>
+		</div>
+		
+		<div id="errortext-patient" class="errormessage"></div>
+		<form name="addpatient" id="addpatient-form" class="patient-info">
+			<table border="0" width="100%">
+			<tr>
+				<td valign="top">
+					<table border="0">
+						<tr>
+							<td class="label-addpatient">RAMQ Number :</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="ramq" id="ramq-value" />
+								</div>
+								
+							</td>
+						</tr>
+						<tr>
+							<td class="label-addpatient">IPM :</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="giu" id="ipm-value" />
+								</div>
+								
+							</td>
+						</tr>
+						<tr>
+							<td class="label-addpatient">Chart Number :</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="chart" id="chart-value" />
+								</div>
+								
+							</td>
+						</tr>
+						<tr style="display:none;">
+							<td class="label-addpatient">JBQBN :</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="jbnqa" id="jbnqa-value"/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="label-addpatient">Band :</td>
+							<td>
+								<div class="textField">
+								<input type="text" name="band" id="band-value" />
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" style="padding:5px;">
+								<div id="radio-sex" class="btn-group" data-toggle="buttons">
+									<label for="male-value" class="btn btn-primary">
+										<input type="radio" name="sex" id="male-value" value="1" class="radioField"/>Male
+									</label>
+									
+									<label for="female-value" class="btn btn-primary">
+										<input type="radio" name="sex" id="female-value" value="2" class="radioField"/>Female
+									</label>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td colspan="2" style="padding:5px;">
+								<div id="radio-iscree" class="btn-group" data-toggle="buttons">
+									
+									<label for="cree-value" class="btn btn-primary">
+										<input type="radio" name="iscree" id="cree-value" value="1" class="radioField"/>Cree
+									</label>
+									
+									<label for="noncree-value" class="btn btn-primary">
+										<input type="radio" name="iscree" id="noncree-value" value="0" class="radioField"/>Non Cree
+									</label>
+								</div>
+							</td>
+						</tr>
+						<tr><td colspan="2" style="height:20px;"></td></tr>
+						
+					</table>
+					<table cellspacing="0" cellpadding="0" class="diabet-addpatient">
+						<tr>
+							<td class="label-addpatient ">Type of diabetes :</td>
+							<td ><select name="dtype" id="dtype-value" class="selectField"></select></td>
+						</tr>
+						<tr>
+							<td class="label-addpatient">Date of diagnosis:</td>
+							<td >
+								<div class="textField">
+									<input type="text" name="ddate" id="ddate-value"><i class="fa fa-calendar" aria-hidden="true"></i>
+								</div>
+								<input type="hidden" name="diabetcode" id="diabetcode-value"/>
+								<input type="hidden" name="diabetidvalue" id="diabetidvalue-value"/>
+							</td>
+						</tr>
+					</table>
+				</td>
+				<td valign="top">
+					<table border="0">
+						<tr><td class="label-addpatient">First Name :</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="fname" id="fname-value"/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="label-addpatient">Last Name :</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="lname" id="lname-value"/>
+								</div>
+							</td>
+						</tr>
+						<tr style="display:none;"><td class="label-addpatient">Mother First Name :</td><td><input type="text" name="mfname" id="mfname-value" class="textField"/></td></tr>
+						<tr style="display:none;"><td class="label-addpatient">Mother Last Name :</td><td><input type="text" name="mlname" id="mlname-value" class="textField"/></td></tr>
+						<tr style="display:none;"><td class="label-addpatient">Father First Name :</td><td><input type="text" name="pfname" id="pfname-value" class="textField"/></td></tr>
+						<tr style="display:none;"><td class="label-addpatient">Father Last Name :</td><td><input type="text" name="plname" id="plname-value" class="textField"/></td></tr>
+						<tr>
+							<td class="label-addpatient">Date of birth :</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="dob" id="dob-value"/><i class="fa fa-calendar" aria-hidden="true"></i>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="label-addpatient">Phone :</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="phone" id="phone-value"/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td class="label-addpatient">Community :</td>
+							<td>
+								<select name="idcommunity" id="idcommunity-value" class="selectField">
+								</select>
+							</td>
+						</tr>
+						<tr style="padding:5px;">
+							<td class="label-addpatient">Deceased :</td>
+							<td>
+							<div id="radio-deceased" class="btn-group" data-toggle="buttons">
+								
+								<label for="deceased-yes-value" class="btn btn-primary">
+									<input type="radio" name="deceased" id="deceased-yes-value" value="1" class="radioField"/>Yes
+								</label>
+								
+								<label for="deceased-no-value" class="btn btn-primary">
+									<input type="radio" name="deceased" id="deceased-no-value" value="0" class="radioField"/>No
+								</label>
+							</div>
+						</td>
+					</tr>
+						<tr><td colspan="2">
+							<div id="deceased-section">
+								<table>
+									<tr>
+										<td class="label-addpatient">Date of death :</td>
+										<td>
+											<div class="textField">
+												<input type="text" name="dod" id="dod-value"/><i class="fa fa-calendar" aria-hidden="true"></i>
+											</div>	
+										</td>
+									</tr>
+									<tr>
+										<td class="label-addpatient">Date cause :</td>
+										<td>
+											<div class="textField">
+												<input type="text" name="dcause" id="dcause-value"/>
+											</div>
+										</td>
+									</tr>	
+								</table>
+							</div>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td colspan=2>
+					<table id="hcp-edit" width="100%" border=0>
+						<tr>
+							<td colspan=2 ><b>Patient`s Health Care Workers</b></td>
+							<td>CHR</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="hcp-chr" id="chr"/>
+								</div>
+								<input type="hidden" name="chrid" id="chrid"/>
+							</td>
+							<td>MD</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="hcp-md" id="md"/>
+								</div>
+								<input type="hidden" name="mdid" id="mdid"/>
+							</td>
+						</tr>
+						<tr>
+							<td>Nurse</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="hcp-nur" id="nur"/>
+								</div>
+								<input type="hidden" name="nurid" id="nurid"/>
+							</td>
+							<td>Nutritionist</td>
+							<td>
+								<div class="textField">
+									<input type="text" name="hcp-nut" id="nut"/>
+								</div>
+								<input type="hidden" name="nutid" id="nutid"/></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+			
+			<!--  
+			<table border="0" width="100%">
+				<tr>
+					<td valign="top">
+						<table border="0">
+							<tr>
+								<td class="label-addpatient">RAMQ Number :</td>
+								<td><input type="text" name="ramq" id="ramq-value" class="textField"/></td>
+							</tr>
+							<tr>
+								<td class="label-addpatient">IPM :</td>
+								<td><input type="text" name="giu" id="ipm-value" class="textField"/></td>
+							</tr>
+							<tr>
+								<td class="label-addpatient">Chart Number :</td>
+								<td><input type="text" name="chart" id="chart-value" class="textField"/></td>
+							</tr>
+							<tr  style="display:none;">
+								<td class="label-addpatient">JBQBN :</td>
+								<td><input type="text" name="jbnqa" id="jbnqa-value" class="textField"/></td>
+							</tr>
+							<tr>
+								<td class="label-addpatient">Band :</td>
+								<td><input type="text" name="band" id="band-value" class="textField"/></td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div id="radio-sex">
+										<input type="radio" name="sex" id="male-value" value="1" class="radioField"/><label for="male-value">Male</label>
+										<input type="radio" name="sex" id="female-value" value="2" class="radioField"/><label for="female-value">Female</label>
+									</div>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">
+									<div id="radio-iscree">
+										<input type="radio" name="iscree" id="cree-value" value="1" class="radioField"/><label for="cree-value">Cree</label>
+										<input type="radio" name="iscree" id="noncree-value" value="0" class="radioField"/><label for="noncree-value">Non Cree</label>
+									</div>
+								</td>
+							</tr>
+							<tr><td colspan="2" style="height:20px;"></td></tr>
+							
+						</table>
+						<table cellspacing="0" cellpadding="0" style="padding:10px;" class="diabet-addpatient">
+							<tr>
+								<td class="label-addpatient "><b>Type of diabetes :</b></td>
+								<td ><select name="dtype" id="dtype-value" class="selectField"></select></td>
+							</tr>
+							<tr>
+								<td class="label-addpatient"><b>Date of diagnosis:</b></td>
+								<td >
+									<input type="text" name="ddate" id="ddate-value" class="textField"/><i class="fa fa-calendar" aria-hidden="true"></i>
+									<input type="hidden" name="diabetcode" id="diabetcode-value" value="dtype"/>
+									<input type="hidden" name="diabetidvalue" id="diabetidvalue-value"/>
+								</td>
+							</tr>
+						</table>
+					</td>
+					<td valign="top">
+						<table border="0">
+							<tr><td class="label-addpatient">First Name :</td><td><input type="text" name="fname" id="fname-value" class="textField"/></td></tr>
+							<tr><td class="label-addpatient">Last Name :</td><td><input type="text" name="lname" id="lname-value" class="textField"/></td></tr>
+							<tr style="display:none;"><td class="label-addpatient">Mother First Name :</td><td><input type="text" name="mfname" id="mfname-value" class="textField"/></td></tr>
+							<tr style="display:none;"><td class="label-addpatient">Mother Last Name :</td><td><input type="text" name="mlname" id="mlname-value" class="textField"/></td></tr>
+							<tr style="display:none;"><td class="label-addpatient">Father First Name :</td><td><input type="text" name="pfname" id="pfname-value" class="textField"/></td></tr>
+							<tr style="display:none;"><td class="label-addpatient">Father Last Name :</td><td><input type="text" name="plname" id="plname-value" class="textField"/></td></tr>
+							<tr><td class="label-addpatient">Date of birth :</td><td><input type="text" name="dob" id="dob-value" class="textField"/><i class="fa fa-calendar" aria-hidden="true"></i></td></tr>
+							<tr><td class="label-addpatient">Phone :</td><td><input type="text" name="phone" id="phone-value" class="textField"/></td></tr>
+							<tr><td class="label-addpatient">Community :</td><td><select name="idcommunity" id="idcommunity-value" class="selectField"></select></td></tr>
+							<tr><td class="label-addpatient">Deceased :</td><td>
+								<div id="radio-deceased">
+									<input type="radio" name="deceased" id="deceased-yes-value" value="1" class="radioField"/><label for="deceased-yes-value">Yes</label>
+									<input type="radio" name="deceased" id="deceased-no-value" value="0" class="radioField"/><label for="deceased-no-value">No</label>
+								</div>
+							</td></tr>
+							<tr><td colspan="2">
+								<div id="deceased-section">
+									<table>
+										<tr><td class="label-addpatient">Date of death :</td><td><input type="text" name="dod" id="dod-value" class="textField"/><i class="fa fa-calendar" aria-hidden="true"></i></td></tr>
+										<tr><td class="label-addpatient">Date cause :</td><td><input type="text" name="dcause" id="dcause-value" class="textField"/></td></tr>	
+									</table>
+								</div>
+							</td></tr>
+						</table>
+					</td>
+				</tr>
+				<tr>
+					<td colspan=2>
+						<table id="hcp-edit" width="100%" border=0>
+							<tr>
+								<td colspan=2 ><b>Patient`s Health Care Workers</b></td>
+								<td>CHR</td>
+								<td><input type="text" name="hcp-chr" id="chr" class="textField"/><input type="hidden" name="chrid" id="chrid"/></td>
+								<td>MD</td>
+								<td><input type="text" name="hcp-md" id="md" class="textField"/><input type="hidden" name="mdid" id="mdid" /></td>
+							</tr>
+							<tr>
+								<td>Nurse</td>
+								<td><input type="text" name="hcp-nur" id="nur" class="textField"/><input type="hidden" name="nurid" id="nurid"/></td>
+								<td>Nutritionist</td>
+								<td><input type="text" name="hcp-nut" id="nut" class="textField"/><input type="hidden" name="nutid" id="nutid"/></td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+			
+			
+			-->
+			<div style="text-align:right;">
+				<div id='cancel-addpatient' class="cisbutton">Cancel</div> <div id="save-addpatient" class="cisbutton">Save</div>
+			</div>
+		</form>
+	</div>
+</div>
+<script>
+//$("#radio-sex").buttonset();
+//$("#radio-iscree").buttonset();
+//$("#radio-deceased").buttonset();
+
+
+$("#dob-value").datepicker({
+    changeMonth: true,
+    yearRange: "1900:2017",
+    dateFormat: "yy-mm-dd",
+    changeYear: true
+  });
+$("#dod-value").datepicker({
+    changeMonth: true,
+    yearRange: "1900:2017",
+    dateFormat: "yy-mm-dd",
+    changeYear: true
+  });
+$("#ddate-value").datepicker({
+    changeMonth: true,
+    yearRange: "1900:2017",
+    dateFormat: "yy-mm-dd",
+    changeYear: true
+  });
+
+/*
+$("#radio-deceased input[type=radio]").change(function() {
+	if($("input[name='deceased']").val() == 1){
+		$("input[name='deceased']").filter("[value='0']").prop('checked', true).button("refresh");
+		$("input[name='deceased']").val(0);
+		$("#deceased-section").hide();	
+	}else{
+		$("input[name='deceased']").filter("[value='1']").prop('checked', true).button("refresh");
+		$("input[name='deceased']").val(1);
+		$("#deceased-section").show();
+	}
+});
+*/
+
+$("#radio-deceased input[type=radio]").change(function() {
+	if($("input[name='deceased']:checked").val() == 1){
+		$("#deceased-section").show();	
+	}else{
+		$("#deceased-section").hide();
+	}
+});
+
+/*
+$("#radio-sex input[type=radio]").change(function() {
+	if($("input[name='sex']").val() == 1){
+		$("input[name='sex']").filter("[value='2']").prop('checked', true).button("refresh");
+		$("input[name='sex']").val(2);
+	}else{
+		$("input[name='sex']").filter("[value='1']").prop('checked', true).button("refresh");
+		$("input[name='sex']").val(1);
+	}
+});
+$("#radio-iscree input[type=radio]").change(function() {
+	if($("input[name='iscree']").val() == 1){
+		$("input[name='iscree']").filter("[value='0']").prop('checked', true).button("refresh");
+		$("input[name='iscree']").val(0);
+	}else{
+		$("input[name='iscree']").filter("[value='1']").prop('checked', true).button("refresh");
+		$("input[name='iscree']").val(1);
+	}
+});
+*/
+
+$(community).each(function(index, value) {
+    $("#idcommunity-value").append($("<option />").val(index).text(value));
+});
+$(dtype).each(function(index, value) {
+	if(index > 2){
+		index = index + 7;
+	}
+    $("#dtype-value").append($("<option />").val(index).text(value));
+});
+
+/*
+ INIT VALUES 
+ */
+$("input[name='iscree']").filter("[value='0']").prop('checked', true);
+$("input[name='iscree']").val(0);
+$("input[name='sex']").filter("[value='1']").prop('checked', true);
+$("input[name='sex']").val(1);
+$("input[name='deceased']").filter("[value='0']").prop('checked', true);
+$("input[name='deceased']").val(0);
+$("#deceased-section").hide();
+$("#dtype-value").val(0);
+$("#idcommunity-value").val(0);
+
+
+
+$("#chr").autocomplete({
+	delay: 300,
+	minLength: 2,
+	autoFocus: true,
+	source: function( request, response ) {
+		$.ajax({
+			url: "/ncdis/service/data/getHcps",
+			dataType: "json",
+			data: {
+				criteria:"chr",
+				term: request.term,
+				language: "en",
+				sid: sid
+			},
+			success: function( data ) {
+				response($.map( data.objs[0], function( item ) {
+					return {
+						iduser : item.iduser,
+						name : item.name
+					};
+				}));
+			}
+		});
+	},
+	position: {  collision: "flip"  },
+	select: function( event, ui ) {
+		//optionSelected = true;
+		$("#chr").val(ui.item.name);
+		$("#chrid").val(ui.item.iduser);
+		return false;
+	},
+	open: function() {
+		//optionSelected = false;
+	},
+	close: function() {
+		
+	}
+}).data("ui-autocomplete")._renderItem = function(ul, item) {
+	var $line = $("<a>");
+	var $container = $("<div>").appendTo($line);
+	$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
+	var $liline = $("<li>");
+	$liline.append($line).appendTo(ul);
+	$(ul).height(200);
+	return $liline;
+};
+
+
+$("#md").autocomplete({
+	delay: 300,
+	minLength: 2,
+	autoFocus: true,
+	source: function( request, response ) {
+		$.ajax({
+			url: "/ncdis/service/data/getHcps",
+			dataType: "json",
+			data: {
+				criteria:"md",
+				term: request.term,
+				language: "en",
+				sid: sid
+			},
+			success: function( data ) {
+				response($.map( data.objs[0], function( item ) {
+					return {
+						iduser : item.iduser,
+						name : item.name
+					};
+				}));
+			}
+		});
+	},
+	position: {  collision: "flip"  },
+	select: function( event, ui ) {
+		//optionSelected = true;
+		$("#md").val(ui.item.name);
+		$("#mdid").val(ui.item.iduser);
+		return false;
+	},
+	open: function() {
+		//optionSelected = false;
+	},
+	close: function() {
+		
+	}
+}).data("ui-autocomplete")._renderItem = function(ul, item) {
+	var $line = $("<a>");
+	var $container = $("<div>").appendTo($line);
+	$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
+	var $liline = $("<li>");
+	//$liline.height("35px");
+	$liline.append($line).appendTo(ul);
+	$(ul).height(200);
+	return $liline;
+};
+
+$("#nur").autocomplete({
+	delay: 300,
+	minLength: 2,
+	autoFocus: true,
+	source: function( request, response ) {
+		$.ajax({
+			url: "/ncdis/service/data/getHcps",
+			dataType: "json",
+			data: {
+				criteria:"nur",
+				term: request.term,
+				language: "en",
+				sid: sid
+			},
+			success: function( data ) {
+				response($.map( data.objs[0], function( item ) {
+					return {
+						iduser : item.iduser,
+						name : item.name
+					};
+				}));
+			}
+		});
+	},
+	position: {  collision: "flip"  },
+	select: function( event, ui ) {
+		//optionSelected = true;
+		$("#nur").val(ui.item.name);
+		$("#nurid").val(ui.item.iduser);
+		return false;
+	},
+	open: function() {
+		//optionSelected = false;
+	},
+	close: function() {
+		
+	}
+}).data("ui-autocomplete")._renderItem = function(ul, item) {
+	var $line = $("<a>");
+	var $container = $("<div>").appendTo($line);
+	$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
+	var $liline = $("<li>");
+	$liline.append($line).appendTo(ul);
+	$(ul).height(200);
+	return $liline;
+};
+
+$("#nut").autocomplete({
+	delay: 300,
+	minLength: 2,
+	autoFocus: true,
+	source: function( request, response ) {
+		$.ajax({
+			url: "/ncdis/service/data/getHcps",
+			dataType: "json",
+			data: {
+				criteria:"nut",
+				term: request.term,
+				language: "en",
+				sid: sid
+			},
+			success: function( data ) {
+				response($.map( data.objs[0], function( item ) {
+					return {
+						iduser : item.iduser,
+						name : item.name
+					};
+				}));
+			}
+		});
+	},
+	position: {  collision: "flip"  },
+	select: function( event, ui ) {
+		//optionSelected = true;
+		$("#nut").val(ui.item.name);
+		$("#nutid").val(ui.item.iduser);
+		return false;
+	},
+	open: function() {
+		//optionSelected = false;
+	},
+	close: function() {
+		
+	}
+}).data("ui-autocomplete")._renderItem = function(ul, item) {
+	var $line = $("<a>");
+	var $container = $("<div>").appendTo($line);
+	$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
+	var $liline = $("<li>");
+	//$liline.height("35px");
+	$liline.append($line).appendTo(ul);
+	$(ul).height(200);
+	return $liline;
+};
+
+
+
+
+resetForm($("#addpatient-form"));
+
+$("#cancel-addpatient").click(function() {
+	//selectSection("dashboard");
+	//window.location="cdis.html?section=dashboard&sid="+sid+"&language=en";
+	gts(sid,"en");
+});
+
+$("#save-addpatient").click(function() {
+	$("#errortext-patient").html("");
+	var data = $('#addpatient-form').serialize();
+	data+="&sid="+sid+"&language=en";
+	//console.log(data);
+	var save = $.ajax({
+		  url: "/ncdis/service/data/addPatientRecord?sid="+sid+"&language=en",
+		  type: "POST",
+		  async : false,
+		  data: data,
+		  dataType: "json",
+		  beforeSend: function(xhr, opts){
+		  	var validRamq = validateRamq($("#ramq-value").val());
+		  	var validChart = validateChart($("#chart-value").val());
+		  	//var validFname = validateFname($("#fname-value").val());
+		  	//var validLname = validateLname($("#lname-value").val());
+		  	var validDeceased = validateDeceased($("#dod-value").val(), $("#dcause-value").val());
+		  	var validDtype = validateDtype($("#dtype-value").val());
+		  	var validDdate = validateDdate($("#ddate-value").val());
+		  	var validPhone = validatePhone($("#phone-value").val());
+		  	var validCommunity = validateCommunity($("#idcommunity-value").val());
+		  	//if(validRamq && validChart && validFname && validLname && validDeceased && validDtype && validDdate){
+		  	if(validRamq && validChart && validCommunity && validDtype && validDdate && validPhone){
+		  		return true;
+		  	}else{
+		  		return false;
+		  	}
+		  }
+		});
+		save.done(function( json ) {
+			//loadPatientObject("ramq",$("#ramq-value").val());
+			//window.location = "cdis.html?section=patient&sid="+sid+"&language=en&ramq="+$("#ramq-value").val();
+			gtc(sid,"en",$("#ramq-value").val(),"patient");
+		});
+		save.fail(function( jqXHR, textStatus ) {
+			var t = $("#errortext-addpatient").html();
+			$("#errortext-addpatient").html(t+"<p>Error saving the patient!</p>");
+		});	
+});
+</script>

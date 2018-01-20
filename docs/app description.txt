@@ -1,0 +1,83 @@
+
+start app in english by default if there is no cookie that say otherwise
+
+set cookie to english
+
+(possible action change interface to french) -> set cookie to french
+
+login 
+
+1 load template (en fr??) sau empty si il populez cu text from server?
+
+
+
+2 populate tem
+
+
+
+	
+	load  template page index and if success  go to page user.html  and from there go to
+	
+	cdis.html
+	
+	or
+	
+	nephro.html
+	
+	from user go to 
+	admin - section - app config, users, 
+	settings
+		password account
+		change reports for app from the page
+	messages
+	inpage - user stats - chart with logins, modications , messages, app choices -go to reports + add new patien- t stats + predifiend reports
+	
+	from cdis
+	in page -stats and reports - example last patients seen 5 - report charts
+		alerts widget - no new alerts
+		messages widget - No new messages
+		find patient + 
+		sections - left menu
+		
+		
+		last data charts - main page
+		medical alerts - schedules of patients 
+	go 
+		custom reports
+		add new patient
+		messages
+		user options
+		admin
+		
+		
+		no diabetes by community m-f  -piramid
+		no diabetes by type m-f - bars
+		male female diabetes - pie
+		types diabetes per year - line - last 5 years (including actual year)
+		
+		last patients viewed (top 5) - table
+		predifined reports
+			- number of patients by comunities  m-f  
+			- number of patients by type
+			- number of new patients per year per type
+			- Export Chisaibi patients last data
+				
+		
+		
+		
+	server side sessions
+	session management - session id userid datetimecreated   
+	login  - insert session   user time
+	all actions afer login verify session 
+	
+	methods
+	isLogin  -  chec if user is in session parms : user 
+	
+	session table
+	idsession
+	iduser
+	ipuser
+	created
+	
+	
+		

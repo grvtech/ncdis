@@ -1,0 +1,33 @@
+Edit patient
+1. cannot modify ramq 
+2. cannot modify chart
+3. cannot modify dob if does not match with sex and ramq
+4. cannot modify sex if does not match ramq
+5. can modify fname, lname, mfname, mlname, pfname, plname address, community
+6. if decesed yes dod and dcause cannot be null
+7. cannot modify fname and lname if initals does not match ramq firts 3 leter of last name and first letter of first name   
+
+client validations
+	- ramq existance and format based on dob and sex + fname and lname
+	- chart existence and format = numeric
+	- dob existance + calculate from ramq
+	- fname and last name with ramq
+	- sex with ramq
+	- deceased = yes dcause and d date not null
+
+
+	 asadmin create-custom-resource --restype=java.lang.String --factoryclass=org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property value="http\://javahowto.blogspot.com" resource/javahowto
+	 
+	 
+	 C:\glassfish4\glassfish\domains\domain1\applications\ncdis\WEB-INF
+	 
+	 asadmin create-custom-resource --user=admin --restype=java.lang.String --factoryclass=org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property="value=\"C:\\glassfish4\\glassfish\\domains\\domain1\\applications\\ncdis\\WEB-INF\"" --target=cdis root-folder
+	 
+	 asadmin create-custom-resource --user=admin --restype=java.lang.String --factoryclass=org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property="value=\"C:\\glassfish4\\glassfish\\domains\\domain1\\applications\\ncdis\\client\\reports\"" --target=cdis reports-folder
+	 
+	 asadmin set server.resources.custom-resource.reports-folder.property.value="C:\servers\glassfish4\glassfish\domains\domain1\eclipseApps\ncdis\client\reports"
+	 
+	 
+	 asadmin get server.resources.custom-resource.reports-folder
+	 
+	 asadmin set server.resources.custom-resource.reports-folder.property.value="C:\servers\glassfish4\glassfish\domains\domain1\eclipseApps\ncdis\client\reports"

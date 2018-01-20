@@ -1,0 +1,17 @@
+sp_getSearchPatientByChart ?
+
+sp_getSearchPatientByRamq ?
+
+sp_getSearchPatientByName ?
+
+sp_getActionByCode ?  DONE
+
+sp_getUserByUsernameAndPassword ?,?    DONE
+
+sp_getUserByID ?
+
+sp_getUserRoles ?
+
+sp_getUserSystems ?
+
+sp_getActionsRole ?

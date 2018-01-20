@@ -1,0 +1,1 @@
+loadTemplate(page);
