@@ -56,13 +56,9 @@
 						<tr>
 							<td colspan="2" style="padding:5px;">
 								<div id="radio-sex" class="btn-group" data-toggle="buttons">
-									<label for="male-value" class="btn btn-primary">
-										<input type="radio" name="sex" id="male-value" value="1" class="radioField"/>Male
-									</label>
-									
-									<label for="female-value" class="btn btn-primary">
-										<input type="radio" name="sex" id="female-value" value="2" class="radioField"/>Female
-									</label>
+									<label for="male-value" class="btn btn-primary"><input type="radio" name="sex-radio" id="male-value" value="1" class="radioField"/>Male</label>
+									<label for="female-value" class="btn btn-primary"><input type="radio" name="sex-radio" id="female-value" value="2" class="radioField"/>Female</label>
+									<input type="hidden" name="sex" id="sex-value" />
 								</div>
 							</td>
 						</tr>
@@ -83,22 +79,24 @@
 						<tr><td colspan="2" style="height:20px;"></td></tr>
 						
 					</table>
-					<table cellspacing="0" cellpadding="0" class="diabet-addpatient">
-						<tr>
-							<td class="label-addpatient ">Type of diabetes :</td>
-							<td ><select name="dtype" id="dtype-value" class="selectField"></select></td>
-						</tr>
-						<tr>
-							<td class="label-addpatient">Date of diagnosis:</td>
-							<td >
-								<div class="textField">
-									<input type="text" name="ddate" id="ddate-value"><i class="fa fa-calendar" aria-hidden="true"></i>
-								</div>
-								<input type="hidden" name="diabetcode" id="diabetcode-value" value="DTYPE"/>
-								<input type="hidden" name="diabetidvalue" id="diabetidvalue-value"/>
-							</td>
-						</tr>
-					</table>
+					<div class="diabet-addpatient">
+						<table cellspacing="0" cellpadding="0" >
+							<tr>
+								<td class="label-addpatient ">Type of diabetes :</td>
+								<td ><select name="dtype" id="dtype-value" class="selectField"></select></td>
+							</tr>
+							<tr>
+								<td class="label-addpatient">Date of diagnosis:</td>
+								<td >
+									<div class="textField">
+										<input type="text" name="ddate" id="ddate-value"><i class="fa fa-calendar" aria-hidden="true"></i>
+									</div>
+									<input type="hidden" name="diabetcode" id="diabetcode-value" value="DTYPE"/>
+									<input type="hidden" name="diabetidvalue" id="diabetidvalue-value"/>
+								</td>
+							</tr>
+						</table>
+					</div>
 				</td>
 				<td valign="top">
 					<table border="0">
@@ -343,13 +341,21 @@ $(dtype).each(function(index, value) {
  */
 $("input[name='iscree']").filter("[value='0']").prop('checked', true);
 $("input[name='iscree']").val(0);
-$("input[name='sex']").filter("[value='1']").prop('checked', true);
-$("input[name='sex']").val(1);
+//$("input[name='sex']").filter("[value='1']").prop('checked', true);
+//$("input[name='sex']").val(1);
 $("input[name='deceased']").filter("[value='0']").prop('checked', true);
 $("input[name='deceased']").val(0);
 $("#deceased-section").hide();
 $("#dtype-value").val(0);
 $("#idcommunity-value").val(0);
+
+
+$("#radio-sex label").change(function() {
+	//alert($(this).find("input[type='radio']").val());
+	$("input[name='sex']").val($(this).find("input[type='radio']").val());
+});
+
+
 
 initAutocompleteHcp($("#chr"));
 initAutocompleteHcp($("#md"));
@@ -361,8 +367,6 @@ initAutocompleteHcp($("#nut"));
 resetForm($("#addpatient-form"));
 
 $("#cancel-addpatient").click(function() {
-	//selectSection("dashboard");
-	//window.location="cdis.html?section=dashboard&sid="+sid+"&language=en";
 	gts(sid,"en");
 });
 
@@ -404,6 +408,7 @@ $('#myModal').on('show.bs.modal', function (event) {
 		          if($.inArray(idv,profession_code_array) >= 0){
 		        	  $(v).text($("#"+idv).val());
 		          }else if(idv == 'sex'){
+		        	  alert($("input[name='sex']").val());
 		        	  $(v).text(report_sex[$("input[name='sex']").val()]);
 		          }else if(idv == 'dtype'){
 		        	  $(v).text(report_dtype[$("#"+idv+"-value").val()]);

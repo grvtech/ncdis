@@ -336,9 +336,9 @@ CDIS PAGE CSS
 .cdisbody_addpatient h1{margin:0px 0px 10px 0px; padding:20px;font-size: 120%;}
 #addpatient-form table {padding:20px;}
 #addpatient-form .label-addpatient{font-family: Sans-Serif; font-size: 100%;color:#000000;font-weight:bold;}
-#addpatient-form .diabet-addpatient{background-color:#cdcdcd;}
+#addpatient-form .diabet-addpatient{background-color:#cdcdcd;padding:10px;}
 #addpatient-form input{color:#000000;border:none;}
-#addpatient-form select{color:#000000;padding:5px;border:none;}
+#addpatient-form select{color:#000000;padding:5px;border:none;background:#ffffff;}
 #addpatient-form .textField{margin:3px;padding:5px;border:none;font-weight:bold;background-color:#ffffff;}
 #addpatient-form .ui-state-default .ui-button-text{font-size: 100%;font-family: Sans-Serif;}
 #addpatient-form .ui-state-active .ui-button-text{font-size: 100%;font-family: Sans-Serif;background-color:#4b3b3b;color:#ffffff;font-weight:bold;}
