@@ -805,3 +805,9 @@ BUTTONS
 	font-size:85%
 }
 
+
+.modal-backdrop.show {
+	background-color: rgba(0,0,0,0.5) !important;
+}
+
+.mb-label{font-weight:bold;}

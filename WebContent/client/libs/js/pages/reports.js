@@ -1090,7 +1090,7 @@ function createValues(objItem){
 				
 				v1.datepicker({
 				    changeMonth: true,
-				    yearRange: "1900:2016",
+				    yearRange: "1900:"+moment().year(),
 				    dateFormat: "yy-mm-dd",
 				    changeYear: true
 				  });
@@ -1115,7 +1115,7 @@ function createValues(objItem){
 				}
 				v2.datepicker({
 				    changeMonth: true,
-				    yearRange: "1900:2016",
+				    yearRange: "1900:"+moment().year(),
 				    dateFormat: "yy-mm-dd",
 				    changeYear: true
 				  });
@@ -1228,7 +1228,7 @@ function createCD(objItem){
 			var new_v1 = $("<input>",{id:objItem.name+"-"+objItem.type+"-collected-date-value1-id",name:objItem.name+"-collected-date-value1",type:"text",class:"ui-button ui-widget ui-state-default ui-corner-all ui-state-hover"}).appendTo($("<td>").appendTo(tr1));
 			new_v1.datepicker({
 			    changeMonth: true,
-			    yearRange: "1900:2016",
+			    yearRange: "1900:"+moment().year(),
 			    dateFormat: "yy-mm-dd",
 			    changeYear: true
 			  });
@@ -1248,7 +1248,7 @@ function createCD(objItem){
 			var new_v2 = $("<input>",{id:objItem.name+"-"+objItem.type+"-collected-date-value2-id",name:objItem.name+"-collected-date-value2",type:"text",class:"ui-button ui-widget ui-state-default ui-corner-all ui-state-hover"}).appendTo($("<td>").appendTo(tr1));
 			new_v2.datepicker({
 			    changeMonth: true,
-			    yearRange: "1900:2016",
+			    yearRange: "1900:"+moment().year(),
 			    dateFormat: "yy-mm-dd",
 			    changeYear: true
 			  });

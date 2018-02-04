@@ -55,16 +55,8 @@
 	</ul>
 	<div class="leftmenu ubs"><i class="fa fa-bars" aria-hidden="true"></i></div>
 </div>
-<!---->
-
 <div class="cdisbody_patient_alerts"></div>
-
-
-
-
-
 <script>
-	
 	$("#radios .btn").focusin(function() {
 		$("#search").val("");
 		$("#search").focus();
@@ -84,10 +76,6 @@
 			$("#radios").show().delay(5000).fadeOut();	
 		}
 	});
-
-	//$(".fnew").click(function() {window.location = "cdis.html?section=addpatient&sid="+sid+"&language=en";});
-	//$("#printsection").click(function() {$("#ub_cdisbody").printCDISSection();});
-	//$( ".cdismenu" ).hide();
 	
 	$("#menu li").each(function( index ) {
 		var sclass = $(this).children("span").attr("class");
@@ -98,9 +86,6 @@
 			gtc(sid,"en",patientObj.ramq,sec);
 		});
 	});
-	
-	//initNavigation();
-	
 	
 	$(".cdisfooter-left").hover(function(){
 		$(".leftfootermenu").toggle("fade");

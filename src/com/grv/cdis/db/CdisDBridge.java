@@ -275,12 +275,13 @@ public class CdisDBridge {
 		MessageResponse result = new MessageResponse("EDITP-DB",false,"en",new ArrayList<>());
 		
 		try {
+			SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd");
 			initContext = new InitialContext();
 			//Context envContext  = (Context)initContext.lookup("java:comp/env");
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
-			String query = "insert into ncdis.ncdis.patient (ramq,chart,band,giu,jbnqa,fname,lname,sex,dob,mfname,mlname,pfname,plname,address,postalcode,dod,death_cause,idcommunity,phone) "
-					+" values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+			String query = "insert into ncdis.ncdis.patient (ramq,chart,band,giu,jbnqa,fname,lname,sex,dob,mfname,mlname,pfname,plname,address,postalcode,dod,death_cause,idcommunity,phone,entrydate,active) "
+					+" values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			
 		    cs=conn.prepareStatement(query);
 		    cs.setEscapeProcessing(true);
@@ -304,6 +305,8 @@ public class CdisDBridge {
 		    cs.setString(17, pat.getDcause());
 		    cs.setString(18, pat.getIdcommunity());
 		    cs.setString(19, pat.getPhone());
+		    cs.setString(20, sdf.format(new Date()));
+		    cs.setString(21, "1");
 		    
 		    cs.executeUpdate();
 		    

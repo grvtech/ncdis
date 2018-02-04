@@ -21,7 +21,7 @@ function loadTemplate(pageName,callBack){
 		    close: function() { }
 		  });
 	}else{
-		$body.append($("<div>",{class:"modal"}).append($("<div>",{class:"modal-span"}).text("CDIS Loading..."))).addClass("loading");
+		$body.append($("<div>",{class:"cdismodal"}).append($("<div>",{class:"modal-span"}).text("CDIS Loading..."))).addClass("loading");
 		if(callBack == null){
 			$( "#wraper").load( "client/templates/"+pageName+".html");
 		}else{
@@ -29,7 +29,7 @@ function loadTemplate(pageName,callBack){
 		}
 		setTimeout(function(){
 			$body.removeClass("loading");
-			$(".modal").remove();
+			$(".cdismodal").remove();
 		},500);
 	}
 }

@@ -73,7 +73,7 @@ button:focus {
 }
 
 
-.modal{
+.cdismodal{
     display:    none;
     position:   fixed;
     z-index:    10000;
@@ -81,7 +81,7 @@ button:focus {
     left:       0;
     height:     100%;
     width:      100%;
-    background: rgba(242, 243, 243, 1);
+    background: rgba(242, 243, 243, 0.8);
     
     /*background: rgba(242, 243, 243, 1) 
                 url('../images/hourglass.gif') 

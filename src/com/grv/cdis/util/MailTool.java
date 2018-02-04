@@ -68,9 +68,9 @@ public class MailTool {
 			MimeMessage message = new MimeMessage(mailSession);
 			message.setContent(body, "text/plain");
 			message.setSubject(subject);
-			message.setFrom(new InternetAddress("radu@grvtech.ca"));
+			message.setFrom(FileTool.getEmailProperty("smtp.from"));
 			message.addRecipient(Message.RecipientType.TO,   new InternetAddress(to));
-			message.addRecipient(Message.RecipientType.BCC,   new InternetAddress("radu@grvtech.ca"));
+			//message.addRecipient(Message.RecipientType.BCC,   new InternetAddress("radu@grvtech.ca"));
 			//transport.connect(FileTool.getEmailProperty("smtp.user"), FileTool.getEmailProperty("smtp.pass"));
 			transport.connect();
 	        transport.sendMessage(message,message.getRecipients(Message.RecipientType.TO));
@@ -111,7 +111,7 @@ public class MailTool {
 			MailDateFormat mdf = new MailDateFormat();
 			message.setSentDate(new Date());
 			message.setSubject(subject);
-			message.setFrom(new InternetAddress("admin@cdis.com"));
+			message.setFrom(FileTool.getEmailProperty("smtp.from"));
 			message.addRecipient(Message.RecipientType.TO,   new InternetAddress(to));
 			transport.connect();
 	        transport.sendMessage(message,message.getRecipients(Message.RecipientType.TO));
@@ -144,8 +144,7 @@ public class MailTool {
 	 
 	
 	
-	public static void sendMailInHtml(String subject, String htmlMessage, String to)
-	{
+	public static void sendMailInHtml(String subject, String htmlMessage, String to){
 	 try {
 		 
 	 		//Email data 
@@ -234,16 +233,13 @@ public class MailTool {
 	            transport.close();
 	            System.out.println("Mail sent successfully..."); 
 	         
-	        }
-	            catch (MessagingException ex) {
+	        }catch (MessagingException ex) {
 	                Logger.getLogger(MailTool.class.getName()).log(Level.SEVERE, null, ex);
-	            }        catch (Exception ae) {
+	        }catch (Exception ae) {
 	            ae.printStackTrace();
 	        }    
-	        }   
-	        catch(Exception exception)
-	        {
-	            exception.printStackTrace();
-	        }
+	   }catch(Exception exception){
+            exception.printStackTrace();
+       }
 	}
 }

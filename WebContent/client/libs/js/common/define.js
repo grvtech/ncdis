@@ -257,6 +257,7 @@ profession_array = [["chr","CHR"],["md","MD"],["nur","Nurse"],["nut","Nutritioni
 profession_object = {"chr":"CHR","md":"MD","nur":"Nurse","nut":"Nutritionist"};
 profession_dbindex={"chr":"4","md":"1","nur":"2","nut":"3"};
 profession_index={"4":"chr","1":"md","2":"nur","3":"nut"};
+profession_code_array = ["chr","md","nur","nut"];
 
 neuromd_values={"0":"Normal","1":"Abnormal"};
 smoke_values={"0":"No","1":"Yes"};

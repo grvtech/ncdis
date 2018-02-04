@@ -976,6 +976,7 @@ public class ChbDBridge {
 		    rs = cs.executeQuery(url);
 		    while(rs.next()){
 		    	SearchPatient sp = new SearchPatient(rs.getString("fname"), rs.getString("lname"), rs.getString("ramq"), rs.getString("name_en"), rs.getInt("chart"), rs.getInt("idpatient"), rs.getString("giu"));
+		    	//System.out.println(rs.getString("fname")+"-----"+ rs.getString("lname")+"-----"+ rs.getString("ramq")+"-----"+ rs.getString("name_en")+"-----"+ rs.getInt("chart")+"-----"+ rs.getInt("idpatient")+"-----"+ rs.getString("giu"));
 		    	result.add(sp);
 		    }
 		    

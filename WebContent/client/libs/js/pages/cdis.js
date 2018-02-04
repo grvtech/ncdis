@@ -1,18 +1,22 @@
 var cdisSection = "dashboard";
-/*
-var default_color = "#4d90fe";
-var dashboard_color = "#f2f2f2";
-var patient_color = "#f2f2f2";
-var mdvisits_color = "#1d1d1d";
-var lab_color = "#cecece";
-var lipid_color = "#fdfdfd";
-var renal_color = "#cdaacd";
-var meds_color = "#cdcd33";
-var complications_color = "#cdcd33";
-var miscellaneous_color = "#cdcd33";
-var svisits_color = "#cdcd33";
-var medication_color = "#cdcd33";
-*/
+
+//Check if a new cache is available on page load.
+window.addEventListener('load', function(e) {
+
+  window.applicationCache.addEventListener('updateready', function(e) {
+    if (window.applicationCache.status == window.applicationCache.UPDATEREADY) {
+      // Browser downloaded a new app cache.
+      if (confirm('A new version of this site is available. Load it?')) {
+        window.location.reload();
+      }
+    } else {
+      // Manifest didn't changed. Nothing new to server.
+    }
+  }, false);
+
+}, false);
+
+
 
 if (!isUserLoged(sid)){
 	logoutUser(sid);
@@ -570,3 +574,55 @@ function toggleRecord(flag){
 	}
 	
 }
+
+
+function initAutocompleteHcp(obj){
+	obj.autocomplete({
+		delay: 300,
+		minLength: 2,
+		autoFocus: true,
+		source: function( request, response ) {
+			$.ajax({
+				url: "/ncdis/service/data/getHcps",
+				dataType: "json",
+				data: {
+					criteria:obj.attr('id'),
+					term: request.term,
+					language: "en",
+					sid: sid
+				},
+				success: function( data ) {
+					response($.map( data.objs[0], function( item ) {
+						return {
+							iduser : item.iduser,
+							name : item.name
+						};
+					}));
+				}
+			});
+		},
+		position: {  collision: "flip"  },
+		select: function( event, ui ) {
+			//optionSelected = true;
+			$("#"+obj.attr('id')).val(ui.item.name);
+			$("#"+obj.attr('id')+"id").val(ui.item.iduser);
+			return false;
+		},
+		open: function() {
+			//optionSelected = false;
+		},
+		close: function() {
+			
+		}
+	}).data("ui-autocomplete")._renderItem = function(ul, item) {
+		var $line = $("<a>");
+		var $container = $("<div>").appendTo($line);
+		$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
+		var $liline = $("<li>");
+		$liline.append($line).appendTo(ul);
+		$(ul).height(200);
+		return $liline;
+	};
+
+}
+
