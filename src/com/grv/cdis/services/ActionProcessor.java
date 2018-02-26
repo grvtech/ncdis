@@ -178,6 +178,10 @@ public class ActionProcessor {
 		Gson gson = new Gson();
 	    JsonParser parser = new JsonParser();
 	    JsonObject jObject = parser.parse(raw).getAsJsonObject();
+	    
+	    //System.out.println(raw);
+	    
+	    
 	    JsonArray jArrayC = jObject.get("criteria").getAsJsonArray();
 	    JsonArray jArraySC = jObject.get("subcriteria").getAsJsonArray();
 	    
@@ -207,6 +211,7 @@ public class ActionProcessor {
 	    }
 	    for(JsonElement obj : jArraySC ){
 	        ReportSubcriteria scse = gson.fromJson( obj , ReportSubcriteria.class);
+	        //System.out.println("SUBCRITERIA : "+scse.getSuboperator()+"   VALUE : "+ scse.getSubvalue());
         	slcs.add(scse);
 	    }
 	    ArrayList<String> header = new ArrayList<>();

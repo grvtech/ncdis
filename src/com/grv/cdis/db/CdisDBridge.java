@@ -1347,22 +1347,20 @@ public class CdisDBridge {
 							subStrWhere = " and bb."+rsc.getSubname()+" "+Renderer.renderOperator(rsc.getSuboperator())+" '"+rsc.getSubvalue()+ "' ";
 							sql = "select count(*) as cnt "
 									+ " from ncdis.ncdis.patient bb"
-									+ " left join (select idpatient, dob as maxdate from ncdis.ncdis.patient where "+nom+" "+op+" '"+val+" and (dod is null or dod ='1900-01-01')) cc"
+									+ " inner join (select idpatient, dob as maxdate from ncdis.ncdis.patient where "+nom+" "+op+" '"+val+"' and (dod is null or dod ='1900-01-01')) cc"
 									+ " on bb.idpatient = cc.idpatient"
-									+ " where bb.idpatient > 0 and bb.active=1 and (bb.dod is not null and bb.dod > '1900-01-01')"
+									+ " where bb.idpatient > 0 and bb.active=1 and (bb.dod is null or bb.dod = '1900-01-01')"
 									+ subStrWhere;
 						}else{
 							//subStrFrom = " left join ncdis.ncdis.cdis_value dd on pp.idpatient = dd.idpatient ";
 							
 							sql = "select count(*) cnt"
-									+ " from ncdis.ncdis.cdis_value bb"
-									+ "     left join 	(select aa.idpatient, aa.dob as maxdate from ncdis.ncdis.patient aa where  (aa.dod is null or aa.dod = '1900-01-01') and aa."+nom+" "+op+" '"+val+"') cc"
-									+ "     on bb.idpatient = cc.idpatient"
+									+ " from ncdis.ncdis.patient bb"
+									+ "     inner join 	(select xx.idpatient, max(xx.datevalue) as mdate from ncdis.ncdis.cdis_value xx where xx.iddata=(select iddata from ncdis.ncdis.cdis_data where data_code = '"+rsc.getSubname().toUpperCase()+"')	and cast(case when coalesce(patindex('%[0-9]%', xx.value),0) = 0  then '0' else xx.value end as float) "+Renderer.renderOperator(rsc.getSuboperator())+" '"+rsc.getSubvalue()+"' group by xx.idpatient) dd on dd.idpatient = bb.idpatient"
 									+ " where"
-									+ " bb.iddata  = (select iddata from ncdis.ncdis.cdis_data where data_code = '"+rsc.getSubname().toUpperCase()+"')"
-									+ " and cast(case when coalesce(patindex('%[0-9]%', bb.value),0) = 0  then '0' else bb.value end as float) "+Renderer.renderOperator(rsc.getSuboperator())+" '"+rsc.getSubvalue()+"'"
-									+ " and cc.maxdate is not null"
-									+ " and bb.datevalue = (select max(xx.datevalue) from ncdis.ncdis.cdis_value xx where xx.iddata=(select iddata from ncdis.ncdis.cdis_data where data_code = '"+rsc.getSubname().toUpperCase()+"') and xx.idpatient = bb.idpatient group by xx.idpatient)";
+									+ " bb.active  = '1' "
+									+ " and "+nom+" "+op+" "+"'"+val+"'"
+									+ " and (bb.dod is null or bb.dod = '1900-01-01')";
 
 						}
 					
@@ -1373,6 +1371,9 @@ public class CdisDBridge {
 							conn = ds.getConnection();
 						    cs=conn.createStatement();		    
 						    cs.setEscapeProcessing(true);
+						    
+						    //System.out.println(sql);
+						    
 						    rs = cs.executeQuery(sql);
 						    int index = 0;
 						    while (rs.next()) {
@@ -1550,6 +1551,9 @@ public class CdisDBridge {
 				if(subcriterias.size() > 0){
 					for(int x=0;x<subcriterias.size();x++){
 						ReportSubcriteria rsc = subcriterias.get(x);
+						
+						//System.out.println("SUBin SQL :"+rsc.getSubvalue());
+						
 						if(rsc.getSubsection().equals("1")){
 							sql = "select count(*) cnt"
 									+ " from ncdis.ncdis.patient bb"
@@ -1586,6 +1590,8 @@ public class CdisDBridge {
 							conn = ds.getConnection();
 						    cs=conn.createStatement();		    
 						    cs.setEscapeProcessing(true);
+						    
+						    System.out.println(sql);
 						    rs = cs.executeQuery(sql);
 						    int index = 0;
 						    while (rs.next()) {

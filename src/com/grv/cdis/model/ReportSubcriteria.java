@@ -26,8 +26,23 @@ public class ReportSubcriteria {
 		this.subdisplay = subdisplay;
 	}
 	public String getSubvalue() {
+		if(subvalue.indexOf("and") >= 0){
+			String tsubvalue = "";
+			subvalue = subvalue.replaceAll("\'","");
+			String[] parts = subvalue.split("and");
+			for(int i=0;i<parts.length;i++){
+				String part = parts[i];
+				if (i == parts.length-1){
+					tsubvalue += part.trim();
+				}else{
+					tsubvalue += part.trim()+ "' and '";
+				}
+			}
+			subvalue = tsubvalue;
+		}
 		return subvalue;
 	}
+	
 	public void setSubvalue(String subvalue) {
 		this.subvalue = subvalue;
 	}

@@ -14,6 +14,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -31,7 +32,7 @@ public class FileTool {
   public FileTool() {
   }
 
-  public String getReport(String filename){
+  public static String getReport(String filename){
     String rez="";
     String str;
 
@@ -46,6 +47,26 @@ public class FileTool {
 
     return rez;
   }
+  
+  
+  public static String getReportsFolder(){
+	  	InitialContext ic;
+	  	String result = "";
+		try {
+			ic = new InitialContext();
+			String rf = (String) ic.lookup("reports-folder");
+			File reportFile = new File(rf);
+			if(reportFile.exists()){
+				result  = reportFile.getAbsolutePath();
+			}
+			
+		} catch (NamingException e) {
+			e.printStackTrace();
+		}
+		
+		return result;
+  }
+  
   
   public static String getMessage(String pathfile){
   	File fl = new File(pathfile);
