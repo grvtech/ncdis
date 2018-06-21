@@ -25,7 +25,20 @@
 	"owner":"System",
 	"graphtype":"pie",
 	"subcriteriatype":"multi",
-	"subcriteria":[],
+	"subcriteria":[
+		{	"subname":"idcommunity",
+			"subvalue":"0",
+			"suboperator":"more than",
+			"subdisplay":"All communities",
+			"subsection":"1"
+		},
+		{	"subname":"dtype",
+			"subvalue":"2",
+			"suboperator":"equal",
+			"subdisplay":"Diabetes Type 1  and Type 2 DM",
+			"subsection":"2"
+		}
+	],
 	"criteria":[
 		{	"name":"under10",
 			"value":"1",
@@ -124,5 +137,4 @@
 			"type":"all"
 		}
 	]
-	
 }

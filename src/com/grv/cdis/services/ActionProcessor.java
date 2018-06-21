@@ -184,8 +184,6 @@ public class ActionProcessor {
 	    
 	    JsonArray jArrayC = jObject.get("criteria").getAsJsonArray();
 	    JsonArray jArraySC = jObject.get("subcriteria").getAsJsonArray();
-	    
-	    
 
 	    ArrayList<ReportCriteria> lcs = new ArrayList<ReportCriteria>();
 	    ArrayList<ReportSubcriteria> slcs = new ArrayList<ReportSubcriteria>();
@@ -207,10 +205,12 @@ public class ActionProcessor {
 	    
 	    for(JsonElement obj : jArrayC ){
 	        ReportCriteria cse = gson.fromJson( obj , ReportCriteria.class);
+	        cse.loadIddata();
 	        lcs.add(cse);
 	    }
 	    for(JsonElement obj : jArraySC ){
 	        ReportSubcriteria scse = gson.fromJson( obj , ReportSubcriteria.class);
+	        scse.loadIddata();
 	        //System.out.println("SUBCRITERIA : "+scse.getSuboperator()+"   VALUE : "+ scse.getSubvalue());
         	slcs.add(scse);
 	    }
@@ -839,11 +839,14 @@ public class ActionProcessor {
 
 
 
-	public String generateDataReport(String reportCode){
+	public String generateDataReport(Hashtable<String, String[]> args){
 		Gson json = new Gson();
 		CdisDBridge db = new CdisDBridge();
 		String result = "";
 		JsonParser jp = new JsonParser();
+		
+		System.out.println("METHOD LAUNCH ");
+		String reportCode = ((String[])args.get("rep"))[0];
 		
 		InitialContext ic;
 		try {
@@ -860,6 +863,8 @@ public class ActionProcessor {
 		    JsonArray jArraySC = jObject.get("subcriteria").getAsJsonArray();
 		    JsonArray jArrayI = jObject.get("input").getAsJsonArray();
 		    
+		    System.out.println(reportFile.getAbsolutePath());
+		    System.out.println(jObject.toString());
 
 		    ArrayList<ReportCriteria> lcs = new ArrayList<ReportCriteria>();
 		    ArrayList<ReportSubcriteria> slcs = new ArrayList<ReportSubcriteria>();
@@ -868,18 +873,16 @@ public class ActionProcessor {
 		    
 		    for(JsonElement obj : jArrayC ){
 		        ReportCriteria cse = gson.fromJson( obj , ReportCriteria.class);
+		        cse.loadIddata();
+		        System.out.println("CRITERIA: "+cse.getName());
 		        lcs.add(cse);
 		    }
+		    
 		    for(JsonElement obj : jArraySC ){
 		        ReportSubcriteria scse = gson.fromJson( obj , ReportSubcriteria.class);
+		        scse.loadIddata();
+		        System.out.println("SUB CRITERIA: "+scse.getSubname());
 	        	slcs.add(scse);
-		    }
-		    
-		    for(JsonElement objI : jArrayI ){
-		       // objI.
-		    	
-		    	//ReportSubcriteria scse = gson.fromJson( obj , ReportSubcriteria.class);
-	        	//slcs.add(scse);
 		    }
 		    
 		    ArrayList<String> header = new ArrayList<>();
@@ -892,9 +895,7 @@ public class ActionProcessor {
 	    	for(int i=0;i<lcs.size();i++){
 	    		ReportCriteria rc = lcs.get(i);
 	    		header.add(rc.getDisplay());
-	    		
 	    		ArrayList<ArrayList<String>> criteriaSet = db.executeReport(rc, "graph", slcs);
-	    		
 	    		map.put(rc, criteriaSet);
 	    	}
 	    	
@@ -919,7 +920,7 @@ public class ActionProcessor {
 			obs.add(reportObject);
 			result = json.toJson(obs);
 
-			
+			System.out.println(result);
 			
 		} catch (NamingException e) {
 			e.printStackTrace();

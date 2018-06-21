@@ -1,5 +1,7 @@
 package com.grv.cdis.model;
 
+import com.grv.cdis.db.CdisDBridge;
+
 public class ReportCriteria {
 	private String name= null;
 	private String section= null;
@@ -12,6 +14,15 @@ public class ReportCriteria {
 	private String datename = null;
 	private String dateoperator = null;
 	private String datevalue = null;
+	private String iddata	= null;
+	
+	
+	public String getIddata() {
+		return iddata;
+	}
+	public void setIddata(String iddata) {
+		this.iddata = iddata;
+	}
 	public String getName() {
 		return name;
 	}
@@ -79,4 +90,9 @@ public class ReportCriteria {
 		this.datevalue = datevalue;
 	}
 	
+	
+	public void loadIddata(){
+		CdisDBridge db = new CdisDBridge();
+		this.iddata = db.getIddata(this.name);
+	}
 }

@@ -1,5 +1,7 @@
 package com.grv.cdis.model;
 
+import com.grv.cdis.db.CdisDBridge;
+
 public class ReportSubcriteria {
 	
 	private String subname = null;
@@ -7,6 +9,8 @@ public class ReportSubcriteria {
 	private String subdisplay = null;
 	private String subvalue = null;
 	private String subsection = null;
+	private String subiddata = null;
+	
 	public String getSubname() {
 		return subname;
 	}
@@ -42,7 +46,6 @@ public class ReportSubcriteria {
 		}
 		return subvalue;
 	}
-	
 	public void setSubvalue(String subvalue) {
 		this.subvalue = subvalue;
 	}
@@ -52,6 +55,16 @@ public class ReportSubcriteria {
 	public void setSubsection(String subsection) {
 		this.subsection = subsection;
 	}
+	public String getSubiddata() {
+		return subiddata;
+	}
+	public void setSubiddata(String subiddata) {
+		this.subiddata = subiddata;
+	}
 	
+	public void loadIddata(){
+		CdisDBridge db = new CdisDBridge();
+		this.subiddata = db.getIddata(this.subname);
+	}
 	
 }
