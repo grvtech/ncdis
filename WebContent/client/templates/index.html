@@ -318,7 +318,7 @@ $("#loginbutton").click(function() {
 	var validPass = Validate.now(Validate.Presence, $("#pass").val());
 	if(validUser && validPass){
 		var request = $.ajax({
-		  url: "/ncdis/service/action/loginSession?username="+user+"&password="+pass+"&language=en",
+		  url: "/ncdis/service/action/loginSession?username="+user+"&password="+pass+"&language=en&reswidth="+$(window).width()+"&resheight="+$(window).height(),
 		  type: "GET",
 		  dataType: "json"
 		});

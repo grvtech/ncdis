@@ -57,6 +57,8 @@ public class ActionProcessor {
 		String username = ((String[])args.get("username"))[0];
 		String password = ((String[])args.get("password"))[0];
 		String language = ((String[])args.get("language"))[0];
+		String reswidth = ((String[])args.get("reswidth"))[0];
+		String resheight = ((String[])args.get("resheight"))[0];
 		User user = new User(username, password);
 		Action act = new Action("LOGIN");
 		Session userSession = null;
@@ -67,7 +69,7 @@ public class ActionProcessor {
 			String combination = ip+user.getUsername()+ (new Date()).toString();
 			String idsession = DigestUtils.md5Hex(combination);
 
-			userSession = new Session(idsession, user.getIduser(), ip, 0);
+			userSession = new Session(idsession, user.getIduser(), ip, 0, 0, Integer.parseInt(reswidth),Integer.parseInt(resheight),1);
 			userSession.setSession();
 			ArrayList<Object> obs = new ArrayList<>();
 			obs.add(user);

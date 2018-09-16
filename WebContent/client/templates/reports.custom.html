@@ -47,6 +47,7 @@
 								<option value="nut">Nutritionist</option>
 							</select>
 							<select id="hcpname"></select>
+							<input type="hidden" id="hcpid" name="hcpid" value="0"/>
 						</div>
 					</div>
 				</div>
@@ -136,6 +137,7 @@
 				$("#hcptype").selectmenu({disabled:true});
 				
 				$("#hcpname").append($("<option>",{value:userProfileObj.user.iduser,selected:true}).text(capitalizeFirstLetter(userProfileObj.user.firstname)+" "+capitalizeFirstLetter(userProfileObj.user.lastname)));
+				$("#hcpid").val(userProfileObj.user.iduser);
 				$("#hcpname").selectmenu({width:250,disabled:true});
 			}else if(userProfileObj.role.idrole == 1){
 				$("#hcptype").val("chr");
@@ -146,7 +148,13 @@
 						  }
 					  }
 				});
-				$("#hcpname").selectmenu({width:250});
+				
+				$("#hcpname").selectmenu({
+					  width:250,
+					  change : function (event, uin){
+						  $("#hcpid").val(uin.item.value);
+					  }
+				});
 				$("#hcpname").selectmenu("refresh");
 				$("#hcpname").selectmenu().selectmenu("menuWidget").addClass("overflowselectmenu");
 				//$("#hcpname").hide();
@@ -162,6 +170,7 @@
 								  }
 							  }
 						  });
+						  
 						  $("#hcpname").selectmenu({width:250});
 						  $("#hcpname").selectmenu("refresh");
 						  $("#hcpname").selectmenu().selectmenu("menuWidget").addClass("overflowselectmenu");

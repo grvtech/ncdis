@@ -87,6 +87,7 @@ function createGraphWidget(values,arrays,container){
 		}
 		openTableForm("","",'0',gctb,arrays[0][0].vtype);
 	});
+	
 	$("#history-"+labelID).click(function(){plotGraphHistory(values,arrays,limitss);});
 	$("#print-"+labelID).click(function(){$("#graph-"+values).parent().printJQPlot(values);});
 }
@@ -150,8 +151,15 @@ function createTableWidget(values,arrays,container){
 		}
 		
 	});
-	mh.click(function(){plotGraphHistory(labelID,arrays,limitss);});
-	mp.click(function(){$("#graph-"+labelID).parent().printJQPlot(value);});
+	
+	mh.click({labelid:labelID,dataarray:arrays,datalimits:limitss},function(event){
+		plotGraphHistory(event.data.labelid,event.data.dataarray,event.data.datalimits);
+	});
+	mp.click({labelid:labelID,dataarray:arrays,datalimits:limitss},function(event){
+		plotGraphHistoryForPrint(event.data.labelid,event.data.dataarray,event.data.datalimits);
+		$("#fullscreen-print").printJQPlot("");
+		$("#fullscreen-print").remove();
+	});
 }
 
 
@@ -328,7 +336,7 @@ function buildTable(arrays,container,limitss){
 		var limitsPrime = limitss[0];
 		var limitsSecond = limitss[1];
 		//prime should be systolic bp 
-		
+		//console.log(limitsPrime);
 		$.each(prime,function(index,value){
 			
 			if(value != null && value.value != null ){
@@ -361,12 +369,14 @@ function buildTable(arrays,container,limitss){
 				
 				var valClass1 = 'genericValue';
 				var valClass2 = 'genericValue';
-				/*
+				/*2018-09-13 Show only critic values in red*/
 				if(typeof(limitsPrime.maxvalue) != 'undefined'){
+					
 					var maxV = Number(limitsPrime.maxvalue);
 					var valV = Number(value.value);
 					if(maxV >= valV){
 						valClass1 = 'normalValue';
+						valClass1 = 'genericValue';
 					}else if(maxV <= valV){
 						valClass1 = 'criticValue';
 					}
@@ -375,6 +385,7 @@ function buildTable(arrays,container,limitss){
 					var valV = Number(value.value);
 					if(minV < valV){
 						valClass1 = 'normalValue';
+						valClass1 = 'genericValue';
 					}else if(minV > valV){
 						valClass1 = 'criticValue';
 					}
@@ -385,6 +396,7 @@ function buildTable(arrays,container,limitss){
 					var valV1 = Number(eObj.value);
 					if(maxV1 >= valV1){
 						valClass2 = 'normalValue';
+						valClass2 = 'genericValue';
 					}else if(maxV1 < valV1){
 						valClass2 = 'criticValue';
 					}
@@ -393,11 +405,12 @@ function buildTable(arrays,container,limitss){
 					var valV2 = Number(eObj.value);
 					if(minV2 <= valV2){
 						valClass2 = 'normalValue';
+						valClass2 = 'genericValue';
 					}else if(minV2 > valV2){
 						valClass2 = 'criticValue';
 					}
 				}
-				*/
+				/**/
 				line.append($("<div>",{class:"col-sm-5"}).append($("<span>",{class:valClass1}).text(value.value)).append($("<span>",{class:"separator"}).html("/")).append($("<span>",{class:valClass2}).text(eObj.value)));
 				line.append($("<div>",{class:"col-sm-7"}).text(value.date));
 			}else{
@@ -480,6 +493,7 @@ function plotGraph(valueName, valueArray, valueLimitsObj){
 
 
 function plotGraphHistory(valueName, valueArray, valueLimitsObj){
+	
 	var label = eval("label_"+valueName);
 	var $w = $("#wraper");
 	var wmd = $("<div>", {id:"fullscreen",class:"uss widget-fullscreen-modal"});
@@ -549,6 +563,56 @@ function plotGraphHistory(valueName, valueArray, valueLimitsObj){
 		$("#wraper").css("overflow","auto");
 	});
 }
+
+function plotGraphHistoryForPrint(valueName, valueArray, valueLimitsObj){
+	var label = eval("label_"+valueName);
+	var $w = $("#wraper");
+	$("#fullscreen-print").remove();
+	var wmd = $("<div>", {id:"fullscreen-print",class:"uss widget-fullscreen-print"});
+	$w.scrollTop();
+	//$w.css("overflow","hidden");
+	var wmdBody = $("<div>", {id:"fullscreen-body-print",class:"widget-fullscreen-body-print"}).appendTo(wmd);
+	wmd.appendTo($w);
+	if(valueArray.length == 2){
+		var wmdGraph1 = $("<div>", {id:"fullscreen-graph1-print",class:"widget-fullscreen-graph-print"}).appendTo(wmdBody);
+		var wmdGraph2 = $("<div>", {id:"fullscreen-graph2-print",class:"widget-fullscreen-graph-print"}).appendTo(wmdBody);
+		var vs = valueName.split("_and_");
+		var values1 = [];
+		var labels1 = [];
+		$(valueArray[0]).each(function( index ) {
+			var ob = $(this)[0];
+			values1.push(ob.value);
+			labels1.push(ob.date);
+		});
+		
+		var values2 = [];
+		var labels2 = [];
+		$(valueArray[1]).each(function( index ) {
+			var ob = $(this)[0];
+			values2.push(ob.value);
+			labels2.push(ob.date);
+		});
+		
+		var gtitle1 = "Evolution of "+vs[0]+" in time";
+		var gtitle2 = "Evolution of "+vs[1]+" in time";
+		loadGraphAllValues("fullscreen-graph1-print",values1,labels1,gtitle1,valueLimitsObj[0],vs[0]);
+		loadGraphAllValues("fullscreen-graph2-print",values2,labels2,gtitle2,valueLimitsObj[1],vs[1]);
+		//$("#fullscreen-graph-zoomreset").hide();
+	}else{
+		var wmdGraph = $("<div>", {id:"fullscreen-graph-print",class:"widget-fullscreen-graph-print"}).appendTo(wmdBody);
+		var values = [];
+		var labels = [];
+		
+		$.each(valueArray[0], function( i , ob) {
+			values.push(ob.value);
+			labels.push(ob.date);
+		});
+		var gtitle = "Evolution of "+label+" in time";
+		loadGraphAllValues("fullscreen-graph-print",values,labels,gtitle,valueLimitsObj[0],valueName);
+	}
+}
+
+
 
 function createFormWidget(valueName,dataType,containerForm,actualValuesObj){
 	var valueType = eval('type_'+valueName);
@@ -664,34 +728,53 @@ function createFormWidget(valueName,dataType,containerForm,actualValuesObj){
 				.append($("<div>",{class:"cisbutton"})
 						.text("Save")
 						.click(function(){
+							
 							var s = eval("section_"+valueName);
 							var vValue = $("#val-"+valueName+"-"+actualValuesObj.id).val();
 							var dValue = $("#dat-"+valueName+"-"+actualValuesObj.id).val();
 							if(dataType == 'radio'){
 								vValue = $("#val-"+valueName+"-"+actualValuesObj.id+" input:radio:checked").val();
 							}
-							saveValue(actualValuesObj.id,s,valueName, dValue,vValue,patientObjArray);
 							
-							if(typeof(window['trigger_'+valueName]) != 'undefined'){
-								var tobj = window['trigger_'+valueName];
-								if(tobj.conditionfield == 'value'){
-									if(vValue == tobj.conditionvalue){
-										saveValue('0',tobj.section,tobj.value, dValue,vValue,patientObjArray);
-									}
-								}else if(tobj.conditionfield == 'date'){
-									if(dValue == tobj.conditionvalue){
-										saveValue('0',tobj.section,tobj.value, dValue,vValue,patientObjArray);
+							if(typeof(vValue) == 'undefined' || typeof(dValue) == 'undefined'){
+								var $d = $("<div>",{id:"dialog-confirm",title:"Missing value or date"}).appendTo($("body"));
+								var $p = $("<p>").text("You cannot add a value without a date or a date without a value").appendTo($d); 
+								$d.dialog({
+								      resizable: false,
+								      height: "auto",
+								      width: 400,
+								      modal: true,
+								      buttons: {
+								        OK: function() {
+								          $( this ).dialog( "close" );
+								          $(this.remove());
+								        }
+								      }
+								    });
+							}else{
+								saveValue(actualValuesObj.id,s,valueName, dValue,vValue,patientObjArray);
+								
+								if(typeof(window['trigger_'+valueName]) != 'undefined'){
+									var tobj = window['trigger_'+valueName];
+									if(tobj.conditionfield == 'value'){
+										if(vValue == tobj.conditionvalue){
+											saveValue('0',tobj.section,tobj.value, dValue,vValue,patientObjArray);
+										}
+									}else if(tobj.conditionfield == 'date'){
+										if(dValue == tobj.conditionvalue){
+											saveValue('0',tobj.section,tobj.value, dValue,vValue,patientObjArray);
+										}
 									}
 								}
+								
+								var sectionObj = getObjectSection(patientObjArray);
+								
+								var secObjValue = eval("sectionObj."+valueName);
+								console.log(secObjValue);
+								buildWidget(valueName, [secObjValue.values], $("#"+valueName));
+								closeTableForm(containerForm.parent());
+								
 							}
-							
-							var sectionObj = getObjectSection(patientObjArray);
-							
-							var secObjValue = eval("sectionObj."+valueName);
-							console.log(secObjValue);
-							buildWidget(valueName, [secObjValue.values], $("#"+valueName));
-							closeTableForm(containerForm.parent());
-							
 						})
 				)
 		);
@@ -808,7 +891,7 @@ function createFormWidget(valueName,dataType,containerForm,actualValuesObj){
 										var secObjValue1 = eval("sectionObj1."+vs[0]);
 										var secObjValue2 = eval("sectionObj2."+vs[1]);
 										buildWidget(valueName, [secObjValue1.values,secObjValue2.values], $("#"+valueName));
-										
+										closeTableForm(containerForm.parent());
 									}else{
 										var s = eval("section_"+valueName);
 										if(dataType == 'radio'){
@@ -819,26 +902,46 @@ function createFormWidget(valueName,dataType,containerForm,actualValuesObj){
 										
 										
 										var dValue = $("#dat-"+valueName+"-"+actualValuesObj.id).val();
-										saveValue(actualValuesObj.id,s,valueName, dValue,vValue,patientObjArray);
 										
-										if(typeof(window['trigger_'+valueName]) != 'undefined'){
-											var tobj = window['trigger_'+valueName];
-											if(tobj.conditionfield == 'value'){
-												if(vValue == tobj.conditionvalue){
-													saveValue('0',tobj.section,tobj.value, dValue,vValue,patientObjArray);
-												}
-											}else if(tobj.conditionfield == 'date'){
-												if(dValue == tobj.conditionvalue){
-													saveValue('0',tobj.section,tobj.value, dValue,vValue,patientObjArray);
+										if(typeof(vValue) == 'undefined' || typeof(dValue) == 'undefined'){
+											var $d = $("<div>",{id:"dialog-confirm",title:"Missing value or date"}).appendTo($("body"));
+											var $p = $("<p>").text("You cannot add a value without a date or a date without a value").appendTo($d); 
+											$d.dialog({
+											      resizable: false,
+											      height: "auto",
+											      width: 400,
+											      modal: true,
+											      buttons: {
+											        OK: function() {
+											          $( this ).dialog( "close" );
+											          $(this.remove());
+											        }
+											      }
+											    });
+										}else{
+										
+											saveValue(actualValuesObj.id,s,valueName, dValue,vValue,patientObjArray);
+											
+											if(typeof(window['trigger_'+valueName]) != 'undefined'){
+												var tobj = window['trigger_'+valueName];
+												if(tobj.conditionfield == 'value'){
+													if(vValue == tobj.conditionvalue){
+														saveValue('0',tobj.section,tobj.value, dValue,vValue,patientObjArray);
+													}
+												}else if(tobj.conditionfield == 'date'){
+													if(dValue == tobj.conditionvalue){
+														saveValue('0',tobj.section,tobj.value, dValue,vValue,patientObjArray);
+													}
 												}
 											}
+											
+											var sectionObj = getObjectArray(s,patientObjArray);
+											var secObjValue = eval("sectionObj."+valueName);
+											buildWidget(valueName, [secObjValue.values], $("#"+valueName));
+											closeTableForm(containerForm.parent());
 										}
-										
-										var sectionObj = getObjectArray(s,patientObjArray);
-										var secObjValue = eval("sectionObj."+valueName);
-										buildWidget(valueName, [secObjValue.values], $("#"+valueName));
 									}
-									closeTableForm(containerForm.parent());
+									
 							})
 					)
 		);

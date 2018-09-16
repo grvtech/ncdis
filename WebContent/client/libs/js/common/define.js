@@ -16,6 +16,9 @@ dbp_dec=0;
 sbp_dec=0;
 weight_dec=0;
 aer_dec=0;
+height_dec=0;
+smoke_dec=0;
+hipo_dec=0;
 hba1c_dec=3;
 acglu_dec=1;
 acratio_dec=1;
@@ -56,8 +59,8 @@ statin=["No","Yes"];
 asa=["No","Yes"];
 role=["Please Select","ADMIN","USER","GUEST"];
 dtype=["Unknown","Type 1 DM","Type 2 DM","PRE DM","GDM"];
-community=["Please Select","Chisasibi","Eastmain","Mistissini","Nemaska","Oujebougoumou","Waskaganish","Waswanipi","Wemindji","Whapmagoostui"];
-report_idcommunity=["All","Chisasibi","Eastmain","Mistissini","Nemaska","Oujebougoumou","Waskaganish","Waswanipi","Wemindji","Whapmagoostui"];
+community=["Please Select","Chisasibi","Eastmain","Mistissini","Nemaska","Oujebougoumou","Waskaganish","Waswanipi","Wemindji","Whapmagoostui","Not living in EI"];
+report_idcommunity=["All","Chisasibi","Eastmain","Mistissini","Nemaska","Oujebougoumou","Waskaganish","Waswanipi","Wemindji","Whapmagoostui","Not living in EI"];
 report_dtype=["All","Type 1 DM","Type 2 DM","PRE DM","GDM"];
 report_sex=["All","Male","Female"];
 report_select_operator=["","equal"];
@@ -102,12 +105,12 @@ label_dtype_collected_date="Type of diabetes date of diagnosys";
 /*MDVISITS VALUES*/
 //sbp
 label_sbp="SBP";label_sbp_collected_date="Date";type_sbp='table';unit_sbp='mmHg';section_sbp='mdvisits';
-limits_sbp={maxvalue:180,minvalue:100,stages:[{title:"SBP > 130",min:130,max:180,color:"rgba(255,0,0,0.4)"},{title:"Normal",min:100,max:130,color:"rgba(0, 255, 0,0.3)"}]};
+limits_sbp={maxvalue:130,minvalue:100,stages:[{title:"SBP > 130",min:130,max:180,color:"rgba(255,0,0,0.4)"},{title:"Normal",min:100,max:130,color:"rgba(0, 255, 0,0.3)"}]};
 //dbp
 label_dbp="DBP";label_dbp_collected_date="Date";type_dbp='table';unit_dbp='mmHg';section_dbp='mdvisits';
-limits_dbp={maxvalue:100,minvalue:50,stages:[{title:"DBP > 80",min:80,max:100,color:"rgba(255,0,0,0.4)"},{title:"Normal",min:50,max:80,color:"rgba(0, 255, 0,0.3)"}]};
+limits_dbp={maxvalue:80,minvalue:50,stages:[{title:"DBP > 80",min:80,max:100,color:"rgba(255,0,0,0.4)"},{title:"Normal",min:50,max:80,color:"rgba(0, 255, 0,0.3)"}]};
 //sbp_and_dbp
-label_sbp_and_dbp="SPB/DBP";label_sbp_and_dbp_collected_date="Date";type_sbp_and_dbp='table';unit_sbp_and_dbp='mmHg';section_sbp_and_dbp='mdvisits_and_mdvisits';
+label_sbp_and_dbp="SBP/DBP";label_sbp_and_dbp_collected_date="Date";type_sbp_and_dbp='table';unit_sbp_and_dbp='mmHg';section_sbp_and_dbp='mdvisits_and_mdvisits';
 //weight
 label_weight_collected_date=" Date";label_weight="Weight";type_weight='table';unit_weight='Kg';section_weight='mdvisits';
 //height
@@ -260,7 +263,7 @@ profession_index={"4":"chr","1":"md","2":"nur","3":"nut"};
 profession_code_array = ["chr","md","nur","nut"];
 
 neuromd_values={"0":"Normal","1":"Abnormal"};
-smoke_values={"0":"No","1":"Yes"};
+smoke_values={"0":"No","1":"Yes","2":"Unknown"};
 foot_values={"0":"Normal","1":"Abnormal"};
 rpathscr_values={"0":"Normal","1":"Abnormal"};
 rpathscr_datelabel="Date of exam";

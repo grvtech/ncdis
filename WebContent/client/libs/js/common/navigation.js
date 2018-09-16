@@ -53,8 +53,6 @@ function initNavigation() {
 		}
 	}
 
-
-	
 	
 	function getPage() {
 		var url =  window.location.href;

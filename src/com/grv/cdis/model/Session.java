@@ -7,19 +7,79 @@ public class Session {
 	private String iduser;
 	private String ipuser;
 	private long created;
+	private long modified;
+	private int reswidth;
+	private int resheight;
+	private int active;
 	
 	
 	
-	public Session(String id, String idu, String ipu, long ts){
-		this.idsession = id;
-		this.iduser = idu;
-		this.ipuser = ipu;
-		this.created = ts;
-		
+	
+	
+	
+	public int getActive() {
+		return active;
 	}
-	
-	
-	
+
+
+
+	public void setActive(int active) {
+		this.active = active;
+	}
+
+
+
+	public long getModified() {
+		return modified;
+	}
+
+
+
+	public void setModified(long modified) {
+		this.modified = modified;
+	}
+
+
+
+	public int getReswidth() {
+		return reswidth;
+	}
+
+
+
+	public void setReswidth(int reswidth) {
+		this.reswidth = reswidth;
+	}
+
+
+
+	public int getResheight() {
+		return resheight;
+	}
+
+
+
+	public void setResheight(int resheight) {
+		this.resheight = resheight;
+	}
+
+
+
+	public Session(String idsession, String iduser, String ipuser,
+			long created, long modified, int reswidth, int resheight,int active) {
+		super();
+		this.idsession = idsession;
+		this.iduser = iduser;
+		this.ipuser = ipuser;
+		this.created = created;
+		this.modified = modified;
+		this.reswidth = reswidth;
+		this.resheight = resheight;
+		this.active = active;
+	}
+
+
+
 	public String getIdsession() {
 		return idsession;
 	}

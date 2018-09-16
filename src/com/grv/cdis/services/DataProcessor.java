@@ -111,7 +111,10 @@ public class DataProcessor {
 		String ramq = ((String[])args.get("ramq"))[0];
 		String notestr = ((String[])args.get("note"))[0];
 		String iduserto = ((String[])args.get("iduserto"))[0];
-		
+		Session session = chbdb.isValidSession(sid);
+		if(session != null){
+			session.setSession();
+		}
 		
 		Patient pat = db.getPatientByRamq(ramq);
 		User u = new User(sid);
@@ -343,6 +346,10 @@ public class DataProcessor {
 		String criteria = ((String[])args.get("criteria"))[0];
 		String term = ((String[])args.get("term"))[0];
 		User user = new User(sid);
+		Session session = chb.isValidSession(sid);
+		if(session != null){
+			session.setSession();
+		}
 		//ArrayList<Object> obs = chb.getPatientsList(criteria,term);
 		ArrayList<Object> obs = chb.getPatientsList(criteria,term,user);
 		result = json.toJson(new MessageResponse(true,language,obs));
@@ -515,6 +522,12 @@ public class DataProcessor {
 		String language = ((String[])args.get("language"))[0];
 		Patient pat = null;
 		CdisDBridge chb = new CdisDBridge();
+		ChbDBridge chbdb = new ChbDBridge();
+		Session session = chbdb.isValidSession(sid);
+		if(session != null){
+			session.setSession();
+		}
+		
 		boolean flag = false;
 		String action = "ADDDATA";
 		if(idvalue.equals("0")){
@@ -571,6 +584,13 @@ public class DataProcessor {
 		String language = ((String[])args.get("language"))[0];
 		Patient pat = null;
 		CdisDBridge chb = new CdisDBridge();
+		
+		ChbDBridge chbdb = new ChbDBridge();
+		Session session = chbdb.isValidSession(sid);
+		if(session != null){
+			session.setSession();
+		}
+		
 		boolean flag = false;
 		String action = "DELDATA";
 		
@@ -641,6 +661,12 @@ public class DataProcessor {
 			pat = db.getPatientByRamq(ramq);
 		}else{
 			pat = db.getPatientById(Integer.parseInt(id));
+		}
+		
+		ChbDBridge chbdb = new ChbDBridge();
+		Session session = chbdb.isValidSession(sid);
+		if(session != null){
+			session.setSession();
 		}
 		
 		MessageResponse patient =  pat.setPatient(args);
@@ -715,7 +741,11 @@ public class DataProcessor {
 		if(args.get("nutid") != null){nut = ((String[])args.get("nutid"))[0];}
 		if(args.get("nurid") != null){nur = ((String[])args.get("nurid"))[0];}
 		
-		
+		ChbDBridge chbdb = new ChbDBridge();
+		Session session = chbdb.isValidSession(sid);
+		if(session != null){
+			session.setSession();
+		}
 		ArrayList<Object> obs = new ArrayList<Object>();
 		
 		MessageResponse patient =  pat.setPatient(args);
@@ -751,6 +781,11 @@ public class DataProcessor {
 		String idpatient = ((String[])args.get("idpatient"))[0];
 		
 		MessageResponse msg = new MessageResponse();
+		
+		Session session = chb.isValidSession(sid);
+		if(session != null){
+			session.setSession();
+		}
 		
 		ArrayList<Object> obs = new ArrayList<Object>();
 		Session ses = chb.isValidSession(sid);

@@ -1967,98 +1967,151 @@ function loadGraphAllValues(divStr, values, labels, title, limits, valueName){
 	
 	if(values.length > 0){
 		if(!$(divStr).hasClass("jqplot-target")){
-			var target=0;
-			var series = [];
-			var lastvalues = [];
-			var dc = eval(valueName+"_dec");
-			var arrLimits = [];
 			
-			var fs = "%."+dc+"f";
-			if(dc == 0){fs = "%d";}
-			 
+			/*special treatment for smoke graph*/
 			
-			for(var i=0;i<values.length;i++){
-				 var lab = Number(values[i]).trimNum(dc);
-				 var serie = [labels[i],Number(values[i]).trimNum(dc),lab];
-				 series.push(serie);
-				 lastvalues.push(values[i]);
-			}
-			 
-			 
-			var minNum = lastvalues.min();
-			 var maxNum = lastvalues.max();
-			 if(limits != null ){
-				 
-					 if(minNum > Number(limits.minvalue)){minNum = limits.minvalue;}
-					 if(maxNum < Number(limits.maxvalue)){maxNum = limits.maxvalue;}
-					 $.each(limits.stages,function(idx,val){
-						 if(idx == 0){
-							 var limitObj = { rectangle: {name:"stage-"+valueName+"-"+idx, ymin:Number(val.min), xminOffset: "0px", xmaxOffset: "0px", yminOffset: "0px", ymaxOffset: "0px",color: val.color, showTooltip: true, tooltipFormatString: val.title } };
-						 }else if(idx == limits.stages.length-1){
-							 var limitObj = { rectangle: {name:"stage-"+valueName+"-"+idx, ymax: Number(val.max),xminOffset: "0px", xmaxOffset: "0px", yminOffset: "0px", ymaxOffset: "0px",color: val.color, showTooltip: true, tooltipFormatString: val.title } }; 
-						 }else{
-							 var limitObj = { rectangle: {name:"stage-"+valueName+"-"+idx, ymax: Number(val.max),ymin:Number(val.min), xminOffset: "0px", xmaxOffset: "0px", yminOffset: "0px", ymaxOffset: "0px",color: val.color, showTooltip: true, tooltipFormatString: val.title } };
-						 }
-						 arrLimits.push(limitObj);
-					 });
-			 }
-			minNum = Number(minNum) - Number(minNum)*0.2; 
-			maxNum = Number(maxNum) + Number(maxNum)*0.2;
-			 
-			 $.jqplot.postDrawHooks.push(function() {
-				 	for(var i=0;i<$('.jqplot-overlayCanvas-canvas').length;i++){
-				 		var overlayCanvas = $($('.jqplot-overlayCanvas-canvas')[i]);
-					    var seriesCanvas = $($('.jqplot-series-canvas')[i]);
-					    seriesCanvas.detach();
-					    overlayCanvas.after(seriesCanvas);
-				 	}
-				    
-			});
-			 
-			 var lc = title.toLowerCase();
-			 
-			 if (valueName == "hba1c"){
-				 var lineLimitObj1 = {horizontalLine: {name: 'lineObj1',y: 0.060,lineWidth:1,xminOffset: '2px',xmaxOffset: '2px',color: 'rgb(5,5,5)',shadow: false}};
-				 var lineLimitObj2 = {horizontalLine: {name: 'lineObj', y: 0.070,lineWidth: 1,xminOffset: '2px', xmaxOffset: '2px', color: 'rgb(5,5,5)',	shadow: false	}};
-				 arrLimits.push(lineLimitObj1);
-				 arrLimits.push(lineLimitObj2);
-			 }
-			 
-			 if (valueName == "acglu"){
-				 var lineLimitObj1 = {horizontalLine: {name: 'lineObj1',y: 6,lineWidth: 1,xminOffset: '2px',xmaxOffset: '2px',color: 'rgb(5,5,5)',shadow: false}};
-				 var lineLimitObj2 = {horizontalLine: {name: 'lineObj2',y: 7,lineWidth: 1,xminOffset: '2px',xmaxOffset: '2px',color: 'rgb(5,5,5)',shadow: false}};
-				 arrLimits.push(lineLimitObj1);
-				 arrLimits.push(lineLimitObj2);
-			 }
-
-			 
-			 var plot = jQuery.jqplot(divStr,[series], {
-				 title:title,
-				 grid:{backgroundColor: '#efefef', gridLineColor: '#cdcdcd',gridLineWidth: 1, borderWidth: 1, borderColor: '#4d4d4d'},
-				 seriesDefaults: {
-					 rendererOptions: {smooth: true},
-					 pointLabels:{ show:true, location:'n', xpadding:10, ypadding:7, edgeTolerance:7 }
-				 },
-			     axes:{
-			            xaxis:{renderer:$.jqplot.DateAxisRenderer,rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer,tickInset:0.5},tickOptions:{fontSize:'14pt',textColor:'#000000' ,fontFamily:'Arial',formatString:'%m/%Y',angle:-30}},
-			            yaxis:{rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer,tickInset:0.5},tickOptions:{fontSize:'14pt',fontFamily:'Arial',show:true, textColor:'#000000', formatString: fs},min:Number(minNum),max:Number(maxNum)}
-			        },
-			     canvasOverlay: {
-			            show: true,
-			            objects: arrLimits
-			          }, 
-		        series:[{lineWidth:3,markerOptions:{ style:'filledCircle', color:'#cdcdcd' },neighborThreshold: -1,color:'#4d4d4d'}],
-		        highlighter: {show: true,sizeAdjust: 10.5,lineWidthAdjust:3.5,tooltipLocation:'ne',tooltipOffset:4,
-		        	formatString:'<table class="jqplot-highlighter" border="0"><tr><td>Date:</td><td>%s</td></tr><tr><td>Value:</td><td>%s</td></tr></table>'},
-		        cursor:{
-		        	show: true,
-		        	zoom:true
-		        	}
+			if(valueName == 'smoke'){
+				var series = [];
+				for(var i=0;i<values.length;i++){
+					var num = Number(values[i]).trimNum(0);
+					var valNum = 0;
+					switch(num) {
+					    case 0:
+					        valNum = 1;
+					        break;
+					    case 1:
+					        valNum = -1;
+					        break;
+					    default:
+					        valNum = 0;
+					}
+					var serie = [labels[i],valNum];
+					series.push(serie);
+				}
+				var lc = title.toLowerCase();
+				
+				var plot = jQuery.jqplot(divStr,[series], {
+					 title:title,
+					 grid:{backgroundColor: '#fefefe', gridLineColor: '#d9d9d9',gridLineWidth: 0.5, borderWidth: 1, borderColor: '#cdcdcd'},
+					 /*grid:{backgroundColor: '#efefef', gridLineColor: '#cdcdcd',gridLineWidth: 1, borderWidth: 1, borderColor: '#4d4d4d'},*/
+					 seriesDefaults: {
+						 rendererOptions: {smooth: true},
+						 pointLabels:{ show:false}
+					 },
+				     axes:{
+				            xaxis:{renderer:$.jqplot.DateAxisRenderer,rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer,tickInset:0.5},tickOptions:{fontSize:'0.8em',textColor:'#000000' ,fontFamily:'Arial',formatString:'%m/%Y',angle:-30}},
+				            yaxis: {min:-2,max:2,tickOptions:{showGridline: false,labelPosition: 'middle',angle:-0,},tickRenderer:$.jqplot.CanvasAxisTickRenderer,labelRenderer: $.jqplot.CanvasAxisLabelRenderer,ticks: [[-1.3,' '],[-1,'Smoker'],[0,'Unknown Status'],[1,'Not smoker'],[1.3,' ']]}
+				        },
+			        seriesDefaults:{renderer:$.jqplot.BarRenderer,color: 'green',negativeSeriesColors: ["#F94545"],rendererOptions: {fillToZero: true,barWidth: 30},pointLabels: { show: false }}
 				});
-			 
-			 $("#"+divStr+"-zoomreset").click(function(){
-				 plot.resetZoom();
-				 plot.redraw();
+				
+				$("#"+divStr+"-zoomreset").remove();
+			}else{
+				var target=0;
+				var series = [];
+				var lastvalues = [];
+				var dc = eval(valueName+"_dec");
+				var arrLimits = [];
+				
+				var fs = "%."+dc+"f";
+				if(dc == 0){fs = "%d";}
+				 
+				
+				for(var i=0;i<values.length;i++){
+					 var lab = Number(values[i]).trimNum(dc);
+					 var serie = [labels[i],Number(values[i]).trimNum(dc),lab];
+					 series.push(serie);
+					 lastvalues.push(values[i]);
+				}
+				
+				 
+				var minNum = lastvalues.min();
+				var maxNum = lastvalues.max();
+				if(limits != null ){
+					 
+						 if(minNum > Number(limits.minvalue)){minNum = limits.minvalue;}
+						 if(maxNum < Number(limits.maxvalue)){maxNum = limits.maxvalue;}
+						 $.each(limits.stages,function(idx,val){
+							 if(idx == 0){
+								 var limitObj = { rectangle: {name:"stage-"+valueName+"-"+idx, ymin:Number(val.min), xminOffset: "0px", xmaxOffset: "0px", yminOffset: "0px", ymaxOffset: "0px",color: val.color, showTooltip: true, tooltipFormatString: val.title } };
+							 }else if(idx == limits.stages.length-1){
+								 var limitObj = { rectangle: {name:"stage-"+valueName+"-"+idx, ymax: Number(val.max),xminOffset: "0px", xmaxOffset: "0px", yminOffset: "0px", ymaxOffset: "0px",color: val.color, showTooltip: true, tooltipFormatString: val.title } }; 
+							 }else{
+								 var limitObj = { rectangle: {name:"stage-"+valueName+"-"+idx, ymax: Number(val.max),ymin:Number(val.min), xminOffset: "0px", xmaxOffset: "0px", yminOffset: "0px", ymaxOffset: "0px",color: val.color, showTooltip: true, tooltipFormatString: val.title } };
+							 }
+							 arrLimits.push(limitObj);
+						 });
+				 }
+				minNum = Number(minNum) - Number(minNum)*0.2; 
+				maxNum = Number(maxNum) + Number(maxNum)*0.2;
+				 
+				$.jqplot.postDrawHooks.push(function() {
+					 	for(var i=0;i<$('.jqplot-overlayCanvas-canvas').length;i++){
+					 		var overlayCanvas = $($('.jqplot-overlayCanvas-canvas')[i]);
+						    var seriesCanvas = $($('.jqplot-series-canvas')[i]);
+						    seriesCanvas.detach();
+						    overlayCanvas.after(seriesCanvas);
+					 	}
+					    
+				});
+				 
+				 var lc = title.toLowerCase();
+				 
+				 if (valueName == "hba1c"){
+					 var lineLimitObj1 = {horizontalLine: {name: 'lineObj1',y: 0.060,lineWidth:1,xminOffset: '2px',xmaxOffset: '2px',color: 'rgb(5,5,5)',shadow: false}};
+					 var lineLimitObj2 = {horizontalLine: {name: 'lineObj', y: 0.070,lineWidth: 1,xminOffset: '2px', xmaxOffset: '2px', color: 'rgb(5,5,5)',	shadow: false	}};
+					 arrLimits.push(lineLimitObj1);
+					 arrLimits.push(lineLimitObj2);
+				 }
+				 
+				 if (valueName == "acglu"){
+					 var lineLimitObj1 = {horizontalLine: {name: 'lineObj1',y: 6,lineWidth: 1,xminOffset: '2px',xmaxOffset: '2px',color: 'rgb(5,5,5)',shadow: false}};
+					 var lineLimitObj2 = {horizontalLine: {name: 'lineObj2',y: 7,lineWidth: 1,xminOffset: '2px',xmaxOffset: '2px',color: 'rgb(5,5,5)',shadow: false}};
+					 arrLimits.push(lineLimitObj1);
+					 arrLimits.push(lineLimitObj2);
+				 }
+
+				 
+				 var plot = jQuery.jqplot(divStr,[series], {
+					 title:title,
+					 grid:{backgroundColor: '#fefefe', gridLineColor: '#d9d9d9',gridLineWidth: 0.5, borderWidth: 1, borderColor: '#cdcdcd'},
+					 /*grid:{backgroundColor: '#efefef', gridLineColor: '#cdcdcd',gridLineWidth: 1, borderWidth: 1, borderColor: '#4d4d4d'},*/
+					 seriesDefaults: {
+						 rendererOptions: {smooth: true},
+						 step:true,
+						 pointLabels:{ show:true, location:'n', xpadding:10, ypadding:7, edgeTolerance:7 }
+					 },
+				     axes:{
+				            xaxis:{renderer:$.jqplot.DateAxisRenderer,rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer,tickInset:0.5},tickOptions:{fontSize:'0.8em',textColor:'#000000' ,fontFamily:'Arial',formatString:'%m/%Y',angle:-30}},
+				            yaxis:{rendererOptions:{tickRenderer:$.jqplot.CanvasAxisTickRenderer,tickInset:0.5},tickOptions:{fontSize:'0.8em',fontFamily:'Arial',show:true, textColor:'#000000', formatString: fs},min:Number(minNum),max:Number(maxNum)}
+				        },
+				     canvasOverlay: {
+				            show: true,
+				            objects: arrLimits
+				          }, 
+			        series:[{lineWidth:3,markerOptions:{ style:'filledCircle', color:'#cdcdcd' },neighborThreshold: -1,color:'#4d4d4d'}],
+			        highlighter: {show: true,sizeAdjust: 10.5,lineWidthAdjust:3.5,tooltipLocation:'ne',tooltipOffset:4,
+			        	formatString:'<table class="jqplot-highlighter" border="0"><tr><td>Date:</td><td>%s</td></tr><tr><td>Value:</td><td>%s</td></tr></table>'},
+			        cursor:{
+			        	show: true,
+			        	zoom:true
+			        	}
+					});
+				 
+				 $("#"+divStr+"-zoomreset").click(function(){
+					 plot.resetZoom();
+					 plot.redraw();
+					 
+					 if(limits != null){
+						 var co = plot.plugins.canvasOverlay;
+						 $.each(limits.stages,function(ii,vv){
+							 var lineN = co.get('stage-'+valueName+'-'+ii);
+							 var normLabel = lineN.gridStop[1]+40;
+							 $('<div class="my-jqplot-normal-title" style="position:absolute;text-align:left;padding:1px;font-weight:bold;color:#b5b5b5;top:'+normLabel+'px;right:15px;font-size:90%;">'+vv.title+'</div>').insertBefore('#'+divStr+' .jqplot-overlayCanvas-canvas');
+						 });
+					 }
+					 
+				 });
 				 
 				 if(limits != null){
 					 var co = plot.plugins.canvasOverlay;
@@ -2068,23 +2121,10 @@ function loadGraphAllValues(divStr, values, labels, title, limits, valueName){
 						 $('<div class="my-jqplot-normal-title" style="position:absolute;text-align:left;padding:1px;font-weight:bold;color:#b5b5b5;top:'+normLabel+'px;right:15px;font-size:90%;">'+vv.title+'</div>').insertBefore('#'+divStr+' .jqplot-overlayCanvas-canvas');
 					 });
 				 }
-				 
-			 });
-			 
-			 if(limits != null){
-				 var co = plot.plugins.canvasOverlay;
-				 $.each(limits.stages,function(ii,vv){
-					 var lineN = co.get('stage-'+valueName+'-'+ii);
-					 var normLabel = lineN.gridStop[1]+40;
-					 $('<div class="my-jqplot-normal-title" style="position:absolute;text-align:left;padding:1px;font-weight:bold;color:#b5b5b5;top:'+normLabel+'px;right:15px;font-size:90%;">'+vv.title+'</div>').insertBefore('#'+divStr+' .jqplot-overlayCanvas-canvas');
-				 });
-			 }
+			}
+
 		}
-		
-		
-	}
-	
-	
+	}/*end values > 0 */
 }
 
 

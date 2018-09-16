@@ -392,7 +392,7 @@ function getReportObjectFromCriterias(){
 	result["graphtype"] = $("input[name='graphtype']:checked").val();
 	result["filter"] = $("input[name='reportfilter']:checked").val();
 	result["hcp"] = $("#hcptype").val();
-	result["hcpid"] = "0";
+	result["hcpid"] = $("#hcpid").val();;
 	
 	var subcriterias = [];
 	if(result["type"] == "graph"){

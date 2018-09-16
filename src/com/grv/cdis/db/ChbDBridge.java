@@ -711,12 +711,17 @@ public class ChbDBridge {
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
 			//   idsystem system_name system_code idrole
-		    cs=conn.prepareStatement("exec sp_setSession ?,?,?");
+		    cs=conn.prepareStatement("exec sp_setSession ?,?,?,?,?,?,?");
 		    cs.setEscapeProcessing(true);
 		    
 		    cs.setString(1,ses.getIdsession());
 		    cs.setString(2, ses.getIduser());
 		    cs.setString(3, ses.getIpuser());
+		    cs.setDate(4, null);
+		    cs.setDate(5, null);
+		    cs.setInt(6, ses.getReswidth());
+		    cs.setInt(7, ses.getResheight());
+		    
 		    //cs.setDate(4, crea);
 		    
 		   
@@ -763,7 +768,7 @@ public class ChbDBridge {
 		    
 		    if(rs.isBeforeFirst()){
 		    	rs.next();
-		    	result = new Session(rs.getString("idsession"), rs.getString("iduser"), rs.getString("ipuser"), (rs.getDate("created").getTime()));
+		    	result = new Session(rs.getString("idsession"), rs.getString("iduser"), rs.getString("ipuser"), (rs.getDate("created").getTime()),(rs.getDate("modified").getTime()), rs.getInt("reswidth"), rs.getInt("resheight"), rs.getInt("active"));
 		    }
 		    
 		    
@@ -802,7 +807,7 @@ public class ChbDBridge {
 		    rs = cs.executeQuery();
 		    if(rs.isBeforeFirst()){
 		    	rs.next();
-		    	result = new Session(rs.getString("idsession"), rs.getString("iduser"), rs.getString("ipuser"), (rs.getDate("created").getTime()));
+		    	result = new Session(rs.getString("idsession"), rs.getString("iduser"), rs.getString("ipuser"), (rs.getDate("created").getTime()),(rs.getDate("modified").getTime()), rs.getInt("reswidth"), rs.getInt("resheight"), rs.getInt("active"));
 		    }
 		    
 		    
