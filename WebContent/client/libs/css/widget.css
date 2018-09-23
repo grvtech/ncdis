@@ -11,12 +11,12 @@
 .graph-widget .widget-header{position:relative;background-color:#8aa5f7;margin:0px;height:35px;}
 .graph-widget .widget-title{line-height:35px;color:#ffffff;font-weight:bold;}
 .graph-widget .widget-menu{text-align : right;padding:2px;}
-.graph-widget .widget-graph{position:relative;height:310px;margin:auto;width:530px;}
+.graph-widget .widget-graph{position:relative;height:310px;margin:auto;width:95% !important;}
 .graph-widget .widget-table{width:250px;height:315px;top:0px;left:0px;background-color:#f7f7f7;position:absolute;padding:0px;display:none;z-index:10;}
 .graph-widget .widget-table-header{height:35px;background-color:#4d4d4d;color:#ffffff;font-weight:bold;font-size:90%;margin:0px;text-align:center;padding:5px;}
 .graph-widget .widget-table-body{height:275px; overflow-y: auto;overflow-x: hidden;}
 
-.panel-section .graph-widget .widget-graph{width:90%;}
+.panel-section .graph-widget .widget-graph{width:95% !important;}
 
 .table-widget{width:100%;height:350px;background-color:#fefefe;padding:0px;}
 .table-widget .widget-header{position:relative;background-color:#8aa5f7;margin:0px;height:70px;}
@@ -56,52 +56,60 @@
 
 .active{border:2px solid #4d4d4d !important;}
 
+
 @media screen  and  (max-width: 1370px) {
+	body{font-size:14px;}
 	/*
 	.panel-section .col-sm-4{padding-left:0px !important;padding-right:0px !important;}
 	.panel-section .col-sm-9 > .row{margin-left:0px !important;}
 	*/
+	.cisbutton{padding:2px 3px 2px 3px !important;}
+	
+	
 	.widget-container p{padding:10px;text-align:center;font-size:70%;}
 	.widget-container .first-line{padding:5px 0px 5px 0px !important;font-size:80% !important;font-weight:bold;}
 	
-	.graph-widget{height:240px;}
-	.graph-widget .widget-graph{height:200px;width:350px;}
-	.panel-section .graph-widget .widget-graph{height:200px;width:380px;}
-	.graph-widget .widget-table{height:205px;}
+	.graph-widget{height:240px;width:100%;}
+	.graph-widget .widget-graph{height:200px;width:95% !important;}
+	.panel-section .graph-widget .widget-graph{height:200px;width:95% !important;}
+	.graph-widget .widget-table{height:100%;}
 	.graph-widget .widget-table-body{height:170px;}
+	.graph-widget .widget-title{font-size:0.8em;line-height:1.2em;}
 	
 	.table-widget{height:240px;}
-	.table-widget .widget-body{height:170px;}
-	.table-widget .widget-table-body{height:135px;}
-	.table-widget .widget-title{font-size:80%;}
+	.table-widget .widget-header{height:20%;}
+	.table-widget .widget-body{height:80%;}
+	.table-widget .widget-table-header{height:15%;}
+	.table-widget .widget-table-body{height:85%;}
+	.table-widget .widget-title{font-size:80%;line-height:1.2em;}
+	
 	
 	.panel-section .table-widget{height:230px;}
-	.panel-section .table-widget .widget-body{height:160px;}
-	.panel-section .table-widget .widget-table-body{height:125px;}
-	
+
 	.single-widget .widget-title{font-size:80%;}
-	
+
+	.cdisheader .search{min-width:500px;}	
 }
 
 @media screen  and  (min-width: 1370px) and (max-width: 1601px) {
-	
+	body{font-size:14px;}
 	.widget-container p{padding:10px;text-align:center;font-size:70%;}
 	.widget-container .first-line{padding:5px 0px 5px 0px !important;font-size:90% !important;font-weight:bold;}
 	
-	.graph-widget{height:290px;}
-	.graph-widget .widget-graph{height:250px;width:420px;}
-	.graph-widget .widget-table{height:255px;}
+	.graph-widget{height:290px;width:100%;}
+	.graph-widget .widget-graph{height:250px;width:95% !important;}
+	.panel-section .graph-widget .widget-graph{height:250px;width:95% !important;}
+	.graph-widget .widget-table{height:100%;}
 	.graph-widget .widget-table-body{height:220px;}
 	
 	.table-widget{height:290px;}
-	.table-widget .widget-body{height:220px;}
-	.table-widget .widget-table-body{height:185px;}
-	.table-widget .widget-title{font-size:80%;}
+	.table-widget .widget-header{height:20%;}
+	.table-widget .widget-body{height:80%;}
+	.table-widget .widget-table-header{height:15%;}
+	.table-widget .widget-table-body{height:85%;}
+	.table-widget .widget-title{font-size:80%;line-height:1.2em;}
 	
 	.panel-section .table-widget{height:230px;}
-	.panel-section .table-widget .widget-body{height:160px;}
-	.panel-section .table-widget .widget-table-body{height:125px;}
-
 	.single-widget .widget-title{font-size:80%;}
 
 }

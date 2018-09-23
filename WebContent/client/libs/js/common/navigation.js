@@ -97,3 +97,17 @@ function initNavigation() {
 		var p = window.btoa("sid="+sid+"&language="+l+"&section=notes&ramq="+r+"&idnote="+idn);
 		window.location = "cdis.html?"+p;
 	}/*go to admin*/
+	
+
+	/*cache validation*/
+	//get The application cache object
+	var appCache = window.applicationCache;
+	appCache.addEventListener('updateready', function(e) {
+		this.swapCache();
+		location.reload();
+	});
+
+	
+	
+
+	

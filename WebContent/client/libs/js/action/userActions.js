@@ -832,7 +832,12 @@ function loadRecomandation(recObj){
 			$("<div>",{class:"title"}).text(rObj.title).appendTo(rcontainer);
 			var tub = $("<div>",{class:"thumbnail"}).append($("<img>",{src:"/ncdis/client/libs/images/"+rObj.thumbnail,height:"60px"})).appendTo(rcontainer);
 		}
+		
 		rcontainer.click(function(){
+			var modalWidth = 850;
+			if(rObj.thumbnail == 'recomandation_ckd_thumbnail.png'){
+				modalWidth = 950; 
+			}
 			if($("#recomandation-modal").length > 0 )$("#recomandation-modal").remove();
 			$("<div>",{id:"recomandation-modal",title:rObj.title}).appendTo($("body"));
 			$("#recomandation-modal").load("/ncdis/client/templates/"+rObj.source);
@@ -843,7 +848,7 @@ function loadRecomandation(recObj){
 			$("#recomandation-modal").dialog({
 					autoOpen: false,
 					height: h,
-					width: 850,
+					width: modalWidth,
 					modal: true,
 			      show: {
 			        effect: "blind",

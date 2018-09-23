@@ -109,7 +109,7 @@ CDIS PAGE CSS
 #hcp .hcp-profession{font-size:90%;color:#ffffff;background-color:#000000;text-align:center;width:30%;}
 #hcp .hcp-name{font-size:90%;font-weight:bold;}
 
-.cdisbody_abcgraphs{width:100%;height:100%;padding:0px;margin:0px;background-color:#ededed;top:0px;}\
+.cdisbody_abcgraphs{width:100%;padding:0px;margin:0px;background-color:#ededed;top:0px;}
 #abcgraphs-container{position:relative;width:100%;display: -webkit-box;display: -moz-box;display: -ms-flexbox;display: -webkit-flex;display: flex;-webkit-flex-flow: row wrap;flex-flow: row wrap;padding:0px !important;}
 
 

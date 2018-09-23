@@ -616,7 +616,7 @@ function loadGraph(divStr, values, labels, title, limits, valueName){
 					    overlayCanvas.after(seriesCanvas);
 				 	}
 			});
-			 
+			
 			var lc = title.toLowerCase();
 			 
 			 if (valueName == "hba1c"){
@@ -667,7 +667,7 @@ function loadGraph(divStr, values, labels, title, limits, valueName){
 					 $('<div class="my-jqplot-normal-title" style="top:'+normLabel+'px;">'+vv.title+'</div>').insertBefore('#'+divStr+' .jqplot-overlayCanvas-canvas');
 				 });
 			 }
-
+			
 		}else{
 			$("#"+divStr).html("<p class='text-center'>No data for "+valueName+"<br>Please use <span class='cisbutton'><i class='fa fa-plus' aria-hidden='true'></i></span> button to add new data.</p>");
 		}/* end values lenght check */

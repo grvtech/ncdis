@@ -286,9 +286,9 @@ public class CdisDBridge {
 		    cs=conn.prepareStatement(query);
 		    cs.setEscapeProcessing(true);
 		    cs.setQueryTimeout(90);
-		    cs.setString(1, pat.getRamq());
+		    cs.setString(1, pat.getRamq().toUpperCase());
 		    cs.setString(2, pat.getChart());
-		    cs.setString(3, pat.getBand());
+		    cs.setString(3, pat.getBand().toUpperCase());
 		    cs.setString(4, pat.getGiu());
 		    cs.setString(5, pat.getJbnqa());
 		    cs.setString(6, pat.getFname());

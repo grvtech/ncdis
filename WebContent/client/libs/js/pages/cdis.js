@@ -1,5 +1,6 @@
 var cdisSection = "dashboard";
 
+/*
 //Check if a new cache is available on page load.
 window.addEventListener('load', function(e) {
 
@@ -16,7 +17,7 @@ window.addEventListener('load', function(e) {
 
 }, false);
 
-
+*/
 
 if (!isUserLoged(sid)){
 	logoutUser(sid);
@@ -70,13 +71,14 @@ function loadPatient(){
 	clearSections();
 	$(".mainpage .main .page").load("/ncdis/client/templates/cdis.patient.html", function(patientObjArr){
 		cdisSection = "patient";
-		drawPatientRecord(patientObjArray);
-		drawABCGraphs();
-		populatePageside();
 		$(".side").hide();
 		$(".cdismenu").hide();
 		$("#menu li").removeClass("selected");
 		$("#menu li").children(".patient_icon_").parent().addClass("selected");
+		
+		drawPatientRecord(patientObjArray);
+		drawABCGraphs();
+		populatePageside();
 		
 		var hcpObject = patientObjArray[1];
 		var cnt = 0;

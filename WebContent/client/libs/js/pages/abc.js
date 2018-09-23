@@ -12,6 +12,9 @@ function drawABCGraphs(){
 				var values = [];
 				var sections =[];
 				
+				//$('#ppp').width('100%');
+				//alert($('.page').width());
+				
 				$.each(abcObject,function(key, value){
 					var parts = key.split('.');
 					if(parts[1] != null){
@@ -22,6 +25,10 @@ function drawABCGraphs(){
 				
 				$.each(values,function(index,valueName){
 					if(typeof(valueName) != 'undefined'){
+						
+						//alert($("#"+valueName).parent().parent().width() +'  aaa '+$("#"+valueName).parent().prop('tagName')+ '  '+$("#"+valueName).parent().attr('class') );
+						//$("#"+valueName).width($("#"+valueName).parent().width());
+						
 						if(valueName.indexOf('_or_') >= 0){
 							var condition = $("#"+valueName).attr("condition");
 							valueObj = validateCondition(valueName,sections[index],condition);
