@@ -5,23 +5,10 @@
 		
 		<div class="page">
 			<div class="panel-full">
-				<div style="width:1000px;margin:auto;background-color:#ededed;margin-top:10px;margin-bottom:10px;">
+				<div class="search-message">
 					<div style="text-align:center;padding:5px;">
 					<span style="font-family:Trebuchet MS; font-size:130%; line-height:1.4em;text-align:center;">
-					All CDIS users can <b>add new patients</b> by choosing the <span class="cisbutton ubs" style="margin:13px;"><i class="fa fa-bars" aria-hidden="true"></i></span> button 
-					<!-- 
-					<span class="ubs" 
-						style="display:inline-block;
-							    width: 30px;
-							    height: 30px;
-							    margin-left: 20px;
-							    margin-right: 3px;
-							    color:#ffffff;
-							    background: #4b3b3b no-repeat url(../../images/work/add_off.png) center center;
-							    -webkit-transition: 0.3s ease-in;
-							    -moz-transition: 0.3s ease-in;
-							    -o-transition: 0.3s ease-in;
-							    transition: 0.3s ease-in;">+</span> button --> on the bottom right part of the screen.
+					All CDIS users can <b>add new patients</b> by choosing the <span class="cisbutton ubs" style="margin:13px;"><i class="fa fa-bars" aria-hidden="true"></i></span> button on the bottom right part of the screen.
 					</span>
 					</div>
 				</div>
@@ -29,30 +16,29 @@
 
 			
 			<div class="panel-full">
+				<form>
 				<div class="search">
-					<form>
-					<div class="searchlabel">Find patient</div>
-				  	<!-- <div id="criteria">CHART</div> -->
-				  	<div class="ssearch">
-				  		<input type="text" name="search" id="search" class="searchtext" tabindex="1"/>
-				  	</div>
-				  	<!-- 
-				  	<div id="radios" class="scriteria">
-					    <input type="radio" id="chart" name="criteria" checked="checked"><label for="chart">CHART</label>
-					    <input type="radio" id="ipm" name="criteria" ><label for="ipm">IPM</label>
-					    <input type="radio" id="ramq" name="criteria"><label for="ramq">RAMQ</label>
-					    <input type="radio" id="fnamelname" name="criteria"><label for="fnamelname">NAME</label>
-				  	</div>
-				  	 -->
-				  	 <div id="radios" class="scriteria btn-group-vertical" data-toggle="buttons">
-					    <label for="chart" class="btn btn-default active"><input type="radio" id="chart" name="criteria" checked="checked">CHART</label>
-					    <label for="ipm" class="btn btn-default"><input type="radio" id="ipm" name="criteria">IPM</label>
-					    <label for="ramq" class="btn btn-default"><input type="radio" id="ramq" name="criteria">RAMQ</label>
-					    <label for="fnamelname" class="btn btn-default"><input type="radio" id="fnamelname" name="criteria">NAME</label>
-				  	</div>
-				  	 
-					</form>
+					
+						
+						<div id="radios" class="scriteria btn-group-vertical" data-toggle="buttons">
+						    <label for="chart" class="btn btn-default active"><input type="radio" id="chart" name="criteria" checked="checked">CHART</label>
+						    <label for="ipm" class="btn btn-default"><input type="radio" id="ipm" name="criteria">IPM</label>
+						    <label for="ramq" class="btn btn-default"><input type="radio" id="ramq" name="criteria">RAMQ</label>
+						    <label for="fnamelname" class="btn btn-default"><input type="radio" id="fnamelname" name="criteria">NAME</label>
+					  	</div>
+					  	
+					  	<div class="ssearch">
+					  		<div class="label">
+					  			Find patient
+					  		</div>
+					  		<div class="input">
+					  			<input type="text" name="search" id="search" class="searchtext" tabindex="1"/>
+					  		</div>
+					  		
+					  	</div>
+					
 				</div>
+				</form>
 			</div>
 				
 			<div class="panel-full">

@@ -1,8 +1,9 @@
 CACHE MANIFEST
-# v5.60 2018-09-23
+# v6.12 2018-09-23
 # First version of manifest cache
 
 CACHE:
+index.html
 client/libs/css/cdis-theme/jquery-ui.css
 client/libs/css/jqplot/jquery.jqplot.min.css
 client/libs/js/jquery/jqte/jquery-te-1.4.0.css
