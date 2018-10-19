@@ -1306,7 +1306,7 @@ public class CdisDBridge {
 					
 				}
 					
-				System.out.println(sql);
+				//System.out.println(sql);
 				
 				try {
 					initContext = new InitialContext();
@@ -1392,7 +1392,7 @@ public class CdisDBridge {
 						    cs=conn.createStatement();		    
 						    cs.setEscapeProcessing(true);
 						    
-						    System.out.println(sql);
+						    //System.out.println(sql);
 						    
 						    rs = cs.executeQuery(sql);
 						    int index = 0;
@@ -1431,7 +1431,7 @@ public class CdisDBridge {
 					    cs=conn.createStatement();		    
 					    cs.setEscapeProcessing(true);
 					    
-					    System.out.println(sql);
+					    //System.out.println(sql);
 					    
 					    rs = cs.executeQuery(sql);
 					    int index = 0;
@@ -1486,15 +1486,18 @@ public class CdisDBridge {
 					for(int x=0;x<subcriterias.size();x++){
 						ReportSubcriteria rsc = subcriterias.get(x);
 						if(rsc.getSubsection().equals("1")){
-							subcriteriaStr += " inner join (select idpatient from ncdis.ncdis.patient where "+rsc.getSubname()+" "+Renderer.renderOperator(rsc.getSuboperator())+" "+rsc.getSubvalue()+" and (dod is null or dod ='1900-01-01')) cc"+x+" on bb.idpatient = cc"+x+".idpatient";
+							//subcriteriaStr += " inner join (select distinct idpatient from ncdis.ncdis.patient where "+rsc.getSubname()+" "+Renderer.renderOperator(rsc.getSuboperator())+" "+rsc.getSubvalue()+" and (dod is null or dod ='1900-01-01')) cc"+x+" on bb.idpatient = cc"+x+".idpatient";
+							subcriteriaStr += " and bb."+rsc.getSubname()+" "+Renderer.renderOperator(rsc.getSuboperator())+" "+rsc.getSubvalue()+" ";
 						}else if(rsc.getSubsection().equals("90")){
-							subcriteriaStr += " inner join (select idpatient from ncdis.ncdis.cdis_value where iddata = '"+rsc.getSubiddata()+"' and value "+Renderer.renderOperator(rsc.getSuboperator())+" "+Renderer.renderValue(rsc.getSubsection()+"."+rsc.getSubvalue())+") cc"+x+" on bb.idpatient = cc"+x+".idpatient";
+							//subcriteriaStr += " inner join (select distinct idpatient from ncdis.ncdis.cdis_value where iddata = '"+rsc.getSubiddata()+"' and value "+Renderer.renderOperator(rsc.getSuboperator())+" "+Renderer.renderValue(rsc.getSubsection()+"."+rsc.getSubvalue())+") cc"+x+" on bb.idpatient = cc"+x+".idpatient";
+							subcriteriaStr += " and bb.dtype "+Renderer.renderOperator(rsc.getSuboperator())+" "+Renderer.renderValue(rsc.getSubsection()+"."+rsc.getSubvalue())+" ";
 						}else{
-							subcriteriaStr += " inner join (select idpatient from ncdis.ncdis.cdis_value where iddata = '"+rsc.getSubiddata()+"' and value "+Renderer.renderOperator(rsc.getSuboperator())+" "+rsc.getSubvalue()+") cc"+x+" on bb.idpatient = cc"+x+".idpatient";
+							subcriteriaStr += " inner join (select distinct idpatient from ncdis.ncdis.cdis_value where iddata = '"+rsc.getSubiddata()+"' and value "+Renderer.renderOperator(rsc.getSuboperator())+" "+rsc.getSubvalue()+") cc"+x+" on bb.idpatient = cc"+x+".idpatient";
 						}
 					}
 					
-					sql = criteriaStr +" "+subcriteriaStr + " "+criteriaWhere;
+					//sql = criteriaStr +" "+subcriteriaStr + " "+criteriaWhere;
+					sql = criteriaStr + " "+criteriaWhere +" "+subcriteriaStr ;
 					//System.out.println(sql);
 					try {
 						initContext = new InitialContext();
@@ -1502,9 +1505,12 @@ public class CdisDBridge {
 						conn = ds.getConnection();
 					    cs=conn.createStatement();		    
 					    cs.setEscapeProcessing(true);
-					    System.out.println(sql);
+					    long ts1 = (new Date()).getTime();
+					    //System.out.println("SQL-"+sec+"-"+criteria.getName()+":"+sql);
 					    rs = cs.executeQuery(sql);
 					    int index = 0;
+					    //long ts11 = (new Date()).getTime();
+					   // System.out.println("Exec Time SQL before parsing-"+sec+"-"+criteria.getName()+": "+ (ts11-ts1));
 					    while (rs.next()) {
 					    	ArrayList<String> line = new ArrayList<>();
 					    	line.add(Integer.toString(index));
@@ -1513,7 +1519,9 @@ public class CdisDBridge {
 				    		result.add(line);
 				    		index++;
 					    }
-				
+					    long ts2 = (new Date()).getTime();
+					    //System.out.println("Exec Time SQL after parsing-"+sec+"-"+criteria.getName()+": "+ (ts2-ts1));
+					    
 					}catch (SQLException se) {
 				        se.printStackTrace();
 				    } catch (NamingException e) {
@@ -1615,7 +1623,7 @@ public class CdisDBridge {
 						    cs=conn.createStatement();		    
 						    cs.setEscapeProcessing(true);
 						    
-						    System.out.println(sql);
+						    //System.out.println(sql);
 						    rs = cs.executeQuery(sql);
 						    int index = 0;
 						    while (rs.next()) {
@@ -1640,8 +1648,6 @@ public class CdisDBridge {
 					            ex.printStackTrace();
 					        }
 					   }
-						
-						
 					}
 				}else{
 					sql = "select count(nn.idpatient) as cnt from ncdis.ncdis.cdis_value nn  "+subStrFrom
@@ -1659,7 +1665,7 @@ public class CdisDBridge {
 					    cs=conn.createStatement();		    
 					    cs.setEscapeProcessing(true);
 					    
-					    System.out.println(sql);
+					    //System.out.println(sql);
 					    
 					    rs = cs.executeQuery(sql);
 					    int index = 0;
@@ -1736,7 +1742,7 @@ public class CdisDBridge {
 		Statement cs=null;
 		Connection conn = null;
 		String sql = "select distinct nn.idpatient from ncdis.ncdis.patient nn left join ncdis.ncdis.patient_hcp ph on nn.idpatient = ph.idpatient where (nn.dod is null or nn.dod = '1900-01-01') and ph."+hcp+"='"+hcpid+"'";
-		System.out.println(sql);
+		//System.out.println(sql);
 		try {
 			initContext = new InitialContext();
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");

@@ -139,171 +139,189 @@ function renderReport(reportObj){
 }
 
 function renderGraphReport(reportObj, divObj){
-	$.ajax({
-	    url: "/ncdis/service/action/executeReport?language=en&idreport="+reportObj.id+"&owner="+reportObj.owner+"&type="+reportObj.type+"&graphtype="+reportObj.graphtype+"&subcriteriatype="+reportObj.subcriteriatype,
-	    type: 'POST',
-	    data:JSON.stringify(reportObj),
-	    contentType: 'application/json; charset=utf-8',
-	    dataType: 'json',
-	    async: true,
-	    success: function(msg) {
-	        dataset = msg.objs[0];
-	    
-	        if($.type(dataset) === "object"){
-	    		var ds = dataset.dataset;
-	    		var dh = dataset.header;
-	    		if(ds.length > 0){
-	    			$(divObj).empty();
-	    			var series = [];
-	    			var total = 0;
-	    			for(var j=0;j<dh.length;j++){
-	    				total += Number(ds[0][j]);
-	    			}
-	    			var graphOptions=null;
-	    			var axes = null;
-	    			if(reportObj.graphtype == "bar"){
-	    				if(reportObj.subcriteria.length > 0 ){
-	    					if(reportObj.subcriteriatype == "single"){
-	    						for(var k=0;k<reportObj.subcriteria.length;k++){
-	    							var s = [];
-	    							for(var kk=0;kk<dh.length;kk++){
-	    								var serie = [dh[kk], Number(ds[k][kk]) ];
-	    								s.push(serie);
-	    							}
-	    							series.push(s);
-	    						}
-	    					}else{
-	    						for(var i=0;i<dh.length;i++){
-	    							var serie = [dh[i], Number(ds[0][i]) ];
-	    							series.push(serie);
-	    						}
-	    						series = [series];
-	    					}
-	    				}else{
-	    					for(var i=0;i<dh.length;i++){
-	    						var serie = [dh[i], Number(ds[0][i]) ];
-	    						series.push(serie);
-	    					}
-	    					series = [series];
-	    				}
-	    				graphOptions = {
-	    						grid:{
-	    							 background:'transparent',
-	    							 drawBorder:false,
-	    							 shadow:false,
-	    							 borderWidth: 1 
-	    						},
-	    				        seriesDefaults:{
-	    				            renderer:$.jqplot.BarRenderer,
-	    				            pointLabels: { show: true },
-	    				            rendererOptions: {
-	    				                // Set the varyBarColor option to true to use different colors for each bar.
-	    				                // The default series colors are used.
-	    				                varyBarColor: true
-	    				            }
-	    				        },
-	    				        axes:{
-	    				            xaxis:{
-	    				                renderer: $.jqplot.CategoryAxisRenderer
-	    				            }
-	    				        }
-	    				    };
-	    			}else if(reportObj.graphtype == "pie"){
-	    				graphOptions = {
-	    										 grid:{
-	    											 background:'transparent',
-	    											 drawBorder:false,
-	    											 shadow:false,
-	    											 borderWidth: 1 
-	    										},
-	    										gridPadding: {top:0, bottom:0, left:0, right:0},
-	    								        seriesDefaults:{
-	    								            renderer:$.jqplot.PieRenderer, 
-	    								            trendline:{ show:true },
-	    								            rendererOptions: { padding: 4, sliceMargin: 2, showDataLabels: true }
-	    								        },
-	    								        legend:{
-	    								            show:true, 
-	    								            placement: 'inside', 
-	    								            location:'e'
-	    								            
-	    								        }       				
-	    				    };
-	    				for(var i=0;i<dh.length;i++){
-	    					var serie = [dh[i]+" "+Number(((Number(ds[0][i])*100)/total).toFixed(2))+"% ["+ds[0][i]+"]",  Number(((Number(ds[0][i])*100)/total).toFixed(2))  ];
-	    					series.push(serie);
-	    				}
-	    			series = [series];
-	    			}else if(reportObj.graphtype == "line"){
-	    				if(reportObj.subcriteria.length > 0 ){
-	    					if(reportObj.subcriteriatype == "single"){
-	    						for(var k=0;k<reportObj.subcriteria.length;k++){
-	    							var s = [];
-	    							for(var kk=0;kk<dh.length;kk++){
-	    								var serie = [dh[kk], Number(ds[k][kk]) ];
-	    								s.push(serie);
-	    							}
-	    							series.push(s);
-	    						}
-	    					}else{
-	    						for(var i=0;i<dh.length;i++){
-	    							var serie = [dh[i], Number(ds[0][i]) ];
-	    							series.push(serie);
-	    						}
-	    						series = [series];
-	    					}
-	    				}else{
-	    					for(var i=0;i<dh.length;i++){
-	    						var serie = [dh[i], Number(ds[0][i]) ];
-	    						series.push(serie);
-	    					}
-	    					series = [series];
-	    				}
-	    				graphOptions = {
-	    						 grid:{
-	    							 background:'transparent',
-	    							 drawBorder:false,
-	    							 shadow:false,
-	    							 borderWidth: 1 
-	    						},
-	    					      axesDefaults: {
-	    					    	  renderer: $.jqplot.CategoryAxisRenderer,
-	    				             labelRenderer: $.jqplot.CanvasAxisLabelRenderer
-	    					      },
-	    					      seriesDefaults: {
-	    					          rendererOptions: {
-	    					              smooth: true
-	    					          }
-	    					      }
-	    					    };
-	    			}
-	    			
-	    			var plot = jQuery.jqplot($(divObj).attr("id"),series, graphOptions);
-	    			$(divObj).bind('jqplotDataHighlight', function(ev, seriesIndex, pointIndex, series) {
-	    		        var idx = pointIndex;
-	    		        $(divObj).find('tr.jqplot-table-legend').removeClass('legend-row-highlighted');  
-	    		        $(divObj).find('tr.jqplot-table-legend').children('.jqplot-table-legend-label').removeClass('legend-text-highlighted');
-	    		        $(divObj).find('tr.jqplot-table-legend').eq(idx).addClass('legend-row-highlighted');
-	    		        $(divObj).find('tr.jqplot-table-legend').eq(idx).children('.jqplot-table-legend-label').addClass('legend-text-highlighted');
-	    		    });
-	    		 
-	    			$(divObj).bind('jqplotDataUnhighlight', function(ev, seriesIndex, pointIndex, series) {
-	    				$(divObj).find('tr.jqplot-table-legend').removeClass('legend-row-highlighted');  
-	    				$(divObj).find('tr.jqplot-table-legend').children('.jqplot-table-legend-label').removeClass('legend-text-highlighted');
-	    		    });
-	    		}else{
-	    			$("#"+reportObj.id).hide();
-	    		}
-	    	}
-	        $("#"+reportObj.id+" > .graph").find(".loading-span").remove();
-	    }
-	});
-	
-	
-	//var dataset = prepareCustomReport(reportObj);
-	
-	
+	if($.type(reportObj.data) === "object"){
+		var obset = [];
+		for(var i=0;i<reportObj.subcriteria.length;i++){
+			if(obset.length == 0 ) {obset = reportObj;}
+			var iname = reportObj.subcriteria[i].subname;
+			var ival = reportObj.subcriteria[i].subvalue;
+			obset = getObjects(obset,iname,ival);
+		} 
+		var set = obset[0];
+		var obj ={};
+		obj["objs"] = [{"dataset":[set.set],"header":reportObj.data.header}];
+		drawGraphReport(obj,reportObj,divObj);
+	}else{
+		$.ajax({
+		    url: "/ncdis/service/action/executeReport?language=en&idreport="+reportObj.id+"&owner="+reportObj.owner+"&type="+reportObj.type+"&graphtype="+reportObj.graphtype+"&subcriteriatype="+reportObj.subcriteriatype,
+		    type: 'POST',
+		    data:JSON.stringify(reportObj),
+		    contentType: 'application/json; charset=utf-8',
+		    dataType: 'json',
+		    async: true,
+		    success: function(data){
+		    	var rob = reportObj;
+		    	var dob = divObj;
+		    	drawGraphReport(data,rob,dob);
+		    }
+		});
+	}
 }
+
+
+
+function drawGraphReport(msg,reportObj, divObj) {
+    dataset = msg.objs[0];
+
+    if($.type(dataset) === "object"){
+		var ds = dataset.dataset;
+		var dh = dataset.header;
+		if(ds.length > 0){
+			$(divObj).empty();
+			var series = [];
+			var total = 0;
+			for(var j=0;j<dh.length;j++){
+				total += Number(ds[0][j]);
+			}
+			var graphOptions=null;
+			var axes = null;
+			if(reportObj.graphtype == "bar"){
+				if(reportObj.subcriteria.length > 0 ){
+					if(reportObj.subcriteriatype == "single"){
+						for(var k=0;k<reportObj.subcriteria.length;k++){
+							var s = [];
+							for(var kk=0;kk<dh.length;kk++){
+								var serie = [dh[kk], Number(ds[k][kk]) ];
+								s.push(serie);
+							}
+							series.push(s);
+						}
+					}else{
+						for(var i=0;i<dh.length;i++){
+							var serie = [dh[i], Number(ds[0][i]) ];
+							series.push(serie);
+						}
+						series = [series];
+					}
+				}else{
+					for(var i=0;i<dh.length;i++){
+						var serie = [dh[i], Number(ds[0][i]) ];
+						series.push(serie);
+					}
+					series = [series];
+				}
+				graphOptions = {
+						grid:{
+							 background:'transparent',
+							 drawBorder:false,
+							 shadow:false,
+							 borderWidth: 1 
+						},
+				        seriesDefaults:{
+				            renderer:$.jqplot.BarRenderer,
+				            pointLabels: { show: true },
+				            rendererOptions: {
+				                // Set the varyBarColor option to true to use different colors for each bar.
+				                // The default series colors are used.
+				                varyBarColor: true
+				            }
+				        },
+				        axes:{
+				            xaxis:{
+				                renderer: $.jqplot.CategoryAxisRenderer
+				            }
+				        }
+				    };
+			}else if(reportObj.graphtype == "pie"){
+				graphOptions = {
+										 grid:{
+											 background:'transparent',
+											 drawBorder:false,
+											 shadow:false,
+											 borderWidth: 1 
+										},
+										gridPadding: {top:0, bottom:0, left:0, right:0},
+								        seriesDefaults:{
+								            renderer:$.jqplot.PieRenderer, 
+								            trendline:{ show:true },
+								            rendererOptions: { padding: 4, sliceMargin: 2, showDataLabels: true }
+								        },
+								        legend:{
+								            show:true, 
+								            placement: 'inside', 
+								            location:'e'
+								            
+								        }       				
+				    };
+				for(var i=0;i<dh.length;i++){
+					var serie = [dh[i]+" "+Number(((Number(ds[0][i])*100)/total).toFixed(2))+"% ["+ds[0][i]+"]",  Number(((Number(ds[0][i])*100)/total).toFixed(2))  ];
+					series.push(serie);
+				}
+			series = [series];
+			}else if(reportObj.graphtype == "line"){
+				if(reportObj.subcriteria.length > 0 ){
+					if(reportObj.subcriteriatype == "single"){
+						for(var k=0;k<reportObj.subcriteria.length;k++){
+							var s = [];
+							for(var kk=0;kk<dh.length;kk++){
+								var serie = [dh[kk], Number(ds[k][kk]) ];
+								s.push(serie);
+							}
+							series.push(s);
+						}
+					}else{
+						for(var i=0;i<dh.length;i++){
+							var serie = [dh[i], Number(ds[0][i]) ];
+							series.push(serie);
+						}
+						series = [series];
+					}
+				}else{
+					for(var i=0;i<dh.length;i++){
+						var serie = [dh[i], Number(ds[0][i]) ];
+						series.push(serie);
+					}
+					series = [series];
+				}
+				graphOptions = {
+						 grid:{
+							 background:'transparent',
+							 drawBorder:false,
+							 shadow:false,
+							 borderWidth: 1 
+						},
+					      axesDefaults: {
+					    	  renderer: $.jqplot.CategoryAxisRenderer,
+				             labelRenderer: $.jqplot.CanvasAxisLabelRenderer
+					      },
+					      seriesDefaults: {
+					          rendererOptions: {
+					              smooth: true
+					          }
+					      }
+					    };
+			}
+			
+			var plot = jQuery.jqplot($(divObj).attr("id"),series, graphOptions);
+			$(divObj).bind('jqplotDataHighlight', function(ev, seriesIndex, pointIndex, series) {
+		        var idx = pointIndex;
+		        $(divObj).find('tr.jqplot-table-legend').removeClass('legend-row-highlighted');  
+		        $(divObj).find('tr.jqplot-table-legend').children('.jqplot-table-legend-label').removeClass('legend-text-highlighted');
+		        $(divObj).find('tr.jqplot-table-legend').eq(idx).addClass('legend-row-highlighted');
+		        $(divObj).find('tr.jqplot-table-legend').eq(idx).children('.jqplot-table-legend-label').addClass('legend-text-highlighted');
+		    });
+		 
+			$(divObj).bind('jqplotDataUnhighlight', function(ev, seriesIndex, pointIndex, series) {
+				$(divObj).find('tr.jqplot-table-legend').removeClass('legend-row-highlighted');  
+				$(divObj).find('tr.jqplot-table-legend').children('.jqplot-table-legend-label').removeClass('legend-text-highlighted');
+		    });
+		}else{
+			$("#"+reportObj.id).hide();
+		}
+	}
+    $("#"+reportObj.id+" > .graph").find(".loading-span").remove();
+}
+
 
 
 function getReports(sid){

@@ -3,8 +3,10 @@ package com.grv.cdis.services;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -157,7 +159,7 @@ public class ActionProcessor {
 			title = ((String[])args.get("title"))[0];
 		}
 		
-		String subcriteriatype = "multi"; //multi or single multi - set combinet wit all sub criterias; single set split by subcriteria
+		String subcriteriatype = "multi"; //multi or single multi - set combined with all sub criterias; single set split by subcriteria
 		if(args.get("subcriteriatype") != null){
 			subcriteriatype = ((String[])args.get("subcriteriatype"))[0];
 		}
@@ -408,9 +410,7 @@ public class ActionProcessor {
 	    	for(int i=0;i<lcs.size();i++){
 	    		ReportCriteria rc = lcs.get(i);
 	    		header.add(rc.getDisplay());
-	    		
 	    		ArrayList<ArrayList<String>> criteriaSet = db.executeReport(rc, "graph", slcs);
-	    		
 	    		map.put(rc, criteriaSet);
 	    	}
 	    	
@@ -841,13 +841,30 @@ public class ActionProcessor {
 
 
 
+	public void writeReportFile(String reportCode, String content){
+		InitialContext ic;
+		try {
+			ic = new InitialContext();
+			String rf = (String) ic.lookup("reports-folder");
+			File reportFile = new File(rf+System.getProperty("file.separator")+"report."+reportCode);
+			Writer writer = new FileWriter(reportFile);
+			writer.write(content);
+			writer.close();
+		}catch(NamingException e){
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	public String generateDataReport(Hashtable<String, String[]> args){
 		Gson json = new Gson();
 		CdisDBridge db = new CdisDBridge();
 		String result = "";
 		JsonParser jp = new JsonParser();
 		
-		System.out.println("METHOD LAUNCH ");
+		//System.out.println("METHOD LAUNCH ");
 		String reportCode = ((String[])args.get("rep"))[0];
 		
 		InitialContext ic;
@@ -860,13 +877,15 @@ public class ActionProcessor {
 			
 			Gson gson = new Gson();
 		    JsonParser parser = new JsonParser();
-		    JsonObject jObject = parser.parse(new FileReader(reportFile)).getAsJsonObject();
+		    //Writer writer = new FileWriter(reportFile);
+		    JsonElement je = parser.parse(new FileReader(reportFile));
+		    JsonObject jObject = je.getAsJsonObject();
 		    JsonArray jArrayC = jObject.get("criteria").getAsJsonArray();
 		    JsonArray jArraySC = jObject.get("subcriteria").getAsJsonArray();
 		    JsonArray jArrayI = jObject.get("input").getAsJsonArray();
 		    
-		    System.out.println(reportFile.getAbsolutePath());
-		    System.out.println(jObject.toString());
+		    //System.out.println(reportFile.getAbsolutePath());
+		    //System.out.println(jObject.toString());
 
 		    ArrayList<ReportCriteria> lcs = new ArrayList<ReportCriteria>();
 		    ArrayList<ReportSubcriteria> slcs = new ArrayList<ReportSubcriteria>();
@@ -876,62 +895,143 @@ public class ActionProcessor {
 		    for(JsonElement obj : jArrayC ){
 		        ReportCriteria cse = gson.fromJson( obj , ReportCriteria.class);
 		        cse.loadIddata();
-		        System.out.println("CRITERIA: "+cse.getName());
+		       // System.out.println("CRITERIA: "+cse.getName());
 		        lcs.add(cse);
 		    }
 		    
 		    for(JsonElement obj : jArraySC ){
 		        ReportSubcriteria scse = gson.fromJson( obj , ReportSubcriteria.class);
 		        scse.loadIddata();
-		        System.out.println("SUB CRITERIA: "+scse.getSubname());
+		       // System.out.println("SUB CRITERIA: "+scse.getSubname());
 	        	slcs.add(scse);
 		    }
 		    
-		    ArrayList<String> header = new ArrayList<>();
-		    ArrayList<ArrayList<String>> set = new ArrayList<>();
-
-
-	    	//graphdata = getGraphdata
-	    	
-	    	Hashtable<ReportCriteria, ArrayList<ArrayList<String>>> map = new Hashtable<>();
-	    	for(int i=0;i<lcs.size();i++){
-	    		ReportCriteria rc = lcs.get(i);
-	    		header.add(rc.getDisplay());
-	    		ArrayList<ArrayList<String>> criteriaSet = db.executeReport(rc, "graph", slcs);
-	    		map.put(rc, criteriaSet);
-	    	}
-	    	
-    		ArrayList<String> setLine = new ArrayList<>();
-    		for(int jj=0;jj<lcs.size();jj++){
-    			ArrayList<ArrayList<String>> criteriaSet = map.get(lcs.get(jj));
-    			if(criteriaSet.size() > 0){
-    				setLine.add(criteriaSet.get(0).get(2));
-    			}else{
-    				setLine.add("0");
-    			}
-    		}
-    		set.add(setLine);
-
-
-		    Hashtable<String, Object> reportObject = new Hashtable<>();
+		    //build subcriteria from input if exists 
+		    ArrayList<ArrayList<ReportSubcriteria>> matrix = new ArrayList<>();
 		    
-		    reportObject.put("dataset", set);
-		    reportObject.put("header", header);
-			
-		    ArrayList<Object> obs = new ArrayList<Object>();
-			obs.add(reportObject);
-			result = json.toJson(obs);
+		    //System.out.println("INput array size : "+jArrayI.size());
+		    for(int iobj=0;iobj<jArrayI.size();iobj++){
+		        JsonObject input = jArrayI.get(iobj).getAsJsonObject();
+		        String iname = input.get("name").getAsString();
+		        
+		        if(matrix.size() > 0){
+		        	JsonArray varr = input.get("values").getAsJsonArray();
+		        	int ml = matrix.size();
+		        	//System.out.println("freeze matrix size : "+ml);
+		        	//System.out.println("start loop for subscriteria :   "+iname);
+		        	
+		        	for(int jj=0;jj<varr.size();jj++){
+		        		ReportSubcriteria scs1 = new ReportSubcriteria();
+		 		        for(JsonElement sobj : jArraySC ){
+		 			        scs1 = gson.fromJson( sobj , ReportSubcriteria.class);
+		 			        if(scs1.getSubname().equals(iname)){break;}
+		 			    }
+		        		scs1.setSubvalue(Integer.toString(jj));
+		        		if(iname.equals("idcommunity") && scs1.getSubvalue().equals("0")){scs1.setSuboperator("more than");}
+		        		for(int ii=0;ii<ml;ii++){
+		        			ArrayList<ReportSubcriteria> ars1 = new ArrayList<>();
+			        		ArrayList<ReportSubcriteria> ars = matrix.get(ii);
+			        		//System.out.println("subcriteria array size in loop: "+ars.size());
+			        		for(ReportSubcriteria xx : ars){
+			        			ars1.add(xx);
+			        		}
+			        		//System.out.println("subcriteria array1 size in loop before add: "+ars1.size());
+		        			//ars1 = ars;
+			        		ars1.add(scs1);
+			        		//System.out.println("subcriteria array1 size in loop after add: "+ars1.size());
+				        	matrix.add(ars1);
+			        	}
+		        	}
+		        	
+		        	for(int iii=0;iii<ml;iii++){
+		        		ArrayList<ReportSubcriteria> d1 = matrix.get(0);
+		        		//System.out.println("delete array from index :"+iii+"   with size : "+d1.size());
+		        		matrix.remove(0);
+		        	}
+		        	
+		        }else{
+		        	JsonArray varr = input.get("values").getAsJsonArray();
+		        	for(int j=0;j<varr.size();j++){
+		        		ArrayList<ReportSubcriteria> arsc = new ArrayList<>();
+		        		ReportSubcriteria scs1 = new ReportSubcriteria();
+		 		        for(JsonElement sobj : jArraySC ){
+		 			        scs1 = gson.fromJson( sobj , ReportSubcriteria.class);
+		 			        if(scs1.getSubname().equals(iname)){break;}
+		 			    }
+		        		scs1.setSubvalue(Integer.toString(j));
+		        		if(iname.equals("idcommunity") && scs1.getSubvalue().equals("0")){scs1.setSuboperator("more than");}
+		        		arsc.add(scs1);
+		        		matrix.add(arsc);
+		        	}
+		        }
+		    }
+		    /*
+		    System.out.println("Matrix size: "+matrix.size());
+		    for(ArrayList<ReportSubcriteria> aa : matrix){
+		    	System.out.println("Subscriteria arrai size: "+aa.size());
+		    	for(ReportSubcriteria bb : aa){
+		    		System.out.println("Subscriteria name: "+bb.getSubname());
+		    		System.out.println("Subscriteria value: "+bb.getSubvalue());
+		    		System.out.println("Subscriteria operator: "+bb.getSuboperator());
+		    	}
+		    }
+		    */
+		    //now i have a matrix of all combinations of report subcriterias
+		    
+		    ArrayList<String> header = new ArrayList<>();
+		    ArrayList<Object> datasets = new ArrayList<Object>();
+		    Hashtable<String, Object> dataObject = new Hashtable<>();
+    		dataObject.put("timestamp", sdf.format(new Date()));
 
-			System.out.println(result);
+		    for(int x=0;x<matrix.size();x++){
+		    	ArrayList<ReportSubcriteria> sc = matrix.get(x);
+		    	
+			    ArrayList<ArrayList<String>> set = new ArrayList<>();
+		    	
+			    Hashtable<ReportCriteria, ArrayList<ArrayList<String>>> map = new Hashtable<>();
+		    	for(int i=0;i<lcs.size();i++){
+		    		ReportCriteria rc = lcs.get(i);
+		    		if(!header.contains(rc.getDisplay())){
+		    			header.add(rc.getDisplay());
+		    		}
+		    		ArrayList<ArrayList<String>> criteriaSet = db.executeReport(rc, "graph", sc);
+		    		map.put(rc, criteriaSet);
+		    	}
+		    	
+	    		ArrayList<String> setLine = new ArrayList<>();
+	    		for(int jj=0;jj<lcs.size();jj++){
+	    			ArrayList<ArrayList<String>> criteriaSet = map.get(lcs.get(jj));
+	    			if(criteriaSet.size() > 0){
+	    				setLine.add(criteriaSet.get(0).get(2));
+	    			}else{
+	    				setLine.add("0");
+	    			}
+	    		}
+			    Hashtable<String, Object> dataset = new Hashtable<>();
+			    for(ReportSubcriteria r : sc ){
+			    	dataset.put(r.getSubname(), r.getSubvalue());
+			    }
+				dataset.put("set", setLine);
+			    datasets.add(dataset);
+		    }
+		    
+		    dataObject.put("header",header);
+		    dataObject.put("datasets",datasets);
+			
+			jObject.add("data", json.toJsonTree(dataObject));
+			writeReportFile(reportCode, jObject.toString());
+			System.out.println("-------------------------------------------------");
+			System.out.println("REPORT "+ reportCode+" GENERATED");
+			System.out.println("-------------------------------------------------");
+
 			
 		} catch (NamingException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-	   
-		return result;
+		return "REPORT "+ reportCode+" GENERATED";
 	}
-
+	
 
 }

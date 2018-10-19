@@ -1724,19 +1724,20 @@ public ArrayList<Note> getUserNotes(String iduserto){
 		    }
 		    
 		}catch (SQLException se) {
-		        se.printStackTrace();
+			se.printStackTrace();
 	    } catch (NamingException e) {
 			e.printStackTrace();
 		} finally {
 	        try {
-	            rs.close();
+	            if(rs != null)rs.close();
 	            cs.close();
 	            conn.close();
 	        } catch (SQLException ex) {
 	            ex.printStackTrace();
+	            
 	        }
 	   }
-		return result;
+	return result;
 	}
 
 	public boolean setScheduleVisit(String idschedule, String iduser, String idpatient, String scheduledate, String idprofesion, String frequency){

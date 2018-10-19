@@ -152,8 +152,8 @@ public class ImportProcessor {
 					}
 					//System.out.println("Value :"+ value );
 				}catch(NumberFormatException ex){
-					ex.printStackTrace();
-					
+					//ex.printStackTrace();
+					System.out.println("parsing error:"+value);
 				}
 				Class<?> cls =  obj.getClass();
 				Values vals = new Values();
