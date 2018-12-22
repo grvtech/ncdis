@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
@@ -28,6 +29,9 @@ import javax.sql.DataSource;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.grv.cdis.model.Hcp;
 import com.grv.cdis.model.MessageResponse;
@@ -1028,9 +1032,9 @@ public class CdisDBridge {
 			sql = "select rr.*,CONCAT(uu.fname, uu.lname) as owner  from ncdis.ncdis.reports rr left join ncdis.ncdis.users uu on rr.iduser = uu.iduser where rr.iduser = '"+iduser+"' and rr.report_code like 'PERSONAL%'";
 		}else if(type.equals("REP")){
 			sql = "select rr.*,CONCAT(uu.fname, uu.lname) as owner  from ncdis.ncdis.reports rr left join ncdis.ncdis.users uu on rr.iduser = uu.iduser where rr.report_code like 'REP%'";
+		}else if(type.equals("LIST")){
+			sql = "select rr.*,CONCAT(uu.fname, uu.lname) as owner  from ncdis.ncdis.reports rr left join ncdis.ncdis.users uu on rr.iduser = uu.iduser where rr.report_code like 'LIST.%'";
 		}
-	
-		
 		
 		try {
 			initContext = new InitialContext();
@@ -1136,6 +1140,9 @@ public class CdisDBridge {
 	
 	
 	public ArrayList<ArrayList<String>> executeReport(ReportCriteria criteria, String reportType, ArrayList<ReportSubcriteria> subcriterias){
+		
+		//System.out.println("REPORT TYPE"+reportType   +"criteria = "+criteria.getName() +"  subcriteria size "+subcriterias.size());
+		
 		ArrayList<ArrayList<String>> result = new ArrayList<>();
 		Context initContext;
 		DataSource ds;
@@ -1144,8 +1151,10 @@ public class CdisDBridge {
 		Connection conn = null;
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		
+		//System.out.println("AAAAAA");
 		if(reportType.equals("list")){
+			
+			//System.out.println("REPORT TYPE LIST");
 			String val = criteria.getValue();
 			String nom = criteria.getName();
 			String op = Renderer.renderOperator(criteria.getOperator());
@@ -1177,7 +1186,7 @@ public class CdisDBridge {
 						+ " "+ criteriaStr+ " "
 						+ "order by nn.idpatient asc";
 				//sql = "select * from ncdis.ncdis.patient";
-				
+				//System.out.println(sql);
 				try {
 					initContext = new InitialContext();
 					ds = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -1392,7 +1401,7 @@ public class CdisDBridge {
 						    cs=conn.createStatement();		    
 						    cs.setEscapeProcessing(true);
 						    
-						    //System.out.println(sql);
+						    System.out.println(sql);
 						    
 						    rs = cs.executeQuery(sql);
 						    int index = 0;
@@ -1697,6 +1706,80 @@ public class CdisDBridge {
 		return result;
 	}
 
+	public ArrayList<Hashtable<String, String>> executeReportFlist(String dataName, JsonArray criterias){
+		ArrayList<Hashtable<String, String>> result = new ArrayList<>();
+		Gson gson = new Gson();
+		Context initContext;
+		DataSource ds;
+		ResultSet rs = null;
+		Statement cs=null;
+		Connection conn = null;
+		String iddata = getIddata(dataName);
+		
+		String sql = "SELECT p.idpatient, p.ramq, p.chart, p.giu, p.sex, DATEDIFF(year, p.dob, GETDATE()) AS age, p.idcommunity, lv.value as "+dataName+", lv.datevalue as "+dataName+"Date, ldv.value as dtype, ldv.datevalue as dtypeDate"
+				+ " FROM ncdis.ncdis.patient as p"
+				+ "	left join (select * from ncdis.[dbo].[LastdateValue] where iddata='"+iddata+"') lv on p.idpatient = lv.idpatient"
+				+ "	left join ncdis.dbo.LastdateValue ldv on p.idpatient = ldv.idpatient"
+				+ "  where p.active =1 and (p.dod is null or p.dod='1900-01-01') and ldv.iddata=1";
+
+		
+		try {
+			initContext = new InitialContext();
+			ds = (DataSource)initContext.lookup("jdbc/ncdis");
+			conn = ds.getConnection();
+		    cs=conn.createStatement();		    
+		    cs.setEscapeProcessing(true);
+		    rs = cs.executeQuery(sql);
+		    ResultSetMetaData rsm =  rs.getMetaData();
+		    int columns = rsm.getColumnCount();
+		    ArrayList<ReportCriteria> rcList = new ArrayList<>();
+		    for(JsonElement criteria : criterias ){
+		        ReportCriteria cse = gson.fromJson( criteria , ReportCriteria.class);
+		        rcList.add(cse);
+		    }
+		   
+		    while (rs.next()) {
+		    	Hashtable<String, String> row = new Hashtable<>();
+		    	for(ReportCriteria rc : rcList){
+		    		for(int i=1;i<=columns;i++){
+		    			//System.out.println(" rc: "+rc.getName()+"  column : "+rsm.getColumnName(i));
+		    			if(rc.getName().equals(rsm.getColumnName(i))){
+		    				String colVal = rs.getString(rsm.getColumnName(i)); 
+		    				if(colVal == null) colVal = "";
+		    				row.put(rc.getName(), colVal);
+		    				if(rc.getDate().equals("yes")){
+		    					String colValDate = rs.getString(rsm.getColumnName(i)+"Date");
+		    					if(colValDate == null) colValDate = "";
+		    					row.put(rc.getName()+"_collecteddate", colValDate);
+		    				}
+		    				break;
+		    			}
+		    		}
+		    	}
+		    	result.add(row);
+		    	/*
+		    	for(Hashtable<String, String> r : result){
+		    		System.out.println(" ramq: "+r.get("ramq")+"  chart : "+r.get("chart"));
+		    	}
+		    	*/
+		    }
+		}catch (SQLException se) {
+	        se.printStackTrace();
+	    } catch (NamingException e) {
+			e.printStackTrace();
+		} finally {
+	        try {
+	            rs.close();
+	            cs.close();
+	            conn.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	   } 
+		return result;
+	}
+	
+	
 	
 	public ArrayList<String> getIdPatients(){
 		ArrayList<String> result = new ArrayList<>();

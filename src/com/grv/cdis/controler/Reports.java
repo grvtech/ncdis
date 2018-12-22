@@ -37,14 +37,17 @@ public class Reports {
 	public static HashMap<String, ArrayList<Report>> getUserReports(String userRole, String idcommunity, String iduser){
 		HashMap<String, ArrayList<Report>> result = new HashMap<>();
 		ArrayList<Report> predefinedReports = new ArrayList<>();
+		ArrayList<Report> listsReports = new ArrayList<>();
 		ArrayList<Report> adminReports = new ArrayList<>();
 		ArrayList<Report> personalReports = new ArrayList<>();
+		
 		if(userRole.equals("ROOT")){
 			predefinedReports = getPredefinedReports(iduser, "0");
 			adminReports = getAdminReports();
-			
 			result.put("predefined",predefinedReports);
 			personalReports = getPersonalReports(iduser, idcommunity, userRole);
+			listsReports = getListsReports(iduser, "0");
+			result.put("lists",listsReports);
 			result.put("personal",personalReports);
 			result.put("admin",adminReports);
 		}else if(userRole.equals("USER")){
@@ -52,6 +55,8 @@ public class Reports {
 			result.put("predefined",predefinedReports);
 			personalReports = getPersonalReports(iduser, idcommunity, userRole);
 			result.put("personal",personalReports);
+			listsReports = getListsReports(iduser, "0");
+			result.put("lists",listsReports);
 		}else{
 			predefinedReports = getPredefinedReports(iduser, "0");
 			result.put("predefined",predefinedReports);
@@ -67,6 +72,15 @@ public class Reports {
 		result = db.getReports(iduser, community,"REP");
 		return result;
 	}
+	
+	
+	public static ArrayList<Report> getListsReports(String iduser, String community){
+		ArrayList<Report> result = new ArrayList<>();
+		CdisDBridge db = new CdisDBridge();
+		result = db.getReports(iduser, community,"LIST");
+		return result;
+	}
+	
 	
 	public static ArrayList<Report> getPersonalReports(String iduser, String community, String userRole){
 		ArrayList<Report> result = new ArrayList<>();

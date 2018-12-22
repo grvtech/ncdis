@@ -578,3 +578,53 @@ REPORTS PAGE CSS
 	top:10px;
 	right:10px;
 }
+
+.reportsbody_list .container{
+	background-color:green;
+	display:block;
+}
+
+
+
+
+.fullscreen-modal{
+	position:absolute;
+	background-color:#efefef;
+	width:100%;
+	height:100%;
+	top:0px;
+	left:0px;
+	z-index:100000;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	font-size: 13px;
+}
+
+.fullscreen-modal-header{height:40px;}
+.fullscreen-modal-body{flex:1 0;display: flex;flex-direction: row;flex-wrap: nowrap;}
+.fullscreen-modal-list{flex:1 80%;display: flex;flex-direction: column;flex-wrap: nowrap;}
+.fullscreen-modal-toolbar{flex:1 20%;display: flex;flex-direction: column;flex-wrap: nowrap;min-width:350px;max-width:350px;}
+.fullscreen-modal-footer{height:10px;background-color:#cdcdcd;}
+
+.list-header{height:35px;display:flex;flex-direction: row;flex-wrap: nowrap;}
+.list-header .column{flex:1 0;font-weight:bold;font-size:1rem;text-align:center;line-height:1rem;}
+
+
+.list-body{flex:1 0;overflow: auto;justif-content:center;align-items:center;}
+
+.list-body-loading{
+	position:absolute;
+	top:50%;
+	left:50%;
+	margin-left:-50px;	
+	width: 100px;
+	padding:10px;
+	border:1px solid black;
+}
+
+
+.list-body .line{max-height:30px;display:flex;flex-direction: row;flex-wrap: nowrap;}
+.list-body .line:nth-child(even) {background: #CCC}
+.list-body .line .column{flex:1 0;text-align:center;}
+

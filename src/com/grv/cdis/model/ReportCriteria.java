@@ -15,8 +15,23 @@ public class ReportCriteria {
 	private String dateoperator = null;
 	private String datevalue = null;
 	private String iddata	= null;
+	private String format	= null;
+	private String dateformat	= null;
 	
 	
+	
+	public String getFormat() {
+		return format;
+	}
+	public void setFormat(String format) {
+		this.format = format;
+	}
+	public String getDateformat() {
+		return dateformat;
+	}
+	public void setDateformat(String dateformat) {
+		this.dateformat = dateformat;
+	}
 	public String getIddata() {
 		return iddata;
 	}

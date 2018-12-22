@@ -44,44 +44,7 @@ function loadReportsTemplate(){
 					renderReport(reportObjectToExecute);
 				});
 			}
-			
-			/*
-			var personalReports = reportsObject.personal;
-			if(personalReports.length > 0){
-				list.append($("<div>",{class:"report-list-header"}).text("Personal Reports"));
-				$.each(personalReports, function(k, vObj){
-					var raport = prepareDefinedReport(vObj.code);
-					list.append($("<div>",{class:"report-list-item",id:vObj.code}).text(raport.title).click(function(){
-						reportObjectToExecute = loadReport(vObj.code);
-						if($.type(reportObjectToExecute.input) === "array"){
-							
-						}else{
-							executeReport(reportObjectToExecute);
-						}
-					}));
-				});
-			}
-			var adminReports = reportsObject.admin;
-			if(adminReports.length > 0){
-				list.append($("<div>",{class:"report-list-header"}).text("Admin Reports"));
-				$.each(adminReports, function(k, vObj){
-					var raport = prepareDefinedReport(vObj.code);
-					list.append($("<div>",{class:"report-list-item",id:vObj.code}).text(raport.title).click(function(){
-						reportObjectToExecute = loadReport(vObj.code);
-						if($.type(reportObjectToExecute.input) === "array"){
-							
-						}else{
-							executeReport(reportObjectToExecute);
-						}
-					}));
-				});
-			}
-			*/
-			//loadGraph1("predefined-report-graph");
 			initPage();
-			//$("body").removeClass("loading");
-			//$(".modal").remove();
-			
 		});
 	}else{
 		logoutUser(sid);
@@ -639,7 +602,8 @@ function buildReportToolbar(divToolbarObj, reportObject){
 	
 	var $exportCSVReport = $("<a>",{id:"report-export-csv", class:"cisbutton",style:"margin-left:10px;margin-top:13px;"}).text("Export to CSV (table only)").appendTo($subtoolbar);
 	
-	var $exportEXCELReport = $("<a>",{id:"report-export-excel", class:"cisbutton",style:"margin-top:13px;"}).text("Export to Excel (table only)").appendTo($subtoolbar);
+	//var $exportEXCELReport = $("<a>",{id:"report-export-excel", class:"cisbutton",style:"margin-top:13px;"}).text("Export to Excel (table only)").appendTo($subtoolbar);
+	
 	if(reportObject.type != "list"){
 		var $exportPNGReport = $("<a>",{id:"report-export-png", class:"cisbutton",style:"margin-top:13px;"}).text("Export to PNG (image)").appendTo($subtoolbar);
 		$exportPNGReport.click(function(){
@@ -668,11 +632,12 @@ function buildReportToolbar(divToolbarObj, reportObject){
 		$("#report-export-toolbar").toggle( "slide" );
 	});
 	
+	/*
 	$exportEXCELReport.click(function(){
 		$(".raportTable").tableExport({type:'excel',escape:'false'});
 		$("#report-export-toolbar").toggle( "slide" );
 	});
-	
+	*/
 	
 	$exportTo.click(function(){
 		console.log(reportObject);
@@ -896,7 +861,6 @@ function addToSummary(objItem, message){
 					summary.attr("datevalue",($("#reportPeriod input[type='radio']:checked").val()));
 				}
 			}
-			
 		}else{
 			summary.attr("date","no");
 			summary.attr("datename","");

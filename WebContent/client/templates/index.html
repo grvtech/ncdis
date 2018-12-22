@@ -86,7 +86,6 @@
   </div>
 </div>
 
-
 <script>
 
 var emailRegex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/,
@@ -192,6 +191,7 @@ function forgotPassword() {
     			}else{
     				tips.html(json.message);
     			}
+    			$( "#dialog-forgot" ).dialog( "option", "buttons", { "Return to CDIS": function() { $(this).dialog("close"); } } );
     		});
     		mes.fail(function( jqXHR, textStatus ) {
     		  alert( "Error sending message : " + textStatus );

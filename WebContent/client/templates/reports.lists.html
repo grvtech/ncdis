@@ -1,0 +1,125 @@
+<div class="reportsbody_list"></div>
+
+<style>
+
+
+</style>
+
+<script>
+console.log(reportsObject);
+$.each(reportsObject.lists, function(i, v){
+	var raport = prepareDefinedReport(v.code);
+	var id = raport.id.replace(".","_").toLowerCase();
+	
+	var reportContainer = $("<div>",{id:"id_"+id,class:"container"})
+		.appendTo($(".reportsbody_list"))
+		.append($("<p>",{class:""}).text(raport.title))
+		.append($("<div>",{id:"gl_"+id,class:"cisbutton"}).text("Generate List"));
+	
+	$("#gl_"+id).click(function(){
+		fullscreenList(raport);
+		//var dataName = raport.id.substring(5).toLowerCase();
+		//renderBodyList(dataName, raport.data.datasets[0].set);
+	});
+});
+
+function fullscreenList(object){
+	var id = object.id.replace(".","_").toLowerCase();
+	var dataName = object.id.substring(5).toLowerCase();
+	
+	var modal = $('<div>',{id:"fullscreen_"+id,class:"fullscreen-modal"}).appendTo($('#wraper'));
+	var header = $('<div>',{class:"fullscreen-modal-header"}).appendTo(modal);
+	var body = $('<div>',{class:"fullscreen-modal-body"}).appendTo(modal);
+	var footer = $('<div>',{class:"fullscreen-modal-footer"}).appendTo(modal);
+	
+	var toolbar = $('<div>',{class:"fullscreen-modal-toolbar"}).appendTo(body).html("<p>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</p>");
+	var list = $('<div>',{class:"fullscreen-modal-list"}).appendTo(body);
+	
+	var listHeader = $('<div>',{id:"header_"+id,class:"list-header"}).appendTo(list);
+	var listBody = $('<div>',{id:"body_"+id,class:"list-body"}).appendTo(list);
+	//$('<div>',{class:"list-body-loading"}).text("loading").appendTo(listBody);
+	//drawLoading(listBody);
+	setTimeout(drawLoading, 100, listBody);
+	renderHeaderList(dataName, object.data.header);
+	setTimeout(renderBodyList, 2000, dataName, object.data.datasets[0].set, object.data.header);
+	
+}
+
+function drawLoading(container){
+	/*
+	if(!$('.loading-body-wrapper').length){
+		var wrapper = $('<div>',{class:"loading-body-wrapper"}).appendTo(container);
+		var loader = $('<div>',{class:"loading-body-loader"}).appendTo(wrapper);
+		for(var i=0;i<9;i++){$('<div>').appendTo(loader);}	
+	}
+	*/
+	var w = $('<div>',{class:"lds-facebook"}).appendTo(container);
+	for(var i=0;i<3;i++){$('<div>').appendTo(w);}
+	
+}
+
+
+function renderHeaderList(dataName, header){
+	$.each(header,function(index, value){
+		$('<div>',{id:"column"+index,class:"column"}).text(value.display).appendTo($('#header_list_'+dataName));
+	});
+}
+
+function renderBodyList(dataName, dataset, header){
+	var c = $('#body_list_'+dataName);
+	$.each(dataset,function(index, valueObject){
+		var line = $('<div>',{id:"line_"+index,class:"line"}).appendTo(c);
+		$.each(header, function(k,v){
+			if(v.type == "array"){
+				//there is an array to convert values
+				var iValue = eval("valueObject."+v.name)
+				var aValue = eval("report_"+v.name+"[iValue]");
+				$('<div>',{id:"line_"+index+"_column_dtype",class:"column"}).text(aValue).appendTo(line);
+			}else if (v.type == "number"){
+				var cValue = Number(eval("valueObject."+v.name));
+				if(!isNaN(cValue)) cValue = cValue.toFixed(v.format.substring(2).length);
+				$('<div>',{id:"line_"+index+"_column_"+k,class:"column"}).text(cValue).appendTo(line);
+			}else if(v.type == "date"){
+				var dValue = eval("valueObject."+v.name+"_collecteddate");
+				var d = moment(dValue);
+				var val = d.format(v.format);
+				$('<div>',{id:"line_"+index+"_column_"+k+"_collecteddate",class:"column"}).text(val).appendTo(line);
+			}else if(v.type == "text"){
+				var nValue = eval("valueObject."+v.name);
+				$('<div>',{id:"line_"+index+"_column_"+k,class:"column"}).text(nValue).appendTo(line);
+			}
+
+		});
+		/*
+		var ramqValue = valueObject.ramq;
+		$('<div>',{id:"line_"+index+"_column_ramq",class:"column"}).text(ramqValue).appendTo(line);
+
+		var chartValue = valueObject.chart;
+		$('<div>',{id:"line_"+index+"_column_chart",class:"column"}).text(chartValue).appendTo(line);
+
+		var giuValue = valueObject.giu;
+		$('<div>',{id:"line_"+index+"_column_giu",class:"column"}).text(giuValue).appendTo(line);
+		
+		var diabetValue = report_dtype[valueObject.dtype];
+		$('<div>',{id:"line_"+index+"_column_dtype",class:"column"}).text(diabetValue).appendTo(line);
+
+		var cValue = Number(eval("valueObject."+dataName));
+		if(!isNaN(cValue)) cValue = cValue.toFixed(3);
+		$('<div>',{id:"line_"+index+"_column_"+dataName,class:"column"}).text(cValue).appendTo(line);
+
+		var dValue = eval("valueObject."+dataName+"_collecteddate");
+		var d = moment(dValue);
+		var val = d.format("YYYY-MM-DD");
+		$('<div>',{id:"line_"+index+"_column_"+dataName+"_collecteddate",class:"column"}).text(val).appendTo(line);
+		
+		var commValue = report_idcommunity[valueObject.idcommunity];
+		$('<div>',{id:"line_"+index+"_column_idcommunity",class:"column"}).text(commValue).appendTo(line);
+		*/
+	});
+	//$('.loading-body-wrapper').remove();
+	$('#loader').remove();
+	return c;
+}
+
+
+</script>
