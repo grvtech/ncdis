@@ -826,7 +826,7 @@ function loadRecomandation(recObj){
 			var rcontainer = $("<div>",{class:"recomandations uss"}).appendTo($(".pageside"));
 		}
 		if($(window).height() < h){
-			$("<div>",{class:"title",style:"position:absolute;"}).text(rObj.title).appendTo(rcontainer);
+			$("<div>",{class:"title"}).text(rObj.title).appendTo(rcontainer);
 			var tub = $("<div>",{class:"thumbnail",style:"text-align:right;"}).append($("<img>",{src:"/ncdis/client/libs/images/"+rObj.thumbnail,height:"55px",width:"30px;"})).appendTo(rcontainer);
 		}else{
 			$("<div>",{class:"title"}).text(rObj.title).appendTo(rcontainer);
@@ -838,7 +838,7 @@ function loadRecomandation(recObj){
 			if(rObj.thumbnail == 'recomandation_ckd_thumbnail.png'){
 				modalWidth = 950; 
 			}
-			if($("#recomandation-modal").length > 0 )$("#recomandation-modal").remove();
+			$("#recomandation-modal").remove();
 			$("<div>",{id:"recomandation-modal",title:rObj.title}).appendTo($("body"));
 			$("#recomandation-modal").load("/ncdis/client/templates/"+rObj.source);
 			
@@ -871,6 +871,7 @@ function loadRecomandation(recObj){
 				         },
 			    	  Close: function() {
 			            $( this ).dialog( "destroy" );
+			            $("#recomandation-modal").remove();
 			         }
 			      }
 			    });

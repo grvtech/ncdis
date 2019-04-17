@@ -579,9 +579,15 @@ REPORTS PAGE CSS
 	right:10px;
 }
 
+
+
 .reportsbody_list .container{
-	background-color:green;
-	display:block;
+	display:inline-block;
+	width:45%;
+	margin:5px;
+	border:1px solid #cdcdcd;
+	padding:5px;
+	background-color:#efefef;
 }
 
 
@@ -601,30 +607,63 @@ REPORTS PAGE CSS
 	font-size: 13px;
 }
 
-.fullscreen-modal-header{height:40px;}
-.fullscreen-modal-body{flex:1 0;display: flex;flex-direction: row;flex-wrap: nowrap;}
-.fullscreen-modal-list{flex:1 80%;display: flex;flex-direction: column;flex-wrap: nowrap;}
+.fullscreen-modal-header{height:25px;background:#4b3b3b;display: flex;flex-direction:row;flex-wrap: nowrap;}
+.fullscreen-modal-header > div{flex:1 0;}
+.fullscreen-modal-header-logo{max-width:20px;height:25px;background:no-repeat url(../images/cdis-logo50.png) #4b3b3b center center;background-size: 15px 20px;}
+.fullscreen-modal-header-cdis{max-width:50px;height:25px;line-height:25px;color:#fff;font-size:1.1rem;font-weight:bold;}
+.fullscreen-modal-header-title{max-width:100px;height:25px;color:#fff;line-height:25px;text-align:right; padding-right:3px;font-size:1.1rem;}
+.fullscreen-modal-header-close{max-width:25px;height:25px;color:#fff;background:#db4437;line-height:25px;text-align:center;font-size:1.2rem;}
+
+.fullscreen-modal-body{flex:1 0;display: flex;flex-direction: row;flex-wrap: nowrap;background:#5c6c9d;}
 .fullscreen-modal-toolbar{flex:1 20%;display: flex;flex-direction: column;flex-wrap: nowrap;min-width:350px;max-width:350px;}
-.fullscreen-modal-footer{height:10px;background-color:#cdcdcd;}
 
-.list-header{height:35px;display:flex;flex-direction: row;flex-wrap: nowrap;}
-.list-header .column{flex:1 0;font-weight:bold;font-size:1rem;text-align:center;line-height:1rem;}
+.fullscreen-modal-toolbar-stats{flex:1 0;padding:10px;}
+.fullscreen-modal-toolbar-stats-container{background:#ededed;height:100%;width:100%;font-size:0.85em;}
 
+
+.fullscreen-modal-toolbar-form{flex:1 0;max-height:150px;min-height:150px;padding:10px;}
+.fullscreen-modal-toolbar-form-container{background:#ededed;height:100%;width:100%;display:flex;flex-direction:column;flex-wrap:nowrap;}
+.fullscreen-modal-toolbar-form-container-title{padding:3px;background:#db4437;color:#ffffff;font-weight:bold;}
+.fullscreen-modal-toolbar-form-container-criteria{flex:1 0;padding:5px;}
+.criteria-wraper{display:flex;flex-direction:row;flex-wrap:wrap;}
+.criteria-wraper > div{flex:1 0;padding:3px;}
+.criteria-wraper-label{font-size:0.8rem;font-weight:bold;}
+.criteria-wraper-input{padding:3px;}
+
+.fullscreen-modal-toolbar-form-container-buttons{flex:1 0;min-height:35px;max-height:35px;padding:5px;}
+.fullscreen-modal-toolbar-form-container-buttons > div{dispaly:inline-block;}
+
+
+.fullscreen-modal-footer{height:10px;background-color:#4b3b3b;}
+
+
+.fullscreen-modal-list{flex:1 0;display: flex;flex-direction: column;flex-wrap: nowrap;background:#fefefe;}
+.list-title{height:30px;color:#4d4d4d;font-weight:500;text-align:center;line-height:30px;font-size:1.05rem;}
+.list-header{height:30px;display:flex;flex-direction: row;flex-wrap: nowrap;font-size:0.9rem;}
+.list-header .column{flex:1 0;font-weight:700;text-align:center;text-align:center;vertical-align:middle;line-height:30px;overflow: hidden;border:1px solid $cdcdcd;}
+.list-header .column-sort{display:inline-block;padding:3px;height:100%;line-height:30px;}
+.list-header .sorted-column{background:#db4437;color:#ffffff;}
 
 .list-body{flex:1 0;overflow: auto;justif-content:center;align-items:center;}
-
-.list-body-loading{
-	position:absolute;
-	top:50%;
-	left:50%;
-	margin-left:-50px;	
-	width: 100px;
-	padding:10px;
-	border:1px solid black;
-}
+.list-body .line{min-height:23px;max-height:23px;display:flex;flex-direction: row;flex-wrap: nowrap;color:#4d4d4d;font-size:0.8rem;}
+.selected-record {background:#5c6c9d !important;color:#ffffff !important; font-weight:bold;}
+.list-body .line:nth-child(even) {background: #f4f4f4;}
+.list-body .line:hover {background:#db4437;color:#ffffff;}
+.list-body .line .column{flex:1 0;text-align:center;padding:3px 0px 3px 0px;}
 
 
-.list-body .line{max-height:30px;display:flex;flex-direction: row;flex-wrap: nowrap;}
-.list-body .line:nth-child(even) {background: #CCC}
-.list-body .line .column{flex:1 0;text-align:center;}
+.list-status{height:30px;display:flex;flex-direction: row;flex-wrap: nowrap;font-size:0.8rem;background:#e0e0e0;}
+.list-status > div{flex:1 0;}
+.list-status .status-text span{line-height:30px;padding:0px 0px 0px 10px;}
+.list-status .status-pages{max-width:250px; text-align:center;}
+.list-status .status-pages span{line-height:30px;padding:0px 10px 0px 10px;font-weight:bold; font-size:0.7rem;cursor: pointer;}
+.list-status .status-pages span:hover{color:#db4437;}
+
+.fullscreen-progress{position:absolute;top:0;left:0;width:100%;height:100%;background:#cdcdcd;z-index:1000000;}
+.fullscreen-progress-container{position:absolute;top:50%;left:50%;width:200px;height:100px;margin:-50px 0px 0px -100px; }
+.fullscreen-progress-container-logo{width:200px;height:70px;background:no-repeat url(../images/cdis-logo50.png) center center;background-size: 45px 60px;}
+.fullscreen-progress-container-text{width:200px;height:30px;color:#4d4d4d;line-height:30px;text-align:center;font-weight:bold;}
+
+
+
 
