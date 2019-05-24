@@ -606,7 +606,7 @@ function exportToCsv(filename, rows, header) {
     	$.each(header, function(k,vob){
    			finalVal += '"' + vob.display +'",';	
     	});
-    	finalVal += '\n';
+    	finalVal += '\r\n';
     	return finalVal;
 	};
 	
@@ -617,7 +617,7 @@ function exportToCsv(filename, rows, header) {
 				//there is an array to convert values	
 				var iValue = row[v.name];
 				var aValue = eval("report_"+v.name+"[iValue]");
-				finalVal += '"'+aValue+'";';
+				finalVal += '"'+aValue+'",';
 			}else if (v.type == "number"){
 				var nValue = row[v.name];
 				if(nValue != ""){
@@ -626,7 +626,7 @@ function exportToCsv(filename, rows, header) {
 				}else{
 					var cValue = "no value";
 				}
-				finalVal += '"'+cValue+'";';
+				finalVal += '"'+cValue+'",';
 				
 			}else if(v.type == "date"){
 				var dValue = row[v.name];
@@ -636,14 +636,14 @@ function exportToCsv(filename, rows, header) {
 				}else{
 					var val = "no date";
 				}
-				finalVal += '"'+val+'";';
+				finalVal += '"'+val+'",';
 			}else if(v.type == "text"){
 				var nValue = row[v.name];
-				finalVal += '"'+nValue+'";';
+				finalVal += '"'+nValue+'",';
 				
 			}
        	});
-        finalVal += '\n';    	
+        finalVal += '\r\n';    	
 		return finalVal;            	
     };
     

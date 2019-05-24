@@ -47,7 +47,7 @@ text-rendering: optimizeLegibility !important;
 
 
 body{margin: 0px;padding : 0px;height: 100%;font-family:Sans-Serif;background:#5c6c9d;}
-#wraper{position:absolute;left:0px;top:0px;height:100%;width:100%;}
+#wraper{position:absolute;left:0px;top:0px;height:100%;width:100%;background: #5c6c9d;}
 .cisbutton{border:none;margin-right:10px;font-family: Sans-Serif;font-size:90%;display:inline-block;text-align:center;vertical-align:middle;color:#ffffff;padding:3px 10px 3px 10px;background-color:#4b3b3b;-moz-border-radius: 2px;-webkit-border-radius: 2px;border-radius: 2px;-moz-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);-webkit-box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);cursor: pointer;text-decoration:none;}
 .cisbutton:hover{background-color:#db4437;color:#000000;-moz-box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3);-webkit-box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3);box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.3);}
 .cisbutton_selected{font-family: roboto-bold;color:#ffffff;background-color:#db4437;}
@@ -200,16 +200,17 @@ body.loading .modal{
 	height:100%;
 	margin:0px;
 	padding:0px;
-	display: -webkit-box;display: -moz-box;display: -ms-flexbox;display: -webkit-flex;display: flex;
-	-webkit-flex-flow: column wrap;flex-flow: column wrap; 
+	/*display: -webkit-box;display: -moz-box;display: -ms-flexbox;display: -webkit-flex;display: flex;
+	-webkit-flex-flow: column nowrap;
+	flex-flow: column nowrap; */
 }
 .mainpage .header{height:100px;width:100%;}
 .mainpage .main{
-	flex:1;
+	/*flex:1;*/
 	width:100%;
 	display: flex;
-	-webkit-flex-flow: column nowrap;
-	flex-flow: column nowrap;
+	-webkit-flex-flow: row nowrap;
+	flex-flow: row nowrap;
 	background:#5c6c9d;
 	/*background:#8aa5f7;*/
 	
