@@ -31,3 +31,33 @@ client validations
 	 asadmin get server.resources.custom-resource.reports-folder
 	 
 	 asadmin set server.resources.custom-resource.reports-folder.property.value="C:\servers\glassfish4\glassfish\domains\domain1\eclipseApps\ncdis\client\reports"
+	 
+	 
+	 
+	 
+keytool -delete -alias utnuserfirstclientauthemailca -keystore cacerts.jks -storepass changeit
+
+keytool -delete -alias utnuserfirsthardwareca -keystore cacerts.jks -storepass changeit
+
+keytool -delete -alias secomvalicertclass1ca -keystore cacerts.jks -storepass changeit
+
+keytool -delete -alias deutschetelekomrootca2 -keystore cacerts.jks -storepass changeit
+
+keytool -delete -alias utnuserfirstobjectca -keystore cacerts.jks -storepass changeit
+
+keytool -delete -alias certplusclass3pprimaryca -keystore cacerts.jks -storepass changeit
+
+
+keytool -delete -alias utndatacorpsgcca -keystore cacerts.jks -storepass changeit
+
+keytool -delete -alias certplusclass2primaryca -keystore cacerts.jks -storepass changeit
+
+keytool -delete -alias valicertclass2ca -keystore cacerts.jks -storepass changeit
+
+keytool -delete -alias entrust2048ca -keystore cacerts.jks -storepass changeit
+
+keytool -delete -alias entrustsslca -keystore cacerts.jks -storepass changeit
+	 
+	 
+	 
+	 
