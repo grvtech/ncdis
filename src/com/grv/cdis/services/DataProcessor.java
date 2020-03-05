@@ -116,6 +116,7 @@ public class DataProcessor {
 			session.setSession();
 		}
 		
+		
 		Patient pat = db.getPatientByRamq(ramq);
 		User u = new User(sid);
 		Note note = new Note("0", notestr, "", u.getIduser(), Integer.toString(pat.getIdpatient()), "1", iduserto, "0");
