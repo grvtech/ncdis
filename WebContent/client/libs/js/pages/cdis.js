@@ -69,7 +69,12 @@ function adjustScreen(){
 
 function loadPatient(){
 	clearSections();
-	$(".mainpage .main .page").load("/ncdis/client/templates/cdis.patient.html", function(patientObjArr){
+	var dtypevalue = patientObjArray[2].dtype.values[0].value;
+	var sec = "patient";
+	if(dtypevalue == 5){
+		sec = "patientblank";
+	}
+	$(".mainpage .main .page").load("/ncdis/client/templates/cdis."+sec+".html", function(patientObjArr){
 		cdisSection = "patient";
 		$(".side").hide();
 		$(".cdismenu").hide();

@@ -1,0 +1,120 @@
+select aa.idpatient, aa.datevalue as date1, aa.value as value1, bb.datevalue as date2, bb.value as value2, 
+round(try_convert(float, aa.value)- try_convert(float, bb.value), 3) as deltavalue, 
+datediff(day , aa.datevalue, bb.datevalue) as deltadate  from
+(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from 
+( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+from ncdis.ncdis.cdis_value cd 
+where cd.iddata=27 ) cc
+where cc.seqnum =1) aa 
+left join  
+(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from 
+( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+from ncdis.ncdis.cdis_value cd 
+where cd.iddata=27 ) cc
+where cc.seqnum =2) bb
+on aa.idpatient = bb.idpatient;
+
+
+
+
+select u.fname,u.lname, u.ramq,u.chart,  
+datediff(year, u.dob, getdate()) as age,
+dd.idpatient, dd.date1, dd.value1, dd.date2, dd.value2, dd.deltavalue, dd.deltadate 
+from
+(select aa.idpatient, aa.datevalue as date1, aa.value as value1, bb.datevalue as date2, bb.value as value2, 
+round(try_convert(float, aa.value)- try_convert(float, bb.value), 3) as deltavalue, 
+datediff(day , bb.datevalue , aa.datevalue) as deltadate  from
+(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from 
+( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+from ncdis.ncdis.cdis_value cd 
+where cd.iddata=27 ) cc
+where cc.seqnum =1) aa 
+left join  
+(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from 
+( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+from ncdis.ncdis.cdis_value cd 
+where cd.iddata=27 ) cc
+where cc.seqnum =2) bb
+on aa.idpatient = bb.idpatient) dd
+left join ncdis.ncdis.patient u 
+on dd.idpatient=u.idpatient ;
+
+
+
+
+
+
+select u.fname,u.lname, u.ramq,u.chart,u.idcommunity, tt.value as dtype, tt.datevalue as ddate, 
+datediff(year, u.dob, getdate()) as age,
+dd.idpatient, dd.date1, round(dd.value1,3) as value1, dd.date2, round(dd.value2,3) as value2, dd.deltavalue, dd.deltadate 
+from
+(select aa.idpatient, aa.datevalue as date1, aa.value as value1, bb.datevalue as date2, bb.value as value2, 
+round(try_convert(float, aa.value)- try_convert(float, bb.value), 3) as deltavalue, 
+datediff(day , bb.datevalue , aa.datevalue) as deltadate  from
+(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from 
+( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+from ncdis.ncdis.cdis_value cd 
+where cd.iddata=27 ) cc
+where cc.seqnum =1) aa 
+left join  
+(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from 
+( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+from ncdis.ncdis.cdis_value cd 
+where cd.iddata=27 ) cc
+where cc.seqnum =2) bb
+on aa.idpatient = bb.idpatient) dd
+left join ncdis.ncdis.patient u 
+on dd.idpatient=u.idpatient 
+left join 
+(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from 
+( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+from ncdis.ncdis.cdis_value cd 
+where cd.iddata=1 ) cc
+where cc.seqnum =1) tt
+on dd.idpatient = tt.idpatient
+order by deltavalue desc, deltadate;
+
+
+
+
+select u.active, u.fname,u.lname, u.ramq,u.chart,u.idcommunity, tt.value as dtype, tt.datevalue as ddate, 
+datediff(year, u.dob, getdate()) as age,
+dd.idpatient, 
+datediff(day, dd.date1, getdate()) as daysfromlastlab,
+dd.date1, round(dd.value1,3) as value1, dd.date2, round(dd.value2,3) as value2, dd.deltavalue, dd.deltadate 
+from
+(select aa.idpatient, aa.datevalue as date1, aa.value as value1, bb.datevalue as date2, bb.value as value2, 
+round(try_convert(float, aa.value)- try_convert(float, bb.value), 3) as deltavalue, 
+datediff(day , bb.datevalue , aa.datevalue) as deltadate  from
+(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from 
+( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+from ncdis.ncdis.cdis_value cd 
+where cd.iddata=27 ) cc
+where cc.seqnum =1) aa 
+left join  
+(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from 
+( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+from ncdis.ncdis.cdis_value cd 
+where cd.iddata=27 ) cc
+where cc.seqnum =2) bb
+on aa.idpatient = bb.idpatient) dd
+left join ncdis.ncdis.patient u 
+on dd.idpatient=u.idpatient 
+left join 
+(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from 
+( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+from ncdis.ncdis.cdis_value cd 
+where cd.iddata=1 ) cc
+where cc.seqnum =1) tt
+on dd.idpatient = tt.idpatient
+where u.active=1
+order by deltavalue desc, deltadate;
+
+
+
+
+
+
+
+
+

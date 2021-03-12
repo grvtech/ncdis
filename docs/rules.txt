@@ -35,6 +35,14 @@ client validations
 	 
 	 
 	 
+	 
+	keytool -list -v -storepass changeit -keystore cacerts.jks > cert-list-cacerts-jks.txt 
+	 
+	keynectisrootca
+	 
+	keytool -delete -alias keynectisrootca -keystore cacerts.jks -storepass changeit 
+	 
+	 
 keytool -delete -alias utnuserfirstclientauthemailca -keystore cacerts.jks -storepass changeit
 
 keytool -delete -alias utnuserfirsthardwareca -keystore cacerts.jks -storepass changeit
