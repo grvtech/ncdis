@@ -1,5 +1,4 @@
 
-
 function initNavigation() {
 	
 	$(".fback").click(function() {gts(sid,applanguage);	});
@@ -101,12 +100,13 @@ function initNavigation() {
 
 	/*cache validation*/
 	//get The application cache object
+/*
 	var appCache = window.applicationCache;
 	appCache.addEventListener('updateready', function(e) {
 		this.swapCache();
 		location.reload();
 	});
-
+*/
 	
 	
 

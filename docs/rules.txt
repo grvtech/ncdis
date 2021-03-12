@@ -16,7 +16,7 @@ client validations
 	- deceased = yes dcause and d date not null
 
 
-	 asadmin create-custom-resource --restype=java.lang.String --factoryclass=org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property value="http\://javahowto.blogspot.com" resource/javahowto
+	 asadmin create-custom-resource --restype=java.lang.String --factoass=org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property value="http\://javahowto.blogspot.com" resource/javahowto
 	 
 	 
 	 C:\glassfish4\glassfish\domains\domain1\applications\ncdis\WEB-INF
@@ -33,7 +33,7 @@ client validations
 	 asadmin set server.resources.custom-resource.reports-folder.property.value="C:\servers\glassfish4\glassfish\domains\domain1\eclipseApps\ncdis\client\reports"
 	 
 	 
-	 
+	 com.microsoft.sqlserver.jdbc.SQLServerDataSource
 	 
 	 
 	keytool -list -v -storepass changeit -keystore cacerts.jks > cert-list-cacerts-jks.txt 
