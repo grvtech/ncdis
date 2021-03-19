@@ -1779,6 +1779,142 @@ public class CdisDBridge {
 		return result;
 	}
 	
+
+	
+	public ArrayList<Object> executeReportLocalList(){
+		ArrayList<Object> result = new ArrayList<>();
+		Gson gson = new Gson();
+		Context initContext;
+		DataSource ds;
+		ResultSet rs = null;
+		Statement cs=null;
+		Connection conn = null;
+		
+		
+		
+		String sql = "select ISNULL(u.fname,'')+' '+ ISNULL(u.lname,'') as fullname, "
+				+ "u.ramq as ramq, "
+				+ "u.sex as sex, "
+				+ "u.chart as chart ,"
+				+ "u.idcommunity, tt.value as dtype, "
+				+ "datediff(year, u.dob, getdate()) as age, "
+				+ "dd.idpatient , "
+				+ "datediff(day, dd.date1, getdate()) as dayslastlab,"
+				+ "dd.date1 as last_hba1c_collecteddate , "
+				+ "round(dd.value1,3) as last_hba1c, "
+				+ "dd.date2 as secondlast_hba1c_collecteddate, "
+				+ "round(dd.value2,3) as secondlast_hba1c, "
+				+ "dd.deltavalue as delta "
+				+ " from "
+					+ "("
+						+ "select aa.idpatient, aa.datevalue as date1, aa.value as value1, bb.datevalue as date2, bb.value as value2,round(try_convert(float, aa.value)- try_convert(float, bb.value), 3) as deltavalue, datediff(day , bb.datevalue , aa.datevalue) as deltadate  from (select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from ( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 ) cc  where cc.seqnum =1) aa "
+							+ "left join "
+							+ "(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from ( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 ) cc where cc.seqnum =2) bb "
+							+ "on aa.idpatient = bb.idpatient"
+					+ ") dd "
+					+ "left join "
+					+ "ncdis.ncdis.patient u "
+						+ "on dd.idpatient=u.idpatient "
+					+ "left join "
+					+ "(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from ( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=1 ) cc where cc.seqnum =1) tt "
+					+ "on dd.idpatient = tt.idpatient "
+				+ "where u.active=1 and (u.dod is null or u.dod='1900-01-01') order by delta desc";
+
+		
+		try {
+			initContext = new InitialContext();
+			ds = (DataSource)initContext.lookup("jdbc/ncdis");
+			conn = ds.getConnection();
+		    cs=conn.createStatement();		    
+		    cs.setEscapeProcessing(true);
+		    rs = cs.executeQuery(sql);
+		    ResultSetMetaData rsm =  rs.getMetaData();
+		    int columns = rsm.getColumnCount();
+		   
+		    while (rs.next()) {
+		    	Hashtable<String, String> row = new Hashtable<>();
+		    	for(int i=1;i<=columns;i++){
+		    		String colVal = rs.getString(rsm.getColumnName(i)); 
+		    		if(colVal == null) colVal = "";
+   					row.put(rsm.getColumnName(i), colVal);
+		    	}
+		    	result.add(row);
+		    }
+		}catch (SQLException se) {
+	        se.printStackTrace();
+	    } catch (NamingException e) {
+			e.printStackTrace();
+		} finally {
+	        try {
+	            rs.close();
+	            cs.close();
+	            conn.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	   } 
+		return result;
+	}
+
+	
+	public ArrayList<Object> executeReportNoHBA1c(){
+		ArrayList<Object> result = new ArrayList<>();
+		Gson gson = new Gson();
+		Context initContext;
+		DataSource ds;
+		ResultSet rs = null;
+		Statement cs=null;
+		Connection conn = null;
+		
+		String sql = "select  u.idpatient,u.active,u.sex, ISNULL(u.fname,'')+' '+ ISNULL(u.lname,'') as fullname, u.ramq,u.chart,u.idcommunity,"
+				+ " datediff(year, u.dob, getdate()) as age, "
+				+ " tt.value as dtype,tt.datevalue as dtype_collecteddate "
+				+ " from "
+				+ "(select aa.idpatient, aa.datevalue as date1, aa.value as value1 from "
+						+ "(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from "
+								+ "( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum "
+								+ "from ncdis.ncdis.cdis_value cd where cd.iddata=27 ) cc "
+						+ "where cc.seqnum =1) aa "
+				+ ") dd "
+				+ " right join ncdis.ncdis.patient u on dd.idpatient=u.idpatient "
+				+ " left join (select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from ( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=1 ) cc where cc.seqnum =1) tt  on u.idpatient = tt.idpatient "
+				+ "where u.active=1 and (u.dod is null or u.dod='1900-01-01') and value1 is null";
+		
+		try {
+			initContext = new InitialContext();
+			ds = (DataSource)initContext.lookup("jdbc/ncdis");
+			conn = ds.getConnection();
+		    cs=conn.createStatement();		    
+		    cs.setEscapeProcessing(true);
+		    rs = cs.executeQuery(sql);
+		    ResultSetMetaData rsm =  rs.getMetaData();
+		    int columns = rsm.getColumnCount();
+		   
+		    while (rs.next()) {
+		    	Hashtable<String, String> row = new Hashtable<>();
+		    	for(int i=1;i<=columns;i++){
+		    		String colVal = rs.getString(rsm.getColumnName(i)); 
+		    		if(colVal == null) colVal = "";
+   					row.put(rsm.getColumnName(i), colVal);
+		    	}
+		    	result.add(row);
+		    }
+		}catch (SQLException se) {
+	        se.printStackTrace();
+	    } catch (NamingException e) {
+			e.printStackTrace();
+		} finally {
+	        try {
+	            rs.close();
+	            cs.close();
+	            conn.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	   } 
+		return result;
+	}
+
 	
 	
 	public ArrayList<String> getIdPatients(){

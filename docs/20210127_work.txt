@@ -114,7 +114,39 @@ order by deltavalue desc, deltadate;
 
 
 
+windows
+1 list body with different header by list
 
-
-
-
+3 lists: (4 lists)
+ - default list :HBA1c Trend = list of patients with bigest delta value between last 2 values ordered by bigest value delta to smallest value
+ 	header = name ramq chart age, community,  dtype, trend ,most recent date, most recent value, second most recent date, second most recent value
+ - date of last a1c - ordered by oldes a1c to newest a1c 
+ 	heeader = name ramq chart age community dtype trend most recent date most recent value 
+ - high a1c value: order by latest hba1c value desc
+ 	header = name ramq chart age comunity dtype trend  most recent date most recent value
+ - with no a1c value
+ 	header = name ramq chart age cmunity dtype 
+ 
+ window with filters 
+ 
+  - button to swith between lists - radio type
+  - age : all or small box to define age period
+  - dtype :  all type 1 and 2 predm gdm 
+  - community (0 if admin or MD ) 
+  
+  toolbar buttons:  print to pdf, export to csv, 
+  
+  
+  window with stats
+   - number of patients with improoved A1c in last 6 months delta positive based on last date and last 2 values not <= 0.07
+   		conditions = delta positive and last a1c <= 0.07 and before last a1c >= 0.07 
+   - number of patients with degraded a1c inthe last 6 months  delta  negative abd and last 2 values not <= 0.07
+   		conditions = delta negative and last a1c >= 0.07 
+   - number of patient with no data in the last 3 months 6 months, 12 months , 18 months,  	
+       
+ 	- number of patients with a1c > xx (dynamic value) in the last month, 3 months, 6 months, 12 months, 18 months
+ 	 by deciles, gender, community
+ 
+ 
+ 
+ 

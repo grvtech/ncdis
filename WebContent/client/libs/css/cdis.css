@@ -21,7 +21,15 @@ CDIS PAGE CSS
 #radios .btn-default{background-color:#ececec;margin-bottom:0px;}
 #radios .btn-default.active{background-color:#4b3b3b;color:#ffffff;font-weight:bold;}
 #radios .btn.focus {  outline: none;box-shadow:none;}
-.ui-autocomplete{height:400px;overflow: auto;font-size: 120%;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;padding:3px;}
+.ui-autocomplete{height:400px;overflow: auto;font-size:105%;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;padding:3px;}
+.search-line{display:grid;grid-template-columns:300px 130px 50px 200px 100px;}
+.ui-menu-item .ui-state-active {
+	background-color:#4b3b3b;
+	border:none;
+}
+.ui-menu-item  strong{background-color:#db4437;color:#fff;}
+
+/*
 .searchname {display:inline-block;width:300px;overflow:hidden;vertical-align:top;padding:3px;}
 .searchname span{padding:3px;}
 .searchname strong{background-color:#db4437;color:#ffffff;}
@@ -38,7 +46,7 @@ CDIS PAGE CSS
 .searchgiu label{padding:3px;}
 .searchgiu span{padding:3px;}
 .searchgiu strong{background-color:#db4437;color:#ffffff;}
-
+*/
 
 
 

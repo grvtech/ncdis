@@ -16,7 +16,7 @@ client validations
 	- deceased = yes dcause and d date not null
 
 
-	 asadmin create-custom-resource --restype=java.lang.String --factoass=org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property value="http\://javahowto.blogspot.com" resource/javahowto
+	 asadmin create-custom-resource --restype=java.lang.String --factoryclass=org.glassfish.resources.custom.factory.PrimitivesAndStringFactory --property value="http\://javahowto.blogspot.com" resource/javahowto
 	 
 	 
 	 C:\glassfish4\glassfish\domains\domain1\applications\ncdis\WEB-INF
@@ -33,7 +33,46 @@ client validations
 	 asadmin set server.resources.custom-resource.reports-folder.property.value="C:\servers\glassfish4\glassfish\domains\domain1\eclipseApps\ncdis\client\reports"
 	 
 	 
-	 com.microsoft.sqlserver.jdbc.SQLServerDataSource
+	 
+	 
+	 
+	 
+	 
+	  keytool -keystore cacerts.jks -storepass changeit -delete -alias equifaxsecureglobalebusinessca1
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias thawtepersonalfreemailca
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias verisigntsaca
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias thawteserverca
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias addtrustqualifiedca
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias thawtepremiumserverca
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias equifaxsecureglobalebusinessca1
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias equifaxsecureebusinessca1
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias certplusclass2primaryca
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias addtrustqualifiedca
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias addtrustexternalca
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias addtrustclass1ca
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias keynectisrootca
+	 
+	 keytool -keystore cacerts.jks -storepass changeit -delete -alias equifaxsecureebusinessca1
+	 
+	 
+	 
+	 
+	 
+	 
+	 
+	 
 	 
 	 
 	keytool -list -v -storepass changeit -keystore cacerts.jks > cert-list-cacerts-jks.txt 
@@ -65,7 +104,3 @@ keytool -delete -alias valicertclass2ca -keystore cacerts.jks -storepass changei
 keytool -delete -alias entrust2048ca -keystore cacerts.jks -storepass changeit
 
 keytool -delete -alias entrustsslca -keystore cacerts.jks -storepass changeit
-	 
-	 
-	 
-	 

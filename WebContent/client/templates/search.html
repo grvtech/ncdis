@@ -16,6 +16,9 @@
 
 			
 			<div class="panel-full">
+			
+			
+			
 				<form>
 				<div class="search">
 					
@@ -43,6 +46,7 @@
 				
 			<div class="panel-full">
 				<div class="dashboard-menu">
+					<div class="cisbutton"  id="locallist-button" data-toggle="tooltip" title="Open local patient list">Local Patient List</div>
 					<div class="cisbutton"  id="reports-button" data-toggle="tooltip" title="Execute reports">Reports</div> 
 					<div class="cisbutton"  id="addpatient-button" data-toggle="tooltip" title="Add new patient">Add Patient</div> 
 					<div class="cisbutton"  id="frontpage-button" data-toggle="tooltip" title="Manage fronpage message">Front Page Message</div>
@@ -95,8 +99,6 @@
 
 
 <script>
-
-	
 
 	$('#search').focus();
 
@@ -209,7 +211,8 @@
 		}
 	}).data("ui-autocomplete")._renderItem = function(ul, item) {
 			var $line = $("<a>");
-			var $container = $("<div>").appendTo($line);
+			var $liline = $("<li>");
+			var $container = $("<div>",{class:"search-line"}).appendTo($liline);
 			//$line.height("95px");
 			if(item.criteria == "fnamelname"){
 				var fn = (item.firstname+" "+item.lastname).toString().toLowerCase();
@@ -243,10 +246,30 @@
 			}else{
 				$("<div>",{class:'searchgiu'}).html("<span>"+item.giu+"</span>").appendTo($container);
 			}
-			var $liline = $("<li>");
-			$liline.height("35px");
-			$liline.append($line).appendTo(ul);
+			
+			//$liline.height("35px");
+			$liline.appendTo(ul);
 			$(ul).css("overflow-x","hidden");
 			return $liline;
 		};
 </script>
+<link type="text/css" rel="stylesheet" href="client/libs/css/locallist.css">
+<script src="client/libs/js/pages/locallist.js" type="text/javascript"></script>
+<script src="client/libs/js/pages/patient.js" type="text/javascript"></script>
+<script src="client/libs/js/jquery/jqplot/jquery.jqplot.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.cursor.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.canvasOverlay.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.dateAxisRenderer.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.canvasTextRenderer.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.canvasAxisTickRenderer.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.canvasAxisLabelRenderer.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.barRenderer.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.categoryAxisRenderer.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.pointLabels.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.pyramidAxisRenderer.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.pyramidGridRenderer.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.pyramidRenderer.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.pieRenderer.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.highlighter.min.js"></script>
+<script type="text/javascript" src="client/libs/js/jquery/print/jqprint.js"></script>
+	

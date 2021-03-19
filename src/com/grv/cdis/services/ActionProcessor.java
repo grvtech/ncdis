@@ -892,7 +892,8 @@ public class ActionProcessor {
 		    ArrayList<Object> header = new ArrayList<Object>();
 		    ArrayList<Object> datasets = new ArrayList<Object>();
 		    Hashtable<String, Object> dataObject = new Hashtable<>();
-    		dataObject.put("timestamp", sdf.format(new Date()));
+		    jObject.addProperty("generated", sdf.format(new Date()));
+    		//dataObject.put("timestamp", sdf.format(new Date()));
 		    
 		    
 		    if(reportType.equals("graph")){
@@ -1045,7 +1046,18 @@ public class ActionProcessor {
 		    	 String dataName = reportId.substring("LIST.".length()).toLowerCase();
 		    	 datasets = executeReportFlist(dataName, jArrayC, jArraySC); 
 		    	 
+		    }else if(reportType.equals("locallist")){
+		    	 JsonArray hdr = jObject.get("data").getAsJsonObject().get("header").getAsJsonArray();
+		    	 for(JsonElement obj : hdr ){header.add(obj);}
+		    	 datasets = executeReportLocalList(); 
+		    	 
+		    }else if(reportType.equals("nohba1c")){
+		    	 JsonArray hdr = jObject.get("data").getAsJsonObject().get("header").getAsJsonArray();
+		    	 for(JsonElement obj : hdr ){header.add(obj);}
+		    	 datasets = executeReportNoHBA1c(); 
+		    	 
 		    }
+		    
 		    System.out.println("-------------------------------------------------");
 		    dataObject.put("header",header);
 		    dataObject.put("datasets",datasets);
@@ -1082,6 +1094,18 @@ public class ActionProcessor {
 		return result;
 	}
 	
-	
-	
+	public static ArrayList<Object> executeReportLocalList(){
+		ArrayList<Object> result = new ArrayList<>();
+		CdisDBridge db = new CdisDBridge();
+		result = db.executeReportLocalList();
+		return result;
+	}
+
+	public static ArrayList<Object> executeReportNoHBA1c(){
+		ArrayList<Object> result = new ArrayList<>();
+		CdisDBridge db = new CdisDBridge();
+		result = db.executeReportNoHBA1c();
+		return result;
+	}
+
 }

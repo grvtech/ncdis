@@ -146,7 +146,8 @@
 		}
 	}).data("ui-autocomplete")._renderItem = function(ul, item) {
 			var $line = $("<a>");
-			var $container = $("<div>",{}).appendTo($line);
+			var $liline = $("<li>");
+			var $container = $("<div>",{class:"search-line"}).appendTo($liline);
 			if(item.criteria == "fnamelname"){
 				var fn = (item.firstname+" "+item.lastname).toString().toLowerCase();
 				fn = replaceAll(fn,item.term.toLowerCase(), "<strong>"+item.term.toLowerCase()+"</strong>");
@@ -177,8 +178,7 @@
 			}else{
 				$("<div>",{class:'searchgiu'}).html("<span>"+item.giu+"</span>").appendTo($container);
 			}
-			var $liline = $("<li>");
-			$liline.append($line).appendTo(ul);
+			$liline.appendTo(ul);
 			return $liline;
 		};
 </script>

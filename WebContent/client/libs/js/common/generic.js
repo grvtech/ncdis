@@ -125,6 +125,11 @@ function getObjects(obj, key, val) {
     return objects;
 }
 
+function randomIntFromInterval(min,max){
+    return Math.floor(Math.random()*(max-min+1)+min);
+}
+
+
 /* tooltip function*/
 //Use a closure to keep vars out of global scope
 /*

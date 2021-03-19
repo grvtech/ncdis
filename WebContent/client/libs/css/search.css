@@ -36,26 +36,33 @@ SEARCH PAGE CSS
 
 
 .ui-autocomplete{width:612px;margin-left:-200px;height:400px;overflow: auto;-moz-border-radius: 0px;-webkit-border-radius: 0px;border-radius: 0px;}
+.search-line{display:grid;grid-template-columns:300px 130px 50px 200px 100px;}
+
+.ui-menu-item .ui-state-active {
+	background-color:#4b3b3b;
+	border:none;
+}
+.ui-menu-item  strong{background-color:#db4437;color:#fff;}
 
 
-
-.searchname {position:absolute;overflow:hidden;width:300px;height:30px;top:5px;left:5px;overflow:hidden;/*border:1px solid #000000;*/}
+/*
+.searchname {position:absolute;overflow:hidden;width:300px;height:30px;top:5px;left:5px;overflow:hidden;}
 .searchname span{font-size: 120%;line-height:30px;font-family:Tahoma;color:#000000;}
 .searchname strong{font-weight:normal;background-color:#db4437;color:#ffffff;}
-.searchcommunity {position:absolute;width:130px;top:5px;left:308px;font-size: 80%;line-height:30px;font-family:Sans-Serif;color:#000000;overflow:hidden;/*border:1px solid #000000;*/}
-.searchchart {position:absolute;width:50px;top:5px;left:440px;overflow:hidden;/*border:1px solid #000000;*/}
+.searchcommunity {position:absolute;width:130px;top:5px;left:308px;font-size: 80%;line-height:30px;font-family:Sans-Serif;color:#000000;overflow:hidden;}
+.searchchart {position:absolute;width:50px;top:5px;left:440px;overflow:hidden;}
 .searchchart label{font-size: 100%;line-height:30px;font-family:Sans-Serif;color:#000000;}
 .searchchart span{font-size: 80%;line-height:30px;font-family:Sans-Serif;color:#000000;}
 .searchchart strong{font-weight:normal;background-color:#db4437;color:#ffffff;}
-.searchramq {position:absolute;width:200px;top:5px;left:493px;overflow:hidden;/*border:1px solid #000000;*/}
+.searchramq {position:absolute;width:200px;top:5px;left:493px;overflow:hidden;}
 .searchramq label{font-size: 90%;line-height:30px;font-family:Sans-Serif;color:#000000;}
 .searchramq span{font-size: 90%;line-height:30px;font-family:Sans-Serif;color:#000000;}
 .searchramq strong{background-color:#db4437;color:#ffffff;}
-.searchgiu {position:absolute;width:100px;top:5px;left:700px;overflow:hidden;/*border:1px solid #000000;*/}
+.searchgiu {position:absolute;width:100px;top:5px;left:700px;overflow:hidden;}
 .searchgiu label{font-size: 90%;line-height:30px;font-family:Sans-Serif;color:#000000;}
 .searchgiu span{font-size: 90%;line-height:30px;font-family:Sans-Serif;color:#000000;}
 .searchgiu strong{background-color:#db4437;color:#ffffff;}
-
+*/
 
 
 .notes-alert{position:relative;height:100px;width:1000px;margin:auto;z-index:2;background-color:#efefef;display:none;overflow-x: hidden;padding:5px;}
