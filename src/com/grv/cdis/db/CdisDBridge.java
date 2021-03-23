@@ -1783,6 +1783,7 @@ public class CdisDBridge {
 	
 	public ArrayList<Object> executeReportLocalList(){
 		ArrayList<Object> result = new ArrayList<>();
+		ArrayList<Object> resultBuffer = new ArrayList<>();
 		Gson gson = new Gson();
 		Context initContext;
 		DataSource ds;
@@ -1830,7 +1831,10 @@ public class CdisDBridge {
 		    rs = cs.executeQuery(sql);
 		    ResultSetMetaData rsm =  rs.getMetaData();
 		    int columns = rsm.getColumnCount();
-		   
+		   int deltaZTotal = 0;
+		   int deltaPTotal = 0;
+		   int deltaNTotal = 0;
+		   int index = 0;
 		    while (rs.next()) {
 		    	Hashtable<String, String> row = new Hashtable<>();
 		    	for(int i=1;i<=columns;i++){
@@ -1838,7 +1842,40 @@ public class CdisDBridge {
 		    		if(colVal == null) colVal = "";
    					row.put(rsm.getColumnName(i), colVal);
 		    	}
-		    	result.add(row);
+		    	String v = row.get("delta");
+		    	if(!v.isEmpty()){
+		    		float d = Float.parseFloat(row.get("delta"));
+			    	if(d > 0 ){
+			    		deltaPTotal++;
+			    		row.put("indexDelta",Integer.toString(deltaPTotal));
+			    	}
+			    	if(d == 0 ){
+			    		deltaZTotal++;
+			    		row.put("indexDelta",Integer.toString(deltaZTotal));
+			    	}
+			    	if(d < 0 ){
+			    		deltaNTotal++;
+			    		row.put("indexDelta",Integer.toString(deltaNTotal));
+			    	}
+		    	}
+		    	resultBuffer.add(row);
+		    }
+		    for(int i=0;i<resultBuffer.size();i++){
+		    	Hashtable<String, String> r = (Hashtable<String, String>)resultBuffer.get(i);
+		    	String ss = r.get("delta");
+		    	if(!ss.isEmpty()){
+			    	float d =  Float.parseFloat(r.get("delta"));
+			    	if(d > 0 ){
+			    		r.put("totalDelta",Integer.toString(deltaPTotal));
+			    	}
+			    	if(d == 0 ){
+			    		r.put("totalDelta",Integer.toString(deltaZTotal));
+			    	}
+			    	if(d < 0 ){
+			    		r.put("totalDelta",Integer.toString(deltaNTotal));
+			    	}
+		    	}
+		    	result.add(r);
 		    }
 		}catch (SQLException se) {
 	        se.printStackTrace();

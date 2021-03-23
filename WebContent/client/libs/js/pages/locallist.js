@@ -35,9 +35,18 @@ var prDegrade = 0;
 var nbNodata = 0;
 var prNodata = 0;
 
-var deciles = ["0-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69","70-79", "80+"];
-var male = [];
-var female = [];
+var decilesValues = ["0 - 9", "10 - 19", "20 - 29", "30 - 39", "40 - 49", "50 - 59", "60 - 69","70 - 79", "80+"];
+var decilesImprovement = ["0-10%", "10%-19%", "20%-29%", "30%-39%", "40%-49%", "+50%"];
+var decilesDate = ["0-3 months", "3-6 months", "6-12 months", "12-24 months", "over 24 months"];
+var maleValue = [];
+var femaleValue = [];
+
+var maleImprovement = [];
+var femaleImprovement = [];
+
+var maleDate = [];
+var femaleDate = [];
+
 
 
 /*
@@ -156,6 +165,9 @@ function setToolbar(filter){
 	var a1cValue = filter.hba1c;
 	if(a1cValue == "0"){
 		$(".gr-a1c-radio div").removeClass("selected");
+		$("#a1c-filter-0").addClass("selected");
+	}else if(a1cValue == "1"){
+		$(".gr-a1c-radio div").removeClass("selected");
 		$("#a1c-filter-1").addClass("selected");
 	}else{
 		$(".gr-a1c-radio div").removeClass("selected");
@@ -266,6 +278,7 @@ function drawToolbarFilters(container){
 	var grA1c = $("<div>",{"id":"toolbarFilterA1c",class:"gr-a1c"}).appendTo(gr2col1);
 	$("<div>").text("HbA1c").appendTo(grA1c);
 	var grA1cC = $("<div>",{class:"gr-a1c-radio gr"}).appendTo(grA1c);
+	$("<div>",{"id":"a1c-filter-0",class:"gr-radio","grv-data":"0"}).appendTo(grA1cC).text("All values");
 	$("<div>",{"id":"a1c-filter-1",class:"gr-radio","grv-data":"1"}).appendTo(grA1cC).text("Latest value >= 0.075");
 	$("<div>",{"id":"a1c-filter-2",class:"gr-radio last","grv-data":"2"}).appendTo(grA1cC).text("Custom values");
 	var grA1cCustom = $("<div>",{class:"gr-a1c-custom gr-custom"}).appendTo(grA1cC);
@@ -279,10 +292,9 @@ function drawToolbarFilters(container){
 		$(this).addClass("selected");
 		if($(this).attr("grv-data") == "2"){
 			$(".gr-a1c-custom").css("visibility","visible");
-			
 		}else{
 			$(".gr-a1c-custom").css("visibility","hidden");
-			appFilter["hba1c"] = "0";
+			appFilter["hba1c"] = $(this).attr("grv-data");
 			$("#a1c-custom-min").val("");
 			$("#a1c-custom-max").val("");
 			//draw data
@@ -310,6 +322,7 @@ function drawToolbarButtons(container){
 		console.log(globalReport);
 		console.log("filter");
 		console.log(appFilter);
+		showProgress($("#locallist-list"));
 		
 		if($("#age-filter-2").hasClass("selected")){
 			var min = isNaN($("#age-custom-min").val())?"0":($("#age-custom-min").val() === '')?"0":$("#age-custom-min").val();
@@ -387,30 +400,199 @@ function getReportHeaderConfig(column, headerArray){
 }
 
 
+
+function getStatsData(){
+	var filter = appFilter;
+	var ds = globalReport.data.datasets;
+	var m0=0;m1=0;m2=0;m3=0;m4=0;m5=0;m6=0;m7=0;m8=0;
+	var f0=0;f1=0;f2=0;f3=0;f4=0;f5=0;f6=0;f7=0;f8=0;
+	
+	var mi0=0;mi1=0;mi2=0;mi3=0;mi4=0;mi5=0;
+	var fi0=0;fi1=0;fi2=0;fi3=0;fi4=0;fi5=0;
+	
+	var md0=0;md1=0;md2=0;md3=0;md4=0;md5=0;
+	var fd0=0;fd1=0;fd2=0;fd3=0;fd4=0;fd5=0;
+	
+	
+	
+	$.each(ds, function(i,obj){
+		//community
+		var hasCommunity = false;
+		if(filter.idcommunity != "0"){
+			if(obj.idcommunity == filter.idcommunity) hasCommunity=true;
+		}else{
+			hasCommunity = true;
+		}
+
+		var dpValue = dataperiodValues[filter.dp];
+		var hasDate = false;
+		/*
+		 * temporar add 36 month 
+		 * */
+		
+		
+		
+		if(filter.dp == "4"){
+			hasDate = true;
+		}else{
+			dpValue = dpValue +36;
+			var filterDate = moment().subtract(dpValue, 'months');
+			var reportDate = moment(obj.last_hba1c_collecteddate);
+			hasDate = reportDate.isAfter(filterDate);
+		}
+				
+		
+		var hasDtype = false;
+		if(filter.dtype.indexOf(obj.dtype) >= 0 )hasDtype = true; 
+
+		var hasAge = false;
+		if(filter.age.indexOf("_") >= 0){
+			var ages = filter.age.split("_");
+			if(obj.age >= ages[0] && obj.age <= ages[1]){
+				hasAge = true;
+			}
+		}else{
+			hasAge=true;
+		}
+		
+		var hasHBA1c = false;
+		if(typeof(obj.last_hba1c) != "undefined"){
+			if(filter.hba1c.indexOf("_") >= 0){
+				var a1cs = filter.hba1c.split("_");
+				if(obj.last_hba1c >= a1cs[0] && obj.last_hba1c <= a1cs[1]){
+					hasHBA1c = true;
+				}
+			}else if(filter.hba1c == "0"){
+				hasHBA1c=true;
+			}else if(filter.hba1c == "1"){
+				if(obj.last_hba1c >= 0.075)hasHBA1c=true;
+			}
+		}else{
+			hasHBA1c=true;
+		}
+		
+		
+		if(hasCommunity &&  hasDtype && hasAge && hasHBA1c){
+			var filterDate3 = moment().subtract(3+36, 'months');
+			var filterDate6 = moment().subtract(6+36, 'months');
+			var filterDate12 = moment().subtract(12+36, 'months');
+			var filterDate18 = moment().subtract(18+36, 'months');
+			var filterDate24 = moment().subtract(24+36, 'months');
+			var reportDate = moment(obj.last_hba1c_collecteddate);
+			
+			if(reportDate.isAfter(filterDate3)){if(obj.sex == "1"){md0++;}else{fd0++;}}
+			if(reportDate.isAfter(filterDate6) && reportDate.isBefore(filterDate3) ){if(obj.sex == "1"){md1++;}else{fd1++;}}
+			if(reportDate.isAfter(filterDate12) && reportDate.isBefore(filterDate6) ){if(obj.sex == "1"){md2++;}else{fd2++;}}
+			if(reportDate.isAfter(filterDate18) && reportDate.isBefore(filterDate12) ){if(obj.sex == "1"){md3++;}else{fd3++;}}
+			if(reportDate.isAfter(filterDate24) && reportDate.isBefore(filterDate18) ){if(obj.sex == "1"){md4++;}else{fd4++;}}
+			if(reportDate.isBefore(filterDate24)){if(obj.sex == "1"){md5++;}else{fd5++;}}
+			
+		}
+		
+		
+		
+		if(hasCommunity && hasDate && hasDtype && hasAge && hasHBA1c){
+			//validate if improved patient
+			//rule both hba1c >= 7 nd delta negative
+			//console.log(obj.delta +"     "+obj.secondlast_hba1c);
+			if(obj.delta < 0 && obj.secondlast_hba1c > 0.07 ){
+				//&& obj.sex=="1" && obj.age >0 && obj.age < 10
+				var pr = Math.round((Math.abs(obj.delta)/Number(obj.last_hba1c))*100);
+				//console.log("percentage : "+pr+"    obj.delta:"+obj.delta+"    last data:"+obj.last_hba1c);
+				if(pr > 0 && pr < 10){if(obj.sex == "1"){mi0++;}else{fi0++;}}
+				if(pr >= 10 && pr < 20){if(obj.sex == "1"){mi1++;}else{fi1++;}}
+				if(pr >= 20 && pr < 30){if(obj.sex == "1"){mi2++;}else{fi2++;}}
+				if(pr >= 30 && pr < 40){if(obj.sex == "1"){mi3++;}else{fi3++;}}
+				if(pr >= 40 && pr < 50){if(obj.sex == "1"){mi4++;}else{fi4++;}}
+				if(pr >= 50 ){if(obj.sex == "1"){mi5++;}else{fi5++;}}
+			}
+			
+			
+			if(obj.sex == "1" && obj.age >= 0 && obj.age <=9) m0=m0+1;
+			if(obj.sex == "1" && obj.age >= 10 && obj.age <=19) m1=m1+1;
+			if(obj.sex == "1" && obj.age >= 20 && obj.age <=29) m2=m2+1;
+			if(obj.sex == "1" && obj.age >= 30 && obj.age <=39) m3=m3+1;
+			if(obj.sex == "1" && obj.age >= 40 && obj.age <=49) m4=m4+1;
+			if(obj.sex == "1" && obj.age >= 50 && obj.age <=59) m5=m5+1;
+			if(obj.sex == "1" && obj.age >= 60 && obj.age <=69) m6=m6+1;
+			if(obj.sex == "1" && obj.age >= 70 && obj.age <=79) m7=m7+1;
+			if(obj.sex == "1" && obj.age >= 80 ) m8=m8+1;
+			
+			
+			if(obj.sex == "2" && obj.age >= 0 && obj.age <=9) f0=f0+1;
+			if(obj.sex == "2" && obj.age >= 10 && obj.age <=19) f1=f1+1;
+			if(obj.sex == "2" && obj.age >= 20 && obj.age <=29) f2=f2+1;
+			if(obj.sex == "2" && obj.age >= 30 && obj.age <=39) f3=f3+1;
+			if(obj.sex == "2" && obj.age >= 40 && obj.age <=49) f4=f4+1;
+			if(obj.sex == "2" && obj.age >= 50 && obj.age <=59) f5=f5+1;
+			if(obj.sex == "2" && obj.age >= 60 && obj.age <=69) f6=f6+1;
+			if(obj.sex == "2" && obj.age >= 70 && obj.age <=79) f7=f7+1;
+			if(obj.sex == "2" && obj.age >= 80 ) f8=f8+1;
+			
+		}
+	});
+
+	maleValue = [m0,m1,m2,m3,m4,m5,m6,m7,m8];
+	femaleValue = [f0,f1,f2,f3,f4,f5,f6,f7,f8];
+	
+	maleImprovement = [mi0,mi1,mi2,mi3,mi4,mi5];
+	femaleImprovement = [fi0,fi1,fi2,fi3,fi4,fi5];
+	
+	maleDate = [md0,md1,md2,md3,md4,md5];
+	femaleDate = [fd0,fd1,fd2,fd3,fd4,fd5];
+	
+	//calculate no data 
+	
+	nbNodata = 0;
+	prNodata = 0;
+	var dsNodata = globalNoHBA1cReport.data.datasets;
+	$.each(dsNodata, function(x,objn){
+		var hasA = false;
+		if(filter.age.indexOf("_") >= 0){
+			var as = filter.age.split("_");
+			if(objn.age >= as[0] && objn.age <= as[1]){
+				hasA = true;
+			}
+		}else{
+			hasA=true;
+		}
+		
+		var hasDt = false;
+		if(filter.dtype.indexOf(objn.dtype) >= 0 )hasDt = true; 
+
+		var hasC = false;
+		if(filter.idcommunity != "0"){
+			if(objn.idcommunity == filter.idcommunity) hasC=true;
+		}else{
+			hasC = true;
+		}
+		
+		if(hasA && hasDt && hasC){
+			nbNodata ++;
+		}
+		
+	});
+	
+	prNodata = Number((nbNodata/(dsNodata.length+ds.length)) * 100).toFixed(2);
+	
+	
+}
+
+
+
+
+
 function applyFilter(report,filter){
 	var result = {};
 	var ds = report.data.datasets;
+	var beforeFilterDs = report.data.datasets;
 	var dsresult = [];
+	var dsresultNoDataFilter = [];
 	result["data"] = {};
 	result["data"]["header"] = report.data.header; 
 	console.log("report before filter");
 	console.log(report);
 	
-	//reset values
-	nbImproved = 0; 
-	prImproved = 0;
-	nbDegrade = 0;
-	prDegrade = 0; 
-	nbNodata = 0; 
-	prNodata = 0;
-	male = []; 
-	female = [];
-
-	var totalTotal = ds.length;
-	var totalFiltered = 0;
-	
-	var m0=0;m1=0;m2=0;m3=0;m4=0;m5=0;m6=0;m7=0;m8=0;
-	var f0=0;f1=0;f2=0;f3=0;f4=0;f5=0;f6=0;f7=0;f8=0;
 	
 	$.each(ds, function(i,obj){
 		//community
@@ -458,68 +640,43 @@ function applyFilter(report,filter){
 				if(obj.last_hba1c >= a1cs[0] && obj.last_hba1c <= a1cs[1]){
 					hasHBA1c = true;
 				}
-			}else if(obj.last_hba1c >= 0.075){
+			}else if(filter.hba1c == "0"){
+				//(obj.last_hba1c >= 0.075
 				hasHBA1c=true;
+			}else if(filter.hba1c == "1"){
+				if(obj.last_hba1c >= 0.075)hasHBA1c=true;
 			}
 		}else{
 			hasHBA1c=true;
 		}
 		
 		
-		//if(hasCommunity && hasDate && hasDtype && hasAge && hasHBA1c){
-		if(hasCommunity && hasDate && hasDtype && hasAge && hasHBA1c){
-			var isGood = false;
+		if(hasCommunity &&  hasDtype && hasAge && hasHBA1c){
+			var isG = false;
 			if(filter.list == "list101"){
-				if(obj.delta != ""){dsresult.push(obj);isGood = true;}
+				if(obj.delta != ""){dsresultNoDataFilter.push(obj);isG = true;}
 			}else if(filter.list == "list102"){
-				if(obj.last_hba1c_colleteddate != ""){dsresult.push(obj);isGood = true;}
+				if(obj.last_hba1c_colleteddate != ""){dsresultNoDataFilter.push(obj);isG = true;}
 			}else if(filter.list == "list103"){
-				if(obj.last_hba1c != ""){dsresult.push(obj);isGood = true;}
+				if(obj.last_hba1c != ""){dsresultNoDataFilter.push(obj);isG = true;}
 			}else if(filter.list == "list104"){
-				dsresult.push(obj);
-				isGood = true;
+				dsresultNoDataFilter.push(obj);
+				isG = true;
 			}
 			
-			if(isGood){
-				//validate if improved patient
-				//rule both hba1c >= 7 nd delta negative
-				//console.log(obj.delta +"     "+obj.secondlast_hba1c);
-				if(obj.delta < 0 && obj.secondlast_hba1c > 0.07 ){
-					nbImproved = nbImproved +1;
-				}else if(obj.delta > 0 && obj.secondlast_hba1c > 0.07 ){
-					nbDegrade = nbDegrade +1;
-				}
-				
-				if(filter.dp == "4"){
-					
-				}else{
-					nbNodata = nbNodata +1;
-				}
-				
-				if(obj.sex == "1" && obj.age >= 0 && obj.age <=9) m0=m0+1;
-				if(obj.sex == "1" && obj.age >= 10 && obj.age <=19) m1=m1+1;
-				if(obj.sex == "1" && obj.age >= 20 && obj.age <=29) m2=m2+1;
-				if(obj.sex == "1" && obj.age >= 30 && obj.age <=39) m3=m3+1;
-				if(obj.sex == "1" && obj.age >= 40 && obj.age <=49) m4=m4+1;
-				if(obj.sex == "1" && obj.age >= 50 && obj.age <=59) m5=m5+1;
-				if(obj.sex == "1" && obj.age >= 60 && obj.age <=69) m6=m6+1;
-				if(obj.sex == "1" && obj.age >= 70 && obj.age <=79) m7=m7+1;
-				if(obj.sex == "1" && obj.age >= 80 ) m8=m8+1;
-				
-				
-				if(obj.sex == "2" && obj.age >= 0 && obj.age <=9) f0=f0+1;
-				if(obj.sex == "2" && obj.age >= 10 && obj.age <=19) f1=f1+1;
-				if(obj.sex == "2" && obj.age >= 20 && obj.age <=29) f2=f2+1;
-				if(obj.sex == "2" && obj.age >= 30 && obj.age <=39) f3=f3+1;
-				if(obj.sex == "2" && obj.age >= 40 && obj.age <=49) f4=f4+1;
-				if(obj.sex == "2" && obj.age >= 50 && obj.age <=59) f5=f5+1;
-				if(obj.sex == "2" && obj.age >= 60 && obj.age <=69) f6=f6+1;
-				if(obj.sex == "2" && obj.age >= 70 && obj.age <=79) f7=f7+1;
-				if(obj.sex == "2" && obj.age >= 80 ) f8=f8+1;
-				
-			}
+		}
+		
+		if(hasCommunity && hasDate && hasDtype && hasAge && hasHBA1c){
+			if(filter.list == "list101"){if(obj.delta != ""){dsresult.push(obj);}
+			}else if(filter.list == "list102"){if(obj.last_hba1c_colleteddate != ""){dsresult.push(obj);}
+			}else if(filter.list == "list103"){if(obj.last_hba1c != ""){dsresult.push(obj);}
+			}else if(filter.list == "list104"){dsresult.push(obj);}
 		}
 	});
+	
+	//the values for data dates should always be calculated excluding data date filter
+	
+	
 	
 	if(filter.list == "list101"){dsresult.sort(compareDeltaDesc);}
 	if(filter.list == "list102"){dsresult.sort(compareLastDateDesc);}
@@ -527,53 +684,10 @@ function applyFilter(report,filter){
 	console.log(dsresult);
 	
 	
-	totalFiltered = dsresult.length;
-	console.log("total filtererd : "+totalFiltered);
-	
-	prImproved = Number(nbImproved/totalFiltered).toFixed(2)*100;
-	prDegrade = Number(nbDegrade/totalFiltered).toFixed(2)*100;
-	
-	if(filter.dp == "4"){
-		totalTotal = globalNoHBA1cReport.data.datasets.length;
-		$.each(globalNoHBA1cReport.data.datasets, function(i,s){
-			var hComm = false;hDt = false;hAge = false;
-			if(filter.idcommunity == "0"){
-				hComm = true;
-			}else{
-				if(s.idcommunity == filter.idcommunity){hComm = true;}
-			}
-			
-			if(filter.dtype.indexOf(s.dtype) >= 0){hDt = true;}
-			if(filter.age.indexOf("_") >= 0){
-				var ages = filter.age.split("_");
-				if(s.age >= ages[0] && s.age <= ages[1]){
-					hAge = true;
-				}
-			}else{
-				hAge=true;
-			}
-			//console.log(hComm +"   "+hDt+"    "+hAge+"    "+filter.dtype+"    "+filter.age+"    "+filter.idcommunity+ "   "+s.dtype+"   "+s.idcommunity+"    "+s.age);
-			if(hComm && hDt && hAge){
-				nbNodata = nbNodata +1;
-			}
-		});
-	}
-	
-	if(filter.dp == "4" && filter.list != "list104"){
-		var t = getTotal(globalReport, appFilter);
-		prNodata = Math.round(nbNodata/(t+nbNodata));
-	}else{
-		prNodata = Math.round(nbNodata/(totalFiltered+nbNodata));
-	}
-	male.push(m0,m1,m2,m3,m4,m5,m6,m7,m8);
-	female.push(f0,f1,f2,f3,f4,f5,f6,f7,f8);
 	result["data"]["datasets"] = dsresult;
 	console.log("report after filter");
 	console.log(result);
 	
-	console.log("nbI = "+nbImproved+"   prIm="+prImproved+"   nbD="+nbDegrade+"  prD="+prDegrade+"   nbNo="+nbNodata+"  prNo="+prNodata);
-	console.log(male);
-	console.log(female);
 	
 	return result;
 	/**/
@@ -603,22 +717,24 @@ function getTotal(report, filter){
 }
 
 
-function getColor(index, total){
+function getColor(indexDelta, totalDelta, delta){
 	var result = "#ffffff";
-	var r = 252;
+	var r = 255;
 	var g = 0;
-	var b = 0;
-	var bond = Math.round(252/total); 
-	if(total >= 252){
-		bond = Math.round(total/252);
-		g = Math.round(index/bond);
-		b = Math.round(index/bond);
-	}else{
-		bond = Math.round(252/total);
-		g = Math.round(index*bond);
-		b = Math.round(index*bond);
+	
+	if(Number(delta) == 0){
+		result = "rgb(255,255,0)";
+		
+	}else if(Number(delta) > 0){
+		p = Number(indexDelta)/Number(totalDelta);
+		g = Math.round(p*255);
+		result = "rgb(255,"+g+",0)";
+	}else if(Number(delta) < 0){
+		p = Number(indexDelta)/Number(totalDelta);
+		r = Math.round(p*255);
+		result = "rgb("+(255-r)+",255,0)";
 	}
-	result = "rgb("+r+","+g+","+b+")";
+	
 	return result;
 }
 
@@ -676,9 +792,9 @@ function drawStats(statsConfig, report){
 	
 	
 	$("<div>",{class:"s-container t1","id":"s1"}).appendTo($(".stats-container"));
-	$("<div>",{class:"s-container t1","id":"s2"}).appendTo($(".stats-container"));
-	$("<div>",{class:"s-container t1","id":"s3"}).appendTo($(".stats-container"));
-	$("<div>",{class:"s-container t2","id":"s4"}).appendTo($(".stats-container"));
+	$("<div>",{class:"s-container tp","id":"s2"}).appendTo($(".stats-container"));
+	$("<div>",{class:"s-container tp","id":"s3"}).appendTo($(".stats-container"));
+	$("<div>",{class:"s-container tp","id":"s4"}).appendTo($(".stats-container"));
 	
 	
 	//refreshStats();
@@ -686,26 +802,98 @@ function drawStats(statsConfig, report){
 }
 
 function refreshStats(){
-	drawStatsImproved($("#s1"));
-	drawStatsDegrade($("#s2"));
-	drawStatsNodata($("#s3"));
-	drawStatsDeciles($("#s4"));
+	
+	getStatsData();
+	console.log(maleValue);
+	console.log(femaleValue);
+	console.log(maleImprovement);
+	console.log(femaleImprovement);
+	console.log(maleDate);
+	console.log(femaleDate);
+	
+	console.log(nbNodata);
+	console.log(prNodata);
+	
+	drawStatsNodata($("#s1"));
+	drawStatsImproved($("#s2"), decilesImprovement, maleImprovement, femaleImprovement);
+	drawStatsPeriod($("#s3"), decilesDate, maleDate, femaleDate);
+	drawStatsDeciles($("#s4"), decilesValues, maleValue, femaleValue);
+	
 }
 
 
-function drawStatsImproved(container){
+function drawStatsImproved(container, ticks, maleArr, femaleArr){
 	$(container).empty();
-	$("<div>",{class:"title"}).appendTo(container).text("Patients with improved HBA1c latest values");
-	$("<div>",{class:"sn panel"}).appendTo(container).text(nbImproved);
-	$("<div>",{class:"sp panel"}).appendTo(container).text(prImproved+"%");
+	$(container)
+	.append($("<div>",{class:"title"}).text("Patient with improved HBA1c"))
+	.append($("<div>",{class:"tp-graph","id":"s2-graph"}))
+	.append($("<div>",{class:"tp-table-container"})
+			.append($("<div>",{class:"stats-gap"}))
+			.append($("<div>",{class:"tp-table-container-container"})
+				.append($("<div>",{class:"stats-gap"}))
+				.append($("<div>",{class:"tp-table tp-table-improvment-improvment"}).append($("<div>",{class:"label"}).text("Improvment")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"tp-table tp-table-improvment-male"}).append($("<div>",{class:"label"}).text("Male")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"tp-table tp-table-improvment-female"}).append($("<div>",{class:"label"}).text("Female")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"tp-table tp-table-improvment-ratio"}).append($("<div>",{class:"label"}).text("Ratio (f/m)")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"stats-gap"}))
+			)
+			.append($("<div>",{class:"stats-gap"}))
+			);
+	
+	drawPiramidGraph($("#s2-graph"), ticks, maleArr, femaleArr,"Improvment");
+	
 }
 
-function drawStatsDegrade(container){
+
+function drawStatsPeriod(container, ticks, maleArr, femaleArr){
 	$(container).empty();
-	$("<div>",{class:"title"}).appendTo(container).text("Patients with increased HBA1c latest values");
-	$("<div>",{class:"sn panel"}).appendTo(container).text(nbDegrade);
-	$("<div>",{class:"sp panel"}).appendTo(container).text(prDegrade+"%");
+	$(container)
+	.append($("<div>",{class:"title"}).text("Patient with latest HBA1c in period"))
+	.append($("<div>",{class:"tp-graph","id":"s3-graph"}))
+	.append($("<div>",{class:"tp-table-container"})
+			.append($("<div>",{class:"stats-gap"}))
+			.append($("<div>",{class:"tp-table-container-container"})
+				.append($("<div>",{class:"stats-gap"}))
+				.append($("<div>",{class:"tp-table tp-table-period-period"}).append($("<div>",{class:"label"}).text("Period")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"tp-table tp-table-period-male"}).append($("<div>",{class:"label"}).text("Male")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"tp-table tp-table-period-female"}).append($("<div>",{class:"label"}).text("Female")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"tp-table tp-table-period-ratio"}).append($("<div>",{class:"label"}).text("Ratio (f/m)")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"stats-gap"}))
+			)
+			.append($("<div>",{class:"stats-gap"}))
+			);
+	
+	
+	
+	drawPiramidGraph($("#s3-graph"), ticks, maleArr, femaleArr,"Period");
+	
 }
+
+
+function drawStatsDeciles(container, ticks, maleArr, femaleArr){
+	$(container).empty();
+	$(container)
+	.append($("<div>",{class:"title"}).text("Patient with HBA1c by age group"))
+	.append($("<div>",{class:"tp-graph","id":"s4-graph"}))
+	.append($("<div>",{class:"tp-table-container"})
+			.append($("<div>",{class:"stats-gap"}))
+			.append($("<div>",{class:"tp-table-container-container"})
+				.append($("<div>",{class:"stats-gap"}))
+				.append($("<div>",{class:"tp-table tp-table-agegroup-agegroup"}).append($("<div>",{class:"label"}).text("Age group")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"tp-table tp-table-agegroup-male"}).append($("<div>",{class:"label"}).text("Male")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"tp-table tp-table-agegroup-female"}).append($("<div>",{class:"label"}).text("Female")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"tp-table tp-table-agegroup-ratio"}).append($("<div>",{class:"label"}).text("Ratio (f/m)")).append($("<div>",{class:"value"})))
+				.append($("<div>",{class:"stats-gap"}))
+			)
+			.append($("<div>",{class:"stats-gap"}))
+			);
+	drawPiramidGraph($("#s4-graph"), ticks, maleArr, femaleArr,"Age Group");
+	
+}
+
+
+
+
 
 function drawStatsNodata(container){
 	$(container).empty();
@@ -716,14 +904,41 @@ function drawStatsNodata(container){
 
 
 
-function drawStatsDeciles(container){
-	$(container).empty();
+function drawPieGraph(data, container){
+	 
+    var s1 = [['Male',7], ['Female',20]];
+    var containerid = $(container).attr("id");
+    var plot8 = $.jqplot(containerid, [s1], {
+        grid: {
+            drawBorder: false, 
+            drawGridlines: false,
+            background: '#ffffff',
+            shadow:false
+        },
+        axesDefaults: {
+             
+        },
+        seriesDefaults:{
+            renderer:$.jqplot.PieRenderer,
+            rendererOptions: {
+                showDataLabels: true,
+                dataLabels : 'label'
+            }
+        },
+        legend: {
+            show: false,
+            rendererOptions: {
+                numberRows: 2
+            },
+            location: 'e'
+        }
+    }); 
+	
 }
 
 
 
 function drawList(listid,listConfig,report){
-	
 	console.log("start draw list : "+ moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
 	if(listid == "list104" && appFilter.dp == "4" ){
 		report = globalNoHBA1cReport;
@@ -743,6 +958,31 @@ function drawList(listid,listConfig,report){
 	if($(".list-container .list-body-container").length){
 		$(".list-container .list-body-container").remove();
 	}
+	
+	if(listid == "list101"){
+		var dataContainer = $("<div>",{class:"list-data-container"}).appendTo(listContainer);
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Total")).append($("<div>",{class:"pvalue","id":"pTotal"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Improved")).append($("<div>",{class:"pvalue","id":"pImproved"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Setback")).append($("<div>",{class:"pvalue","id":"pSetback"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Male")).append($("<div>",{class:"pvalue","id":"pMale"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Female")).append($("<div>",{class:"pvalue","id":"pFemale"}));
+	}else if(listid == "list102"){
+		var dataContainer = $("<div>",{class:"list-data-container"}).appendTo(listContainer);
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Total")).append($("<div>",{class:"pvalue","id":"pTotal"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Last month")).append($("<div>",{class:"pvalue","id":"pLastmonth"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Male")).append($("<div>",{class:"pvalue","id":"pMale"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Female")).append($("<div>",{class:"pvalue","id":"pFemale"}));
+	}else if(listid == "list103"){
+		var dataContainer = $("<div>",{class:"list-data-container"}).appendTo(listContainer);
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Total")).append($("<div>",{class:"pvalue","id":"pTotal"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Under 0.06")).append($("<div>",{class:"pvalue","id":"pUnder"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Between 0.06 and 0.07")).append($("<div>",{class:"pvalue","id":"pBetween"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Over 0.07")).append($("<div>",{class:"pvalue","id":"pOver"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Male")).append($("<div>",{class:"pvalue","id":"pMale"}));
+		$("<div>",{class:"list-data-container-panel"}).appendTo(dataContainer).append($("<div>",{class:"plabel"}).text("Female")).append($("<div>",{class:"pvalue","id":"pFemale"}));
+	}
+	
+	
 	var headerContainer = $("<div>",{class:"list-header-container"}).appendTo(listContainer);
 	var bodyContainer = $("<div>",{"id":"list-body",class:"list-body-container"}).appendTo(listContainer);
 	var header = eval("listConfig."+listid+".header");
@@ -774,6 +1014,17 @@ function drawList(listid,listConfig,report){
 	
 	var bc = document.getElementById("list-body");
 	var c = document.createDocumentFragment();
+	
+	var pTotal = 0;
+	var pMale = 0;
+	var pFemale = 0;
+	var pImproved = 0;
+	var pSetback = 0;
+	var pUnder = 0;
+	var pBetween = 0;
+	var pOver = 0;
+	var pLastmonth = 0;
+	
 	$.each(reportBody,function(i,row){
 		
 		var e = document.createElement("div");
@@ -786,7 +1037,12 @@ function drawList(listid,listConfig,report){
 		$.each(header,function(index,column){
 			if(column == "trend"){
 				var e1 = document.createElement("div");
-			    e1.style="background-color:"+getColor(i,reportBody.length);
+				if(listid == "list101"){
+					e1.style="background-color:"+getColor(row.indexDelta,row.totalDelta,row.delta);
+				}else if(listid == "list102" || listid == "list103"){
+					e1.style="background-color:"+getColor(i,reportBody.length,1);
+				}
+			    
 			    e1.className="trend";
 			    e1.id = "trend_"+row.idpatient;
 			    e.appendChild(e1);
@@ -806,8 +1062,26 @@ function drawList(listid,listConfig,report){
 			/**/
 		});
 		
+		pTotal++;
+		if(row.sex == "1"){pMale++;}else{pFemale++;}
+		if(row.delta < 0 && row.secondlast_hba1c > 0.07){pImproved++;}
+		if(row.delta > 0 && row.secondlast_hba1c > 0.07){pSetback++;}
+		if(row.last_hba1c < 0.06){pUnder++;}else if(row.last_hba1c >= 0.06 && row.last_hba1c <= 0.07){pBetween++;}else if(row.last_hba1c > 0.07){pOver++;}
+		if(moment(row.last_hba1c_colleteddate).isAfter(moment().subtract(1,'month'))){pLastmonth++;}
+		
 	});
 	console.log("after body "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
+	
+	$("#pImproved").text(pImproved);
+	$("#pTotal").text(pTotal);
+	$("#pSetback").text(pSetback);
+	$("#pMale").text(pMale);
+	$("#pFemale").text(pFemale);
+	$("#pLastmonth").text(pLastmonth);
+	$("#pUnder").text(pUnder);
+	$("#pOver").text(pOver);
+	$("#pBetween").text(pBetween);
+	
 	
 	$(".list-body-container-line").on("click",function(){
 		var lid = $(this).attr("id");
