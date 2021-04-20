@@ -1076,6 +1076,61 @@ public class ActionProcessor {
 		}
 		return "REPORT "+ reportCode+" GENERATED";
 	}
+
+	
+	public String generateDataGraph(Hashtable<String, String[]> args){
+		Gson json = new Gson();
+		CdisDBridge db = new CdisDBridge();
+		String result = "";
+		JsonParser jp = new JsonParser();
+		
+		//System.out.println("METHOD LAUNCH ");
+		/*
+		String idcommunity = ((String[])args.get("idcommunity"))[0];
+		String sex = ((String[])args.get("sex"))[0];
+		String dataperiod = ((String[])args.get("dataperiod"))[0];
+		String dtype = ((String[])args.get("dtype"))[0];
+		String age = ((String[])args.get("age"))[0];
+		String hba1c = ((String[])args.get("hba1c"))[0];
+		
+		*/
+		String dataset = ((String[])args.get("dataset"))[0];
+		InitialContext ic;
+		try {
+			Gson gson = new Gson();
+		    JsonParser parser = new JsonParser();
+		    
+		    if (dataset.equals("trend")){
+		    	//get ticks for trend graph
+		    	//get labels for trend graph
+		    	
+		    	//get series for trend graph
+		    	//should be like 3 series negative = improved , positive trend = setback , constant trend
+		    	
+		    	//variables for the function should be  idcommunity, sex, dateperiod, dype
+		    	// dateperiod = last 3 monts means dates from the last 3 months  means 12 weeks  alltime = 24 months = 96 weeks
+		    	int dateperiod = 96;
+		    	int idc = 0;
+		    	int gen = 0;
+		    	ArrayList<Integer> dtypes = new ArrayList<>();
+		    	dtypes.add(1);
+		    	dtypes.add(2);
+		    	//ArrayList<ArrayList<Integer>> series =   db.getHbA1cTrendSeries(dateperiod,idc,gen,dtypes);
+		    	
+		    }
+		    
+		    
+		    System.out.println("-------------------------------------------------");
+		   
+			
+			System.out.println("-------------------------------------------------");
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return "DATA GRAPH GENERATED";
+	}
+
 	
 
 	public static ArrayList<Object> executeReportFlist(String dataName, JsonArray criterias, JsonArray subcriterias){

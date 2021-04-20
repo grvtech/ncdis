@@ -9117,6 +9117,7 @@
         newContext.textAlign = 'left';
         newContext.textBaseline = 'top';
 
+        
         function getLineheight(el) {
             var lineheight = parseInt($(el).css('line-height'), 10);
 
@@ -9136,51 +9137,55 @@
             var breaks = [];
             var temptop = top;
             var templeft = left;
-
+            
             for (var i=0; i<wl; i++) {
                 w += words[i];
-                if (context.measureText(w).width > tagwidth) {
+                var ww = context.measureText(w).width;
+                if (ww > tagwidth) {
                     breaks.push(i);
-                    w = '';
-                    i--;
-                }   
+                    //w = '';
+                    //i--;
+                } 
             }
-            if (breaks.length === 0) {
-                // center text if necessary
-                if ($(el).css('textAlign') === 'center') {
-                    templeft = left + (canvasWidth - context.measureText(w).width)/2  - transx;
+            
+                if (breaks.length === 0) {
+                    // center text if necessary
+                	if ($(el).css('textAlign') === 'center') {
+                        templeft = left + (canvasWidth - context.measureText(w).width)/2  - transx;
+                    }
+                    context.fillText(text, templeft, top);
                 }
-                context.fillText(text, templeft, top);
-            }
-            else {
-                w = words.slice(0, breaks[0]).join(' ');
-                // center text if necessary
-                if ($(el).css('textAlign') === 'center') {
-                    templeft = left + (canvasWidth - context.measureText(w).width)/2  - transx;
-                }
-                context.fillText(w, templeft, temptop);
-                temptop += lineheight;
-                for (var i=1, l=breaks.length; i<l; i++) {
-                    w = words.slice(breaks[i-1], breaks[i]).join(' ');
+                else {
+                	
+                	
+                    w = words.slice(0, breaks[0]).join(' ');
                     // center text if necessary
                     if ($(el).css('textAlign') === 'center') {
                         templeft = left + (canvasWidth - context.measureText(w).width)/2  - transx;
                     }
                     context.fillText(w, templeft, temptop);
                     temptop += lineheight;
+                    for (var i=1, l=breaks.length; i<l; i++) {
+                        w = words.slice(breaks[i-1], breaks[i]).join(' ');
+                        // center text if necessary
+                        if ($(el).css('textAlign') === 'center') {
+                            templeft = left + (canvasWidth - context.measureText(w).width)/2  - transx;
+                        }
+                        context.fillText(w, templeft, temptop);
+                        temptop += lineheight;
+                    }
+                    w = words.slice(breaks[i-1], words.length).join(' ');
+                    // center text if necessary
+                    if ($(el).css('textAlign') === 'center') {
+                        templeft = left + (canvasWidth - context.measureText(w).width)/2  - transx;
+                    }
+                    context.fillText(w, templeft, temptop);
                 }
-                w = words.slice(breaks[i-1], words.length).join(' ');
-                // center text if necessary
-                if ($(el).css('textAlign') === 'center') {
-                    templeft = left + (canvasWidth - context.measureText(w).width)/2  - transx;
-                }
-                context.fillText(w, templeft, temptop);
-            }
-
         }
 
         function _jqpToImage(el, x_offset, y_offset) {
-            var tagname = el.tagName.toLowerCase();
+            var tagname = $(el).prop("tagName").toLowerCase();
+            
             var p = $(el).position();
             var css = window.getComputedStyle ?  window.getComputedStyle(el, "") : el.currentStyle; // for IE < 9
             var left = x_offset + p.left + parseInt(css.marginLeft, 10) + parseInt(css.borderLeftWidth, 10) + parseInt(css.paddingLeft, 10);
@@ -9190,16 +9195,16 @@
 
             // somehow in here, for divs within divs, the width of the inner div should be used instead of the canvas.
 
-            if ((tagname == 'div' || tagname == 'span') && !$(el).hasClass('jqplot-highlighter-tooltip')) {
+            if ((tagname == 'div' || tagname == 'span') && (!$(el).hasClass('jqplot-highlighter-tooltip') && !$(el).hasClass('jqplot-highlight') )) {
+            	
                 $(el).children().each(function() {
-                    _jqpToImage(this, left, top);
+            		_jqpToImage(this, left, top);
                 });
                 var text = $(el).jqplotChildText();
-
+                
                 if (text) {
                     newContext.font = $(el).jqplotGetComputedFontStyle();
                     newContext.fillStyle = $(el).css('color');
-
                     writeWrappedText(el, newContext, text, left, top, w);
                 }
             }
@@ -9961,16 +9966,16 @@
         },
         
         'fr': {
-            monthNames: ['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'],
-            monthNamesShort: ['Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'],
+            monthNames: ['Janvier','FÃ©vrier','Mars','Avril','Mai','Juin','Juillet','AoÃ»t','Septembre','Octobre','Novembre','DÃ©cembre'],
+            monthNamesShort: ['Jan','FÃ©v','Mar','Avr','Mai','Jun','Jul','AoÃ»','Sep','Oct','Nov','DÃ©c'],
             dayNames: ['Dimanche','Lundi','Mardi','Mercredi','Jeudi','Vendredi','Samedi'],
             dayNamesShort: ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'],
             formatString: '%Y-%m-%d %H:%M:%S'
         },
         
         'de': {
-            monthNames: ['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
-            monthNamesShort: ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
+            monthNames: ['Januar','Februar','MÃ¤rz','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'],
+            monthNamesShort: ['Jan','Feb','MÃ¤r','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'],
             dayNames: ['Sonntag','Montag','Dienstag','Mittwoch','Donnerstag','Freitag','Samstag'],
             dayNamesShort: ['So','Mo','Di','Mi','Do','Fr','Sa'],
             formatString: '%Y-%m-%d %H:%M:%S'
@@ -9985,18 +9990,18 @@
         },
         
         'ru': {
-            monthNames: ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
-            monthNamesShort: ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'],
-            dayNames: ['воскресенье','понедельник','вторник','среда','четверг','пятница','суббота'],
-            dayNamesShort: ['вск','пнд','втр','срд','чтв','птн','сбт'],
+            monthNames: ['Ð¯Ð½Ð²Ð°Ñ€ÑŒ','Ð¤ÐµÐ²Ñ€Ð°Ð»ÑŒ','ÐœÐ°Ñ€Ñ‚','Ð�Ð¿Ñ€ÐµÐ»ÑŒ','ÐœÐ°Ð¹','Ð˜ÑŽÐ½ÑŒ','Ð˜ÑŽÐ»ÑŒ','Ð�Ð²Ð³ÑƒÑ�Ñ‚','Ð¡ÐµÐ½Ñ‚Ñ�Ð±Ñ€ÑŒ','ÐžÐºÑ‚Ñ�Ð±Ñ€ÑŒ','Ð�Ð¾Ñ�Ð±Ñ€ÑŒ','Ð”ÐµÐºÐ°Ð±Ñ€ÑŒ'],
+            monthNamesShort: ['Ð¯Ð½Ð²','Ð¤ÐµÐ²','ÐœÐ°Ñ€','Ð�Ð¿Ñ€','ÐœÐ°Ð¹','Ð˜ÑŽÐ½','Ð˜ÑŽÐ»','Ð�Ð²Ð³','Ð¡ÐµÐ½','ÐžÐºÑ‚','Ð�Ð¾Ñ�','Ð”ÐµÐº'],
+            dayNames: ['Ð²Ð¾Ñ�ÐºÑ€ÐµÑ�ÐµÐ½ÑŒÐµ','Ð¿Ð¾Ð½ÐµÐ´ÐµÐ»ÑŒÐ½Ð¸Ðº','Ð²Ñ‚Ð¾Ñ€Ð½Ð¸Ðº','Ñ�Ñ€ÐµÐ´Ð°','Ñ‡ÐµÑ‚Ð²ÐµÑ€Ð³','Ð¿Ñ�Ñ‚Ð½Ð¸Ñ†Ð°','Ñ�ÑƒÐ±Ð±Ð¾Ñ‚Ð°'],
+            dayNamesShort: ['Ð²Ñ�Ðº','Ð¿Ð½Ð´','Ð²Ñ‚Ñ€','Ñ�Ñ€Ð´','Ñ‡Ñ‚Ð²','Ð¿Ñ‚Ð½','Ñ�Ð±Ñ‚'],
             formatString: '%Y-%m-%d %H:%M:%S'
         },
         
         'ar': {
-            monthNames: ['كانون الثاني', 'شباط', 'آذار', 'نيسان', 'آذار', 'حزيران','تموز', 'آب', 'أيلول',   'تشرين الأول', 'تشرين الثاني', 'كانون الأول'],
+            monthNames: ['ÙƒØ§Ù†ÙˆÙ† Ø§Ù„Ø«Ø§Ù†ÙŠ', 'Ø´Ø¨Ø§Ø·', 'Ø¢Ø°Ø§Ø±', 'Ù†ÙŠØ³Ø§Ù†', 'Ø¢Ø°Ø§Ø±', 'Ø­Ø²ÙŠØ±Ø§Ù†','ØªÙ…ÙˆØ²', 'Ø¢Ø¨', 'Ø£ÙŠÙ„ÙˆÙ„',   'ØªØ´Ø±ÙŠÙ† Ø§Ù„Ø£ÙˆÙ„', 'ØªØ´Ø±ÙŠÙ† Ø§Ù„Ø«Ø§Ù†ÙŠ', 'ÙƒØ§Ù†ÙˆÙ† Ø§Ù„Ø£ÙˆÙ„'],
             monthNamesShort: ['1','2','3','4','5','6','7','8','9','10','11','12'],
-            dayNames: ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'],
-            dayNamesShort: ['سبت', 'أحد', 'اثنين', 'ثلاثاء', 'أربعاء', 'خميس', 'جمعة'],
+            dayNames: ['Ø§Ù„Ø³Ø¨Øª', 'Ø§Ù„Ø£Ø­Ø¯', 'Ø§Ù„Ø§Ø«Ù†ÙŠÙ†', 'Ø§Ù„Ø«Ù„Ø§Ø«Ø§Ø¡', 'Ø§Ù„Ø£Ø±Ø¨Ø¹Ø§Ø¡', 'Ø§Ù„Ø®Ù…ÙŠØ³', 'Ø§Ù„Ø¬Ù…Ø¹Ø©'],
+            dayNamesShort: ['Ø³Ø¨Øª', 'Ø£Ø­Ø¯', 'Ø§Ø«Ù†ÙŠÙ†', 'Ø«Ù„Ø§Ø«Ø§Ø¡', 'Ø£Ø±Ø¨Ø¹Ø§Ø¡', 'Ø®Ù…ÙŠØ³', 'Ø¬Ù…Ø¹Ø©'],
             formatString: '%Y-%m-%d %H:%M:%S'
         },
         
@@ -10017,10 +10022,10 @@
         },
         
         'pl': {
-            monthNames: ['Styczeń','Luty','Marzec','Kwiecień','Maj','Czerwiec','Lipiec','Sierpień','Wrzesień','Październik','Listopad','Grudzień'],
-            monthNamesShort: ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze','Lip', 'Sie', 'Wrz', 'Paź', 'Lis', 'Gru'],
-            dayNames: ['Niedziela', 'Poniedziałek', 'Wtorek', 'Środa', 'Czwartek', 'Piątek', 'Sobota'],
-            dayNamesShort: ['Ni', 'Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb'],
+            monthNames: ['StyczeÅ„','Luty','Marzec','KwiecieÅ„','Maj','Czerwiec','Lipiec','SierpieÅ„','WrzesieÅ„','PaÅºdziernik','Listopad','GrudzieÅ„'],
+            monthNamesShort: ['Sty', 'Lut', 'Mar', 'Kwi', 'Maj', 'Cze','Lip', 'Sie', 'Wrz', 'PaÅº', 'Lis', 'Gru'],
+            dayNames: ['Niedziela', 'PoniedziaÅ‚ek', 'Wtorek', 'Åšroda', 'Czwartek', 'PiÄ…tek', 'Sobota'],
+            dayNamesShort: ['Ni', 'Pn', 'Wt', 'Åšr', 'Cz', 'Pt', 'Sb'],
             formatString: '%Y-%m-%d %H:%M:%S'
         },
 
@@ -10035,8 +10040,8 @@
         'sv': {
             monthNames: ['januari','februari','mars','april','maj','juni','juli','augusti','september','oktober','november','december'],
           monthNamesShort: ['jan','feb','mar','apr','maj','jun','jul','aug','sep','okt','nov','dec'],
-            dayNames: ['söndag','måndag','tisdag','onsdag','torsdag','fredag','lördag'],
-            dayNamesShort: ['sön','mån','tis','ons','tor','fre','lör'],
+            dayNames: ['sÃ¶ndag','mÃ¥ndag','tisdag','onsdag','torsdag','fredag','lÃ¶rdag'],
+            dayNamesShort: ['sÃ¶n','mÃ¥n','tis','ons','tor','fre','lÃ¶r'],
             formatString: '%Y-%m-%d %H:%M:%S'
         }
     

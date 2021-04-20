@@ -111,6 +111,146 @@ where u.active=1
 order by deltavalue desc, deltadate;
 
 
+declare @d1 DATE = '2017-06-01';
+select 
+	@d1 as dateslice
+	,sum(case when a.deltavalue > 0 then 1 else 0 end) as pTotal
+	,sum(case when a.deltavalue < 0 then 1 else 0 end) as nTotal
+	,sum(case when a.deltavalue = 0 then 1 else 0 end) as cTotal
+	,sum(case when a.deltavalue > 0 and a.sex=1 then 1 else 0 end) as pMale
+	,sum(case when a.deltavalue > 0 and a.sex=2 then 1 else 0 end) as pFemale
+	,sum(case when a.deltavalue < 0 and a.sex=1 then 1 else 0 end) as nMale
+	,sum(case when a.deltavalue < 0 and a.sex=2 then 1 else 0 end) as nFemale
+	,sum(case when a.deltavalue = 0 and a.sex=1 then 1 else 0 end) as cMale
+	,sum(case when a.deltavalue = 0 and a.sex=2 then 1 else 0 end) as cFemale
+	,sum(case when a.deltavalue > 0 and (a.dtype=1 or a.dtype=2) then 1 else 0 end) as pType12
+	,sum(case when a.deltavalue > 0 and (a.dtype=3) then 1 else 0 end) as pType3
+	,sum(case when a.deltavalue > 0 and (a.dtype=4) then 1 else 0 end) as pType4
+	,sum(case when a.deltavalue < 0 and (a.dtype=1 or a.dtype=2) then 1 else 0 end) as nType12
+	,sum(case when a.deltavalue < 0 and (a.dtype=3) then 1 else 0 end) as nType3
+	,sum(case when a.deltavalue < 0 and (a.dtype=4) then 1 else 0 end) as nType4
+	,sum(case when a.deltavalue = 0 and (a.dtype=1 or a.dtype=2) then 1 else 0 end) as cType12
+	,sum(case when a.deltavalue = 0 and (a.dtype=3) then 1 else 0 end) as cType3
+	,sum(case when a.deltavalue = 0 and (a.dtype=4) then 1 else 0 end) as cType4
+	,sum(case when a.deltavalue = 0 and (a.idcommunity=1) then 1 else 0 end) as cC1
+	,sum(case when a.deltavalue = 0 and (a.idcommunity=2) then 1 else 0 end) as cC2
+	,sum(case when a.deltavalue = 0 and (a.idcommunity=3) then 1 else 0 end) as cC3
+	,sum(case when a.deltavalue = 0 and (a.idcommunity=4) then 1 else 0 end) as cC4
+	,sum(case when a.deltavalue = 0 and (a.idcommunity=5) then 1 else 0 end) as cC5
+	,sum(case when a.deltavalue = 0 and (a.idcommunity=6) then 1 else 0 end) as cC6
+	,sum(case when a.deltavalue = 0 and (a.idcommunity=7) then 1 else 0 end) as cC7
+	,sum(case when a.deltavalue = 0 and (a.idcommunity=8) then 1 else 0 end) as cC8
+	,sum(case when a.deltavalue = 0 and (a.idcommunity=9) then 1 else 0 end) as cC9
+	,sum(case when a.deltavalue = 0 and (a.idcommunity=10) then 1 else 0 end) as cC10
+	,sum(case when a.deltavalue > 0 and (a.idcommunity=1) then 1 else 0 end) as pC1
+	,sum(case when a.deltavalue > 0 and (a.idcommunity=2) then 1 else 0 end) as pC2
+	,sum(case when a.deltavalue > 0 and (a.idcommunity=3) then 1 else 0 end) as pC3
+	,sum(case when a.deltavalue > 0 and (a.idcommunity=4) then 1 else 0 end) as pC4
+	,sum(case when a.deltavalue > 0 and (a.idcommunity=5) then 1 else 0 end) as pC5
+	,sum(case when a.deltavalue > 0 and (a.idcommunity=6) then 1 else 0 end) as pC6
+	,sum(case when a.deltavalue > 0 and (a.idcommunity=7) then 1 else 0 end) as pC7
+	,sum(case when a.deltavalue > 0 and (a.idcommunity=8) then 1 else 0 end) as pC8
+	,sum(case when a.deltavalue > 0 and (a.idcommunity=9) then 1 else 0 end) as pC9
+	,sum(case when a.deltavalue > 0 and (a.idcommunity=10) then 1 else 0 end) as pC10
+
+from
+	
+
+	(select tt1.idpatient, tt1.value as value1, tt2.value as value2 , tt1.datevalue as date1, tt2.datevalue as date2
+		, datepart(week, tt1.datevalue) as weekOfYear, datepart(year, @d1) as yearOfYear
+		, round(try_convert(float, tt1.value) - try_convert(float, tt2.value), 3) as deltavalue 
+		, p.idcommunity
+		,p.sex
+		,tt3.value as dtype
+		,tt3.datevalue as ddate
+
+		from 
+	
+				(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum 
+					from 
+						(select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue <= @d1) aa
+					where
+						aa.seqnum = 1
+				) as tt1
+
+			left join
+		
+				(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum 
+					from 
+						(select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue <= @d1) aa
+					where
+						aa.seqnum = 2
+				) as tt2
+		
+				on tt1.idpatient = tt2.idpatient
+
+			left join
+				ncdis.ncdis.patient p
+				on  tt1.idpatient = p.idpatient
+			left join 
+				(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum 
+					from 
+						(select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=1 and cd.datevalue <= @d1) aa
+					where
+						aa.seqnum = 1
+				) as tt3
+				on tt1.idpatient = tt3.idpatient
+
+		where 
+			tt2.value is not null
+			and try_convert(float, tt2.value) > 0.07
+	) as a
+
+;
+
+declare @d1 DATE = '2016-01-01';
+
+select count(ss.idpatient) from 
+(
+select tt1.idpatient, tt1.value as value1, tt2.value as value2 , tt1.datevalue as date1, tt2.datevalue as date2
+		, datepart(week, tt1.datevalue) as weekOfYear, datepart(year, @d1) as yearOfYear
+		, round(try_convert(float, tt1.value) - try_convert(float, tt2.value), 3) as deltavalue 
+		, p.idcommunity
+		,p.sex
+		,tt3.value as dtype
+		,tt3.datevalue as ddate
+
+		from 
+	
+				(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum 
+					from 
+						(select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue <= @d1) aa
+					where
+						aa.seqnum = 1
+				) as tt1
+
+			left join
+		
+				(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum 
+					from 
+						(select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue <= @d1) aa
+					where
+						aa.seqnum = 2
+				) as tt2
+		
+				on tt1.idpatient = tt2.idpatient
+
+			left join
+				ncdis.ncdis.patient p
+				on  tt1.idpatient = p.idpatient and p.active=1 and (p.dod is null or p.dod='1900-01-01')
+			left join 
+				(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum 
+					from 
+						(select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=1 and cd.datevalue <= @d1) aa
+					where
+						aa.seqnum = 1
+				) as tt3
+				on tt1.idpatient = tt3.idpatient
+
+		where 
+			tt2.value is not null
+			
+) as ss;	
 
 
 

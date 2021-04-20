@@ -1,6 +1,8 @@
 package com.grv.cdis.services;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 
@@ -817,5 +819,44 @@ public class DataProcessor {
 		result = json.toJson(new MessageResponse(true,language,obs));
 		return result;
 	}
+	
+	
+	/*
+	 *  /ncdis/service/data/getStatsData
+	 * */
+	public String getStatsData(Hashtable<String, String[]> args){
+		Gson json = new Gson();
+		String result = "";
+		CdisDBridge db = new CdisDBridge();
+		
+		String idcommunity = ((String[])args.get("idcommunity"))[0];
+		String sex = ((String[])args.get("sex"))[0];
+		String dtype = ((String[])args.get("dtype"))[0];
+		String age = ((String[])args.get("age"))[0];
+		String hba1c = ((String[])args.get("hba1c"))[0];
+		
+		String stats = ((String[])args.get("stats"))[0];
+		String period = ((String[])args.get("period"))[0];
+
+		int periodNumber = Integer.parseInt(period);
+		
+		ArrayList<Object> obs = new ArrayList<>();
+		if(stats.equals("trend")){
+			Hashtable<String, ArrayList<Object>> serie = db.getHbA1cTrendItem(periodNumber,idcommunity,sex,dtype, age, hba1c);
+			obs.add(serie);
+		}else if(stats.equals("period")){
+			Hashtable<String, ArrayList<Object>> serie = db.getHbA1cPeriodItem(periodNumber,idcommunity,sex,dtype,age, hba1c);
+			obs.add(serie);
+		}else if(stats.equals("value")){
+			Hashtable<String, ArrayList<Object>> serie = db.getHbA1cValueItem(periodNumber,idcommunity,sex,dtype,age, hba1c);
+			obs.add(serie);
+		}
+		
+		
+		result = json.toJson(new MessageResponse(true,"en",obs));
+		
+		return result;
+	}
+	
 	
 }

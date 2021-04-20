@@ -14,6 +14,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ import com.grv.cdis.model.Value;
 import com.grv.cdis.model.ValueLimit;
 import com.grv.cdis.model.Values;
 import com.grv.cdis.util.FileTool;
+
 
 
 public class CdisDBridge {
@@ -1792,7 +1794,7 @@ public class CdisDBridge {
 		Connection conn = null;
 		
 		
-		
+		/*
 		String sql = "select ISNULL(u.fname,'')+' '+ ISNULL(u.lname,'') as fullname, "
 				+ "u.ramq as ramq, "
 				+ "u.sex as sex, "
@@ -1808,7 +1810,8 @@ public class CdisDBridge {
 				+ "dd.deltavalue as delta "
 				+ " from "
 					+ "("
-						+ "select aa.idpatient, aa.datevalue as date1, aa.value as value1, bb.datevalue as date2, bb.value as value2,round(try_convert(float, aa.value)- try_convert(float, bb.value), 3) as deltavalue, datediff(day , bb.datevalue , aa.datevalue) as deltadate  from (select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from ( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 ) cc  where cc.seqnum =1) aa "
+						+ "select aa.idpatient, aa.datevalue as date1, aa.value as value1, bb.datevalue as date2, bb.value as value2,round(try_convert(float, aa.value)- try_convert(float, bb.value), 3) as deltavalue, datediff(day , bb.datevalue , aa.datevalue) as deltadate  "
+						+ " from (select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from ( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 ) cc  where cc.seqnum =1) aa "
 							+ "left join "
 							+ "(select cc.idpatient, cc.datevalue, cc.value, cc.seqnum from ( select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 ) cc where cc.seqnum =2) bb "
 							+ "on aa.idpatient = bb.idpatient"
@@ -1821,6 +1824,44 @@ public class CdisDBridge {
 					+ "on dd.idpatient = tt.idpatient "
 				+ "where u.active=1 and (u.dod is null or u.dod='1900-01-01') order by delta desc";
 
+		*/
+		
+		String sql = "select tt1.idpatient"
+				+ ",ISNULL(p.fname,'')+' '+ ISNULL(p.lname,'') as fullname "
+				+ ",p.ramq as ramq "
+				+ ",p.sex as sex "
+				+ ",p.chart as chart"
+				+ ",p.idcommunity "
+				+ ",datediff(year, p.dob, getdate()) as age "
+				+ ",tt3.value as dtype "
+				+ ",tt3.datevalue as ddate "
+				+ ",tt4.users as users "
+				+ ",datediff(day, tt1.datevalue, getdate()) as dayslastlab"
+				+ ",tt1.datevalue as last_hba1c_collecteddate "
+				+ ",round(tt1.value,3) as last_hba1c "
+				+ ",tt2.datevalue as secondlast_hba1c_collecteddate "
+				+ ",round(tt2.value,3) as secondlast_hba1c "
+				+ ",round(try_convert(float, tt1.value) - try_convert(float, tt2.value), 3) as delta"
+					+ " from "  
+					+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue <= getdate()) aa where aa.seqnum = 1) as tt1 "
+					+ "left join "
+						+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue <= getdate()) aa where aa.seqnum = 2) as tt2 "
+							+ "on tt1.idpatient = tt2.idpatient "
+						+ "left join "
+						+ "ncdis.ncdis.patient p "
+							+ "on  tt1.idpatient = p.idpatient "
+						+ "left join "
+						+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=1 and cd.datevalue <= getdate()) aa where aa.seqnum = 1) as tt3 "
+							+ "on tt1.idpatient = tt3.idpatient "
+						+ "left join "
+						+ "(SELECT idpatient, case when isnumeric(chr) =1  or isnumeric(nut)=1 or isnumeric(nur)=1 or isnumeric(md)=1 then concat(chr,';',nur,';',nut,';',md) else '0' end as users FROM [ncdis].[ncdis].[patient_hcp] where isnumeric(chr) =1  or isnumeric(nut)=1 or isnumeric(nur)=1 or isnumeric(md)=1) as tt4 "
+							+ "on tt1.idpatient = tt4.idpatient "
+					+ " where "
+						+ " tt2.value is not null "
+						+ " and p.active=1 and (p.dod is null or p.dod='1900-01-01') "
+						+ " and p.idcommunity != 10 "
+				+ " order by delta desc ";
+		
 		
 		try {
 			initContext = new InitialContext();
@@ -1858,6 +1899,9 @@ public class CdisDBridge {
 			    		row.put("indexDelta",Integer.toString(deltaNTotal));
 			    	}
 		    	}
+		    	if(row.get("dtype").equals("10")){row.put("dtype", "3");}
+		    	if(row.get("dtype").equals("11")){row.put("dtype", "4");}
+		    	
 		    	resultBuffer.add(row);
 		    }
 		    for(int i=0;i<resultBuffer.size();i++){
@@ -2146,9 +2190,499 @@ public class CdisDBridge {
 	   }
 		return result;
 	}
+
+	public  Hashtable<String, ArrayList<Object>> getHbA1cTrendItem(int period, String idcommunity, String sex, String dtype, String age, String hba1c) {
+
+		Hashtable<String, ArrayList<Object>> result = new Hashtable();
+		Context initContext;
+		DataSource ds;
+		ResultSet rs = null;
+		Statement cs=null;
+		Connection conn = null;
+		
+		String cStr = " and a.idcommunity > 0 ";
+		if(!idcommunity.equals("0"))cStr = " and a.idcommunity="+idcommunity+" "; 
+		String gStr = " and a.sex > 0 ";
+		if(!sex.equals("0"))gStr = " and a.sex="+sex+" ";
+		String dtStr =" and (a.dtype=1 or a.dtype=2) ";
+		if(!dtype.equals("1_2")){
+			dtype = dtype.replaceAll("_", "");
+			String[] parts = dtype.split("(?!^)");
+			dtStr = " and (";
+			for(int x=0;x<parts.length;x++){
+				String s = " a.dtype="+parts[x];
+				if(parts[x].equals("3")){s = " a.dtype=3 or a.dtype=10 ";}
+				if(parts[x].equals("4")){s = " a.dtype=4 or a.dtype=11 ";}
+				
+				if(x == 0){
+					dtStr +=  s;
+				}else{
+					dtStr +=  " or "+s;
+				}
+			}
+			dtStr += " ) ";
+		}
+		String aStr = " and a.age > 0 ";
+		if(!age.equals("0")){
+			String[] parts = age.split("_");
+			aStr = " and a.age >="+parts[0]+" and a.age <="+parts[1]+" ";
+		}
+		
+		String vStr = " and try_convert(float,a.value1) > 0.0 ";
+		if(hba1c.equals("0")){
+			vStr = vStr;
+		}else  if(hba1c.equals("1")){
+			vStr = " and try_convert(float,a.value1) >= 0.075 ";
+		}else{
+			String[] parts = hba1c.split("_");
+			vStr = " and try_convert(float,a.value1) >="+parts[0]+" and try_convert(float,a.value1) <="+parts[1]+" ";
+		}
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		
+		Date now = new Date();
+		
+		//we have to shift 3 years back because of data
+		
+		Calendar calStart = Calendar.getInstance();
+		Calendar calEnd = Calendar.getInstance();
+		calStart.setTime(now);
+		//calStart.add(Calendar.YEAR, -3);
+		calEnd.setTime(now);
+		//calEnd.add(Calendar.YEAR, -3);
+		
+		calStart.add(Calendar.MONTH, (period)*-1 ); // we go back period number and 1 month more because we exclude current month
+		calStart.set(Calendar.DAY_OF_MONTH, 1);
+		calEnd.add(Calendar.MONTH, -1);
+		calEnd.set(Calendar.DAY_OF_MONTH, calEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+				try {
+					initContext = new InitialContext();
+					ds = (DataSource)initContext.lookup("jdbc/ncdis");
+					conn = ds.getConnection();
+				    cs=conn.createStatement();		    
+				    cs.setEscapeProcessing(true);
+				    
+				    ArrayList<Integer> improved = new ArrayList<>();
+					ArrayList<Integer> setback = new ArrayList<>();
+					ArrayList<Integer> constant = new ArrayList<>();
+					ArrayList<Object> series = new ArrayList<>();
+					ArrayList<Object> ticks = new ArrayList<>();
+					
+					ArrayList<Object> labels = new ArrayList<>();
+					Hashtable<String, String> label1 = new Hashtable<>();
+					label1.put("label", "Increased");
+					labels.add(label1);
+					Hashtable<String, String> label2 = new Hashtable<>();
+					label2.put("label", "No Change");
+					labels.add(label2);
+					Hashtable<String, String> label3 = new Hashtable<>();
+					label3.put("label", "Improved");
+					labels.add(label3);
+					result.put("labels", labels);
+					
+					for(int i=0;i<period;i++){
+						Calendar c = Calendar.getInstance();
+						c.set(Calendar.YEAR, calStart.get(Calendar.YEAR));
+						c.set(Calendar.MONTH, calStart.get(Calendar.MONTH));
+						c.set(Calendar.DAY_OF_MONTH, calStart.get(Calendar.DAY_OF_MONTH));
+						c.add(Calendar.MONTH, i);
+						String d1 = sdf.format(c.getTime());
+						c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+						String d2 = sdf.format(c.getTime());
+						
+						String sql = "SELECT "
+								+ " sum(case when a.deltavalue > 0 "+cStr+" "+dtStr+" "+gStr+" "+aStr+" "+vStr+" then 1 else 0 end) as pTotal "
+								+ ",sum(case when a.deltavalue < 0 "+cStr+" "+dtStr+" "+gStr+" "+aStr+" "+vStr+" then 1 else 0 end) as nTotal "
+								+ ",sum(case when a.deltavalue = 0 "+cStr+" "+dtStr+" "+gStr+" "+aStr+" "+vStr+" then 1 else 0 end) as cTotal "
+								+ " from "
+									+ "(select tt1.idpatient, tt1.value as value1, tt2.value as value2 , tt1.datevalue as date1, tt2.datevalue as date2 "
+									+ " ,datediff(year, p.dob, getdate()) as age  "
+									+ " ,round(try_convert(float, tt1.value) - try_convert(float, tt2.value), 3) as deltavalue , p.idcommunity ,p.sex,tt3.value as dtype ,tt3.datevalue as ddate "
+										+ " from "  
+										+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue between '"+d1+"' and '"+d2+"') aa where aa.seqnum = 1) as tt1 "
+//										+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue between '"+d1+"' and '"+d2+"') aa where aa.seqnum = 1) as tt1 "
+										+ "left join "
+											+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue <= '"+d2+"' ) aa where aa.seqnum = 2) as tt2 "
+												+ "on tt1.idpatient = tt2.idpatient "
+											+ "left join "
+											+ "ncdis.ncdis.patient p "
+												+ "on  tt1.idpatient = p.idpatient and p.active=1 and (p.dod is null or p.dod='1900-01-01') "
+											+ "left join "
+											+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=1 and cd.datevalue <= '"+d2+"') aa where aa.seqnum = 1) as tt3 "
+												+ "on tt1.idpatient = tt3.idpatient "
+										+ " where "
+											+ " tt2.value is not null "
+											+ " and p.idcommunity != 10 "
+									+ " ) as a ";
+
+									
+							//System.out.println(sql);
+							rs = cs.executeQuery(sql);
+						    while (rs.next()) {
+						    	
+						    	improved.add(rs.getInt("nTotal"));
+						    	setback.add(rs.getInt("pTotal"));
+						    	constant.add(rs.getInt("cTotal"));
+						    	
+						    	ArrayList<Object> tick = new ArrayList<Object>();
+						    	tick.add(i+1);
+						    	tick.add(sdf.format(c.getTime()));
+						    	ticks.add(tick);
+						    }
+						    
+						    rs.clearWarnings();
+						    cs.clearBatch();
+						    
+						    
+					}
+					
+					
+				    series.add(setback);
+				    series.add(constant);
+				    series.add(improved);
+				    
+					result.put("series", series);
+					result.put("ticks", ticks);
+					
+				}catch (SQLException se) {
+			        se.printStackTrace();
+			    } catch (NamingException e) {
+					e.printStackTrace();
+				} finally {
+			        try {
+			            rs.close();
+			            cs.close();
+			            conn.close();
+			        } catch (SQLException ex) {
+			            ex.printStackTrace();
+			        }
+			   } 
+		
+		return result;
+	}
+	
 	
 	
 
+	public  Hashtable<String, ArrayList<Object>> getHbA1cPeriodItem(int period, String idcommunity, String sex, String dtype, String age, String hba1c) {
+
+		Hashtable<String, ArrayList<Object>> result = new Hashtable();
+		Context initContext;
+		DataSource ds;
+		ResultSet rs = null;
+		Statement cs=null;
+		Connection conn = null;
+		
+		String cStr = " a.idcommunity > 0 ";
+		if(!idcommunity.equals("0"))cStr = " a.idcommunity="+idcommunity+" "; 
+		String gStr = " and a.sex > 0 ";
+		if(!sex.equals("0"))gStr = " and a.sex="+sex+" ";
+		String dtStr =" and (a.dtype=1 or a.dtype=2) ";
+		if(!dtype.equals("1_2")){
+			dtype = dtype.replaceAll("_", "");
+			String[] parts = dtype.split("(?!^)");
+			dtStr = " and (";
+			for(int x=0;x<parts.length;x++){
+				String s = " a.dtype="+parts[x];
+				if(parts[x].equals("3")){s = " a.dtype=3 or a.dtype=10 ";}
+				if(parts[x].equals("4")){s = " a.dtype=4 or a.dtype=11 ";}
+				
+				if(x == 0){
+					dtStr +=  s;
+				}else{
+					dtStr +=  " or "+s;
+				}
+			}
+			dtStr += " ) ";
+		}
+		String aStr = " and a.age > 0 ";
+		if(!age.equals("0")){
+			String[] parts = age.split("_");
+			aStr = " and a.age >="+parts[0]+" and a.age <="+parts[1]+" ";
+		}
+		
+		String vStr = " and try_convert(float,a.value1) > 0.0 ";
+		if(hba1c.equals("0")){
+			vStr = vStr;
+		}else  if(hba1c.equals("1")){
+			vStr = " and try_convert(float,a.value1) >= 0.075 ";
+		}else{
+			String[] parts = hba1c.split("_");
+			vStr = " and try_convert(float,a.value1) >="+parts[0]+" and try_convert(float,a.value1) <="+parts[1]+" ";
+		}
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		
+		Date now = new Date();
+		
+		//we have to shift 3 years back because of data
+		
+		Calendar calStart = Calendar.getInstance();
+		Calendar calEnd = Calendar.getInstance();
+		calStart.setTime(now);
+		//calStart.add(Calendar.YEAR, -3);
+		calEnd.setTime(now);
+		//calEnd.add(Calendar.YEAR, -3);
+		
+		calStart.add(Calendar.MONTH, (period)*-1 ); // we go back period number and 1 month more because we exclude current month
+		calStart.set(Calendar.DAY_OF_MONTH, 1);
+		calEnd.add(Calendar.MONTH, -1);
+		calEnd.set(Calendar.DAY_OF_MONTH, calEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+		
+				try {
+					initContext = new InitialContext();
+					ds = (DataSource)initContext.lookup("jdbc/ncdis");
+					conn = ds.getConnection();
+				    cs=conn.createStatement();		    
+				    cs.setEscapeProcessing(true);
+				    
+				    ArrayList<Integer> number = new ArrayList<>();
+					ArrayList<Integer> total = new ArrayList<>();
+
+					ArrayList<Object> series = new ArrayList<>();
+					ArrayList<Object> ticks = new ArrayList<>();
+					
+					ArrayList<Object> labels = new ArrayList<>();
+					Hashtable<String, String> label1 = new Hashtable<>();
+					label1.put("label", "Number");
+					labels.add(label1);
+					Hashtable<String, String> label2 = new Hashtable<>();
+					label2.put("label", "Percentage");
+					labels.add(label2);
+					result.put("labels", labels);
+					
+					for(int i=0;i<period;i++){
+						Calendar c = Calendar.getInstance();
+						c.set(Calendar.YEAR, calStart.get(Calendar.YEAR));
+						c.set(Calendar.MONTH, calStart.get(Calendar.MONTH));
+						c.set(Calendar.DAY_OF_MONTH, calStart.get(Calendar.DAY_OF_MONTH));
+						c.add(Calendar.MONTH, i);
+						c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+						String d1 = sdf.format(c.getTime());
+						//last 12 month
+						String dtick = sdf.format(c.getTime());
+						c.add(Calendar.MONTH, -12);
+						String d2 = sdf.format(c.getTime());
+						String dateStr = "and a.date1 >= '"+d2+"'"; 
+						String sql = "SELECT "
+								+ " sum(case when "+cStr+" "+dtStr+" "+gStr+" "+aStr+" "+vStr+" "+dateStr+" then 1 else 0 end) as pNumber "
+								+ ",sum(case when "+cStr+" then 1 else 0 end) as pTotal "
+								+ " from "
+									+ "(select tt1.idpatient, tt1.value as value1, tt1.datevalue as date1 "
+									+ " ,datediff(year, p.dob, getdate()) as age  "
+									+ " ,p.idcommunity ,p.sex,tt3.value as dtype ,tt3.datevalue as ddate "
+										+ " from "  
+										+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue <= '"+d1+"') aa where aa.seqnum = 1) as tt1 "
+										+ "left join "
+											+ "ncdis.ncdis.patient p "
+										+ "on  tt1.idpatient = p.idpatient and p.active=1 and (p.dod is null or p.dod='1900-01-01') "
+										+ "left join "
+											+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=1 and cd.datevalue <= '"+d1+"') aa where aa.seqnum = 1) as tt3 "
+												+ "on tt1.idpatient = tt3.idpatient "
+										+ " where "
+											+ " tt1.value is not null "
+											+ " and p.idcommunity != 10 "
+									+ " ) as a ";
+
+							//System.out.println(sql);
+							rs = cs.executeQuery(sql);
+						    while (rs.next()) {
+						    	
+						    	number.add(rs.getInt("pNumber"));
+						    	total.add(rs.getInt("pTotal"));
+						    	
+						    	ArrayList<Object> tick = new ArrayList<Object>();
+						    	tick.add(i+1);
+						    	tick.add(dtick);
+						    	ticks.add(tick);
+						    }
+						    
+						    rs.clearWarnings();
+						    cs.clearBatch();
+						    
+					}
+					series.add(number);
+				    series.add(total);
+					result.put("series", series);
+					result.put("ticks", ticks);
+					
+				}catch (SQLException se) {
+			        se.printStackTrace();
+			    } catch (NamingException e) {
+					e.printStackTrace();
+				} finally {
+			        try {
+			            rs.close();
+			            cs.close();
+			            conn.close();
+			        } catch (SQLException ex) {
+			            ex.printStackTrace();
+			        }
+			   } 
+		
+		return result;
+	}
 	
+	
+
+
+	public  Hashtable<String, ArrayList<Object>> getHbA1cValueItem(int period, String idcommunity, String sex, String dtype, String age, String hba1c) {
+
+		Hashtable<String, ArrayList<Object>> result = new Hashtable();
+		Context initContext;
+		DataSource ds;
+		ResultSet rs = null;
+		Statement cs=null;
+		Connection conn = null;
+		
+		String cStr = " a.idcommunity > 0 ";
+		if(!idcommunity.equals("0"))cStr = " a.idcommunity="+idcommunity+" "; 
+		String gStr = " and a.sex > 0 ";
+		if(!sex.equals("0"))gStr = " and a.sex="+sex+" ";
+		String dtStr =" and (a.dtype=1 or a.dtype=2) ";
+		if(!dtype.equals("1_2")){
+			dtype = dtype.replaceAll("_", "");
+			String[] parts = dtype.split("(?!^)");
+			dtStr = " and (";
+			for(int x=0;x<parts.length;x++){
+				String s = " a.dtype="+parts[x];
+				if(parts[x].equals("3")){s = " a.dtype=3 or a.dtype=10 ";}
+				if(parts[x].equals("4")){s = " a.dtype=4 or a.dtype=11 ";}
+				
+				if(x == 0){
+					dtStr +=  s;
+				}else{
+					dtStr +=  " or "+s;
+				}
+			}
+			dtStr += " ) ";
+		}
+		String aStr = " and a.age > 0 ";
+		if(!age.equals("0")){
+			String[] parts = age.split("_");
+			aStr = " and a.age >="+parts[0]+" and a.age <="+parts[1]+" ";
+		}
+		
+		String vStr = " and try_convert(float,a.value1) > 0.0 ";
+		if(hba1c.equals("0")){
+			vStr = vStr;
+		}else  if(hba1c.equals("1")){
+			vStr = " and try_convert(float,a.value1) >= 0.075 ";
+		}else{
+			String[] parts = hba1c.split("_");
+			vStr = " and try_convert(float,a.value1) >="+parts[0]+" and try_convert(float,a.value1) <="+parts[1]+" ";
+		}
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		
+		Date now = new Date();
+		
+		//we have to shift 3 years back because of data
+		
+		Calendar calStart = Calendar.getInstance();
+		Calendar calEnd = Calendar.getInstance();
+		calStart.setTime(now);
+		//calStart.add(Calendar.YEAR, -3);
+		calEnd.setTime(now);
+		//calEnd.add(Calendar.YEAR, -3);
+		
+		calStart.add(Calendar.MONTH, (period)*-1 ); // we go back period number and 1 month more because we exclude current month
+		calStart.set(Calendar.DAY_OF_MONTH, 1);
+		calEnd.add(Calendar.MONTH, -1);
+		calEnd.set(Calendar.DAY_OF_MONTH, calEnd.getActualMaximum(Calendar.DAY_OF_MONTH));
+				try {
+					initContext = new InitialContext();
+					ds = (DataSource)initContext.lookup("jdbc/ncdis");
+					conn = ds.getConnection();
+				    cs=conn.createStatement();		    
+				    cs.setEscapeProcessing(true);
+				    
+				    ArrayList<Integer> number = new ArrayList<>();
+					ArrayList<Integer> total = new ArrayList<>();
+
+					ArrayList<Object> series = new ArrayList<>();
+					ArrayList<Object> ticks = new ArrayList<>();
+					
+					ArrayList<Object> labels = new ArrayList<>();
+					Hashtable<String, String> label1 = new Hashtable<>();
+					label1.put("label", "Number");
+					labels.add(label1);
+					Hashtable<String, String> label2 = new Hashtable<>();
+					label2.put("label", "Percentage");
+					labels.add(label2);
+					result.put("labels", labels);
+					
+					for(int i=0;i<period;i++){
+						Calendar c = Calendar.getInstance();
+						c.set(Calendar.YEAR, calStart.get(Calendar.YEAR));
+						c.set(Calendar.MONTH, calStart.get(Calendar.MONTH));
+						c.set(Calendar.DAY_OF_MONTH, calStart.get(Calendar.DAY_OF_MONTH));
+						c.add(Calendar.MONTH, i);
+						c.set(Calendar.DAY_OF_MONTH, c.getActualMaximum(Calendar.DAY_OF_MONTH));
+						String d1 = sdf.format(c.getTime());
+						//last 12 month
+						
+						
+						 
+						String sql = "SELECT "
+								+ " sum(case when "+cStr+" "+dtStr+" "+gStr+" "+aStr+" "+vStr+" then 1 else 0 end) as pNumber "
+								+ ",sum(case when "+cStr+" then 1 else 0 end) as pTotal "
+								+ " from "
+									+ "(select tt1.idpatient, tt1.value as value1, tt1.datevalue as date1 "
+									+ " ,datediff(year, p.dob, getdate()) as age  "
+									+ " ,p.idcommunity ,p.sex,tt3.value as dtype ,tt3.datevalue as ddate "
+										+ " from "  
+										+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=27 and cd.datevalue <= '"+d1+"') aa where aa.seqnum = 1) as tt1 "
+										+ "left join "
+											+ "ncdis.ncdis.patient p "
+										+ "on  tt1.idpatient = p.idpatient and p.active=1 and (p.dod is null or p.dod='1900-01-01') "
+										+ "left join "
+											+ "(select aa.datevalue, aa.value, aa.idpatient, aa.seqnum from (select cd.* , row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum from ncdis.ncdis.cdis_value cd where cd.iddata=1 and cd.datevalue <= '"+d1+"') aa where aa.seqnum = 1) as tt3 "
+												+ "on tt1.idpatient = tt3.idpatient "
+										+ " where "
+											+ " tt1.value is not null "
+											+ " and p.idcommunity != 10 "
+									+ " ) as a ";
+
+									
+							//System.out.println(sql);
+							rs = cs.executeQuery(sql);
+						    while (rs.next()) {
+						    	
+						    	number.add(rs.getInt("pNumber"));
+						    	total.add(rs.getInt("pTotal"));
+						    	
+						    	ArrayList<Object> tick = new ArrayList<Object>();
+						    	tick.add(i+1);
+						    	tick.add(sdf.format(c.getTime()));
+						    	ticks.add(tick);
+						    }
+						    
+						    rs.clearWarnings();
+						    cs.clearBatch();
+						    
+					}
+					series.add(number);
+				    series.add(total);
+					result.put("series", series);
+					result.put("ticks", ticks);
+					
+				}catch (SQLException se) {
+			        se.printStackTrace();
+			    } catch (NamingException e) {
+					e.printStackTrace();
+				} finally {
+			        try {
+			            rs.close();
+			            cs.close();
+			            conn.close();
+			        } catch (SQLException ex) {
+			            ex.printStackTrace();
+			        }
+			   } 
+		
+		return result;
+	}
+
 	
 }

@@ -7,7 +7,6 @@ import com.grv.cdis.db.CdisDBridge;
 import com.grv.cdis.model.Report;
 
 public class Reports {
-	
 	/*
 	 * Reports 
 	 * predefined reports

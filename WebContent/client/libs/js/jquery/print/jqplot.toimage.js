@@ -122,6 +122,9 @@
 
         var temptop, templeft, tempbottom, tempright;
 
+        
+        
+        
         for (var i = 0; i < clses.length; i++) {
             $(this).find('.'+clses[i]).each(function() {
                 temptop = $(this).offset().top - plottop;
@@ -237,11 +240,16 @@
             	if($(el).hasClass('jqplot-data-label') || $(el).hasClass('jqplot-xaxis-tick') ||  $(el).hasClass('jqplot-point-label')){
             		left = left - 400;
             	} 
+            	
+            	console.log($(el).children());
+            	
             	$(el).children().each(function() {
-                    _jqpToImage(this, left, top);
+                    //_jqpToImage(this, left, top);
                 });
                 var text = $(el).jqplotChildText();
-
+                
+                
+                                
                 if (text) {
                     newContext.font = $(el).jqplotGetComputedFontStyle();
                     newContext.fillStyle = $(el).css('color');
@@ -295,14 +303,17 @@
                 var elem = null;
             }
 
+            
+
             else if (tagname == 'canvas') {
                 newContext.drawImage(el, left, top);
             }
         }
+        
         $(this).children().each(function() {
             _jqpToImage(this, x_offset, y_offset);
         });
-        return newCanvas;
+        
     };
 
     // return the raw image data string.

@@ -241,3 +241,284 @@ jQuery.fn.printCDISSection = function(){
 		(60 * 1000)
 		);
 }
+
+
+jQuery.fn.printCDISLocalList = function(){
+	if (this.size() > 1){
+		this.eq( 0 ).print();
+		return;
+	} else if (!this.size()){
+		return;
+	}
+	
+	//onli the list should be printed
+    var printHeaderDivs = $(this).find('.list-header-container .head');
+    var printBodyRowsDivs = $(this).find('.list-body-container .list-body-container-line');
+    
+    var strFrameName = ("CDIS Local List Printer-" + (new Date()).getTime());
+    
+    setTimeout(function() {
+    	
+    	var jFrame = $( "<iframe name='" + strFrameName + "'>" );
+    	jFrame
+    		.css( "width", "1px" )
+    		.css( "height", "1px" )
+    		.css( "position", "absolute" )
+    		.css( "left", "-9999px" )
+    		.appendTo( $( "body:first" ) )
+    	;
+    	var objFrame = window.frames[ strFrameName ];
+    	var objDoc = objFrame.document;
+    	//var jStyleDiv = $( "<div>" ).append($("<style>" ).clone());
+     
+    	objDoc.open();
+    	objDoc.write( "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" );
+    	objDoc.write( "<html>" );
+    	objDoc.write( "<head>" );
+    	objDoc.write( "<title>" );
+    	objDoc.write( document.title );
+    	objDoc.write( "</title>" );
+    	//objDoc.write( jStyleDiv.html() );
+    	
+    	
+    	if ($("link[media=print]").length > 0){
+             $("link[media=print]").each( function() {
+            	 objDoc.write("<link type='text/css' rel='stylesheet' href='"  + $(this).attr("href") + "' media='print' />");
+             });
+        }
+    	
+    	objDoc.write( "</head>" );
+    	objDoc.write( "<body style='background-color:#ffffff;'>" );
+    	//objDoc.write( '<div class="locallist-print-container">');
+    		//page-header
+    		objDoc.write( '<div class="locallist-print-container-header">');
+    			objDoc.write('<table border="0" width="100%" height="100%">');
+    			objDoc.write( '<tr><td class="header-cell-logo"><div class="header-logo"></td><td class="header-cell-app"><div class="header-app"><label>CDIS<label><br><span>Cree Diabetes Information System</span></td><td class="header-cell-section"><div class="header-section"><span>Local Patient List</span></td></tr>');
+    			objDoc.write( '<tr><td class="header-cell-title" colspan=3><div class="header-report-title">'+getReportTitle(appFilter,"list")+'</div></td></tr>');
+    			objDoc.write( '<tr><td class="header-cell-header" colspan=3><table border="0" width="100%"><tr><td class="table-header patient-details">Patient Details</td><td class="table-header patient-comments">Comments</td></table></table></td></tr>');
+    			objDoc.write( '</table>');
+    		objDoc.write( '</div>');
+    		
+    		//page-footer
+    		objDoc.write( '<div class="locallist-print-container-footer">');
+				objDoc.write('<table border="0" width="100%" height="100%">');
+				objDoc.write( '<tr><td>Report Generated : '+moment().format()+'</td></tr>');
+				objDoc.write( '</table>');
+			objDoc.write( '</div>');
+    		
+			objDoc.write( '<div class="page locallist-print-container-body">');
+    		objDoc.write('<table class="cdis-print-display" border="0" width="100%">');
+    			objDoc.write( '<thead><tr><td>');
+    				objDoc.write('<div class="page-header-space"></div>');
+    			objDoc.write( '</td></tr></thead>');
+    		
+    			objDoc.write( '<tbody><tr><td>');	
+	    			objDoc.write( '<table width="100%">');
+	    			$.each(printBodyRowsDivs,function(index, row){
+	    				objDoc.write( '<tr class="page-body-line">');
+		    				objDoc.write( '<td class="patient-details">');
+		    				$.each($(row).find(".value"), function(i, v){
+		    					var addText = "";
+		    					if($(v).hasClass("chart"))addText = "<b>Chart:</b>";
+		    					if($(v).hasClass("age"))addText = "<b>Age:</b>";
+		    					if($(v).hasClass("last_hba1c"))addText = "<b>Last value:</b>";
+		    					if($(v).hasClass("last_hba1c_collecteddate"))addText = "<b>Last date:</b>";
+		    					if($(v).hasClass("secondlast_hba1c"))addText = "<b>Second last value:</b>";
+		    					if($(v).hasClass("secondlast_hba1c_collecteddate"))addText = "<b>Second last date:</b>";
+		    					if(i == 2 || i == 5 || i== 7)objDoc.write('<br>');
+		    					if($(v).hasClass("dtype")){
+		    						objDoc.write('<span><b>'+addText+$(v).text()+'</b></span>');
+		    					}else if($(v).hasClass("fullname")){
+		    						objDoc.write('<span><b>'+addText+$(v).text()+'</b></span>');
+		    					}else{
+		    						objDoc.write('<span>'+addText+$(v).text()+'</span>');
+		    					}
+		    				});
+		    				objDoc.write( '</td>');
+		    				objDoc.write( '<td class="patient-comments">&nbsp; ');
+		    				//comments cell
+		    				objDoc.write( '</td>');
+	    				objDoc.write( '</tr>');
+	    			});
+	    			objDoc.write( '</table>');
+    			objDoc.write( '</td></tr></tbody>');
+    			
+    			objDoc.write( '<tfoot><tr><td>');
+    			objDoc.write('<div class="page-footer-space"></div>');
+    			objDoc.write( '</td></tr></tfoot>');
+			objDoc.write( '</table>');
+			objDoc.write( '</div>');
+			
+    	objDoc.write( "</body>" );
+    	objDoc.write( "</html>" );
+    	objDoc.close();
+    }, 1000);
+    
+    
+	setTimeout(function() {var objFrame = window.frames[ strFrameName ];objFrame.focus();objFrame.print();}, 2750);
+
+	// Have the frame remove itself in about a minute so that
+	// we don't build up too many of these frames.
+	setTimeout(function(){
+		jFrame.empty();
+		jFrame.remove();
+		},
+		(60 * 1000)
+		);
+}
+
+jQuery.fn.printCDISLocalListGraphs = function(){
+	if (this.size() > 1){
+		this.eq( 0 ).print();
+		return;
+	} else if (!this.size()){
+		return;
+	}
+	
+	//onli the list should be printed
+	//can be one or can be more
+    var charts = $(this).find('div.tp-graph');
+    var chartsTs = $(this).find('.s-container .title');
+    // var imgelem = chart.jqplotToImageElem();
+    var chartsImages = [];
+    var chartsTitles = [];
+    var chartsData = [];
+    var chartsTypes = [];
+    for(var i=0;i<charts.length;i++){
+    	var chart = charts[i];
+    	chartsImages.push($(chart).jqplotToImageElemStr());
+    	//chartsImages.push($(chart).jqplotToImageStr());
+    	//chartsImages.push($(chart).jqplotToImageElem());
+    	chartsTitles.push($(chartsTs[i]).text());
+    	var id = $(chart).prop("id").replace("-graph","");
+    	chartsData.push(eval(id+"StatsData"));
+    	chartsTypes.push(id);
+    }
+    
+    var strFrameName = ("CDIS Local List Printer-" + (new Date()).getTime());
+    
+    setTimeout(function() {
+    	
+    	var jFrame = $( "<iframe name='" + strFrameName + "'>" );
+    	jFrame
+    		.css( "width", "1px" )
+    		.css( "height", "1px" )
+    		.css( "position", "absolute" )
+    		.css( "left", "-9999px" )
+    		.appendTo( $( "body:first" ) )
+    	;
+    	var objFrame = window.frames[ strFrameName ];
+    	var objDoc = objFrame.document;
+    	//var jStyleDiv = $( "<div>" ).append($("<style>" ).clone());
+     
+    	objDoc.open();
+    	objDoc.write( "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" );
+    	objDoc.write( "<html>" );
+    	objDoc.write( "<head>" );
+    	objDoc.write( "<title>" );
+    	objDoc.write( document.title );
+    	objDoc.write( "</title>" );
+    	
+    	if ($("link[media=print]").length > 0){
+             $("link[media=print]").each( function() {
+            	 objDoc.write("<link type='text/css' rel='stylesheet' href='"  + $(this).attr("href") + "' media='print' />");
+             });
+        }
+    	
+    	objDoc.write( "</head>" );
+    	objDoc.write( "<body style='background-color:#ffffff;'>" );
+    	//objDoc.write( '<div class="locallist-print-container">');
+    		//page-header
+    		objDoc.write( '<div class="locallist-print-container-header">');
+    			objDoc.write('<table border="0" width="100%" height="100%">');
+    			objDoc.write( '<tr><td class="header-cell-logo"><div class="header-logo"></td><td class="header-cell-app"><div class="header-app"><label>CDIS<label><br><span>Cree Diabetes Information System</span></td><td class="header-cell-section"><div class="header-section"><span>Local Patient List</span></td></tr>');
+    			objDoc.write( '<tr><td class="header-cell-title" colspan=3><div class="header-report-title">'+getReportTitle(appFilter,"graph")+'</div></td></tr>');
+    			//objDoc.write( '<tr><td class="header-cell-header" colspan=3><table border="0" width="100%"><tr><td class="table-header patient-details">Patient Details</td><td class="table-header patient-comments">Comments</td></table></table></td></tr>');
+    			objDoc.write( '</table>');
+    		objDoc.write( '</div>');
+    		
+    		//page-footer
+    		objDoc.write( '<div class="locallist-print-container-footer">');
+				objDoc.write('<table border="0" width="100%" height="100%">');
+				objDoc.write( '<tr><td>Report Generated : '+moment().format()+'</td></tr>');
+				objDoc.write( '</table>');
+			objDoc.write( '</div>');
+    		
+			objDoc.write( '<div class="page locallist-print-container-body">');
+    		objDoc.write('<table class="cdis-print-display" border="0" width="100%">');
+    			objDoc.write( '<thead><tr><td>');
+    				objDoc.write('<div class="page-header-space"></div>');
+    			objDoc.write( '</td></tr></thead>');
+    			
+    			objDoc.write( '<tbody><tr><td>');	
+    			$.each(chartsImages, function(i, img){
+    				objDoc.write( '<div class="page">');
+		    			objDoc.write( '<table width="100%" border="0">');
+		    					objDoc.write( '<tr class="page-body-line-graph-title">');
+		    						objDoc.write('<td class="patient-graph-title">');
+		    							objDoc.write(chartsTitles[i]);
+		    						objDoc.write('</td>');
+		    					objDoc.write('</tr>');
+		    					objDoc.write( '<tr class="page-body-line-graph">');
+		    						objDoc.write( '<td class="patient-graph">');
+		    							objDoc.write(img);
+		    						objDoc.write('</td>');
+		    					objDoc.write('</tr>');
+		    					objDoc.write( '<tr class="page-body-line-graph">');
+	    							objDoc.write( '<td class="patient-graph-table" align="center">');
+	    							var data = chartsData[i];
+	    							var ticks = chartsData[i].ticks;
+	    							var chartType = chartsTypes[i];
+	    								objDoc.write( '<table>');
+	    									objDoc.write( '<thead>');
+	    									if(chartType == "trend"){
+	    										objDoc.write( '<tr><td>Date</td><td>Improved</td><td>Constatnt</td><td>Setback</td></tr>');
+	    									}else{
+	    										objDoc.write( '<tr><td>Date</td><td>Number of patiens</td><td>Percentage</td></tr>');
+	    									}
+	    									objDoc.write( '<thead>');
+	    									objDoc.write( '<tbody>');
+	    									$.each(data.series[0], function(i,v){
+	    										if(chartType == "trend"){
+	    											objDoc.write( '<tr><td>'+moment(ticks[i][1]).format('MMMM YYYY')+'</td><td>'+data.series[2][i]+'</td><td>'+data.series[1][i]+'</td><td>'+data.series[0][i]+'</td></tr>');
+	    										}else{
+	    											var pr = Math.round(100*data.series[0][i]/data.series[1][i]);
+	    											objDoc.write( '<tr><td>'+moment(ticks[i][1]).format('MMMM YYYY')+'</td><td>'+data.series[0][i]+'</td><td>'+pr+'%</td></tr>');
+	    										}
+	    									});
+	    									objDoc.write( '</tbody>');
+	    								objDoc.write( '</table>');
+	    							objDoc.write('</td>');
+	    						objDoc.write('</tr>');
+		    			objDoc.write( '</table>');
+	    			objDoc.write( '</div>');
+	    			
+	    			
+    			});
+    			objDoc.write( '</td></tr></tbody>');
+    			
+    			objDoc.write( '<tfoot><tr><td>');
+    			objDoc.write('<div class="page-footer-space"></div>');
+    			objDoc.write( '</td></tr></tfoot>');
+			objDoc.write( '</table>');
+			objDoc.write( '</div>');
+			
+    	objDoc.write( "</body>" );
+    	objDoc.write( "</html>" );
+    	objDoc.close();
+    }, 1000);
+    
+    
+	setTimeout(function() {var objFrame = window.frames[ strFrameName ];objFrame.focus();objFrame.print();}, 4750);
+
+	// Have the frame remove itself in about a minute so that
+	// we don't build up too many of these frames.
+	setTimeout(function(){
+		jFrame.empty();
+		jFrame.remove();
+		},
+		(60 * 1000)
+		);
+}
+
+

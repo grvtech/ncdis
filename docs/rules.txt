@@ -104,3 +104,8 @@ keytool -delete -alias valicertclass2ca -keystore cacerts.jks -storepass changei
 keytool -delete -alias entrust2048ca -keystore cacerts.jks -storepass changeit
 
 keytool -delete -alias entrustsslca -keystore cacerts.jks -storepass changeit
+
+
+keytool -keystore cacerts.jks -storepass changeit -delete -alias soneraclass1ca
+
+keytool -keystore cacerts.jks -storepass changeit -delete -alias soneraclass2ca

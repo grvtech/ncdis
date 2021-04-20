@@ -75,7 +75,8 @@ report_value_operators=["more","less","equal","between"];
 report_date_operators=["starting","until","equal","between"];
 report_select_operators=["equal"];
 report_profession=["None","CHR","MD","Nurse","Nutritionist"];
-report_dp=["last 3 months","last 6 months","last 12 months","last 18 months","All time"];
+report_dp=["last 6 months","last 12 months","last 2 years","last 5 years"];
+tool_idcommunity=["All","Chisasibi","Eastmain","Mistissini","Nemaska","Oujebougoumou","Waskaganish","Waswanipi","Wemindji","Whapmagoostui"];
 /*LABELS*/
 label_ramq="RAMQ";
 label_chart="Chart Number";

@@ -62,6 +62,16 @@ function getUser(iduser){
 	return uObj;
 }
 
+function getUserFromArray(iduser){
+	var uObj = null;
+	$.each(usersArray,function(i,obj){
+		if(obj.iduser == iduser)uObj = obj;
+	});
+	return uObj;
+}
+
+
+
 function getPatientInfo(idpatient){
 	var pObj = null;
 	var request = $.ajax({
