@@ -243,7 +243,7 @@ jQuery.fn.printCDISSection = function(){
 }
 
 
-jQuery.fn.printCDISLocalList = function(){
+jQuery.fn.printCDISLocalListOld = function(){
 	if (this.size() > 1){
 		this.eq( 0 ).print();
 		return;
@@ -321,15 +321,18 @@ jQuery.fn.printCDISLocalList = function(){
 		    					var addText = "";
 		    					if($(v).hasClass("chart"))addText = "<b>Chart:</b>";
 		    					if($(v).hasClass("age"))addText = "<b>Age:</b>";
-		    					if($(v).hasClass("last_hba1c"))addText = "<b>Last value:</b>";
-		    					if($(v).hasClass("last_hba1c_collecteddate"))addText = "<b>Last date:</b>";
-		    					if($(v).hasClass("secondlast_hba1c"))addText = "<b>Second last value:</b>";
-		    					if($(v).hasClass("secondlast_hba1c_collecteddate"))addText = "<b>Second last date:</b>";
-		    					if(i == 2 || i == 5 || i== 7)objDoc.write('<br>');
+		    					if($(v).hasClass("last_hba1c"))addText = "<b>most recent value:</b>";
+		    					if($(v).hasClass("secondlast_hba1c"))addText = "<b>2nd most recent value:</b>";
+		    					//if(i == 2 || i == 5 || i== 7)objDoc.write('<br>');
+		    					if(i == 5)objDoc.write('<br>');
 		    					if($(v).hasClass("dtype")){
 		    						objDoc.write('<span><b>'+addText+$(v).text()+'</b></span>');
 		    					}else if($(v).hasClass("fullname")){
 		    						objDoc.write('<span><b>'+addText+$(v).text()+'</b></span>');
+		    					}else if($(v).hasClass("last_hba1c_collecteddate")){
+		    						objDoc.write('<span>('+$(v).text()+')</span>');
+		    					}else if($(v).hasClass("secondlast_hba1c_collecteddate")){
+		    						objDoc.write('<span>('+$(v).text()+')</span>');
 		    					}else{
 		    						objDoc.write('<span>'+addText+$(v).text()+'</span>');
 		    					}
@@ -521,4 +524,164 @@ jQuery.fn.printCDISLocalListGraphs = function(){
 		);
 }
 
+jQuery.fn.printCDISLocalList = function(){
+	if (this.size() > 1){
+		this.eq( 0 ).print();
+		return;
+	} else if (!this.size()){
+		return;
+	}
+	
+	//onli the list should be printed
+    var printHeaderDivs = $(this).find('.list-header-container .head');
+    var printBodyRowsDivs = $(this).find('.list-body-container .list-body-container-line');
+    
+    var strFrameName = ("CDIS Local List Printer-" + (new Date()).getTime());
+    
+    setTimeout(function() {
+    	
+    	var jFrame = $( "<iframe name='" + strFrameName + "'>" );
+    	jFrame
+    		.css( "width", "1px" )
+    		.css( "height", "1px" )
+    		.css( "position", "absolute" )
+    		.css( "left", "-9999px" )
+    		.appendTo( $( "body:first" ) )
+    	;
+    	var objFrame = window.frames[ strFrameName ];
+    	var objDoc = objFrame.document;
+    	//var jStyleDiv = $( "<div>" ).append($("<style>" ).clone());
+     
+    	objDoc.open();
+    	objDoc.write( "<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Transitional//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd\">" );
+    	objDoc.write( "<html>" );
+    	objDoc.write( "<head>" );
+    	objDoc.write( "<title>" );
+    	objDoc.write( document.title );
+    	objDoc.write( "</title>" );
+    	//objDoc.write( jStyleDiv.html() );
+    	
+    	
+    	if ($("link[media=print]").length > 0){
+             $("link[media=print]").each( function() {
+            	 objDoc.write("<link type='text/css' rel='stylesheet' href='"  + $(this).attr("href") + "' media='print' />");
+             });
+        }
+    	
+    	objDoc.write( "</head>" );
+    	objDoc.write( "<body style='background-color:#ffffff;'>" );
+    	//objDoc.write( '<div class="locallist-print-container">');
+    		//page-header
+    		objDoc.write( '<div class="locallist-print-container-header">');
+    			//objDoc.write( '<div class="locallist-print-container-header-buffer"></div>');
+    			objDoc.write( '<div class="locallist-print-container-header-content">');
+	    			objDoc.write('<table border="0" width="100%" height="100%">');
+	    			objDoc.write( '<tr><td class="header-cell-logo"><div class="header-logo"></td><td class="header-cell-app"><div class="header-app"><label>CDIS<label><br><span>Cree Diabetes Information System</span></td><td class="header-cell-section"><div class="header-section"><span>Local Patient List</span></td></tr>');
+	    			objDoc.write( '<tr><td class="header-cell-title" colspan=3><div class="header-report-title">'+getReportTitle(appFilter,"list")+'</div><div><b>MRV</b> - most recent value<br><b>2nd MRV</b> - second most recent value</div></td></tr>');
+	    			objDoc.write( '<tr><td class="header-cell-header" colspan=3>');
+	    				objDoc.write( '<table border="0" width="100%"><tr>');
+	    					$.each(printBodyRowsDivs,function(index, row){
+	    						if(index == 0){
+	    							$.each($(row).find(".value"), function(i, v){
+	    		    					if($(v).hasClass("chart")){
+	    		    						objDoc.write('<td class="chart">Chart</b></td>');
+	    		    					}else if($(v).hasClass("age")){
+	    		    						objDoc.write('<td class="age">Age</td>');
+	    		    					}else if($(v).hasClass("last_hba1c")){
+	    		    						v1 = $(v).text();
+	    		    					}else if($(v).hasClass("secondlast_hba1c")){
+	    		    						v2 = $(v).text();
+	    		    					}else if($(v).hasClass("fullname")){
+	    		    						objDoc.write('<td class="name">Fullname</td>');
+	    		    					}else if($(v).hasClass("last_hba1c_collecteddate")){
+	    		    						objDoc.write('<td class="mrv">MRV</td>');
+	    		    					}else if($(v).hasClass("secondlast_hba1c_collecteddate")){
+	    		    						objDoc.write('<td class="mrv">2nd MRV</td>');
+	    		    					}else{
+	    		    					}
+	    		    				});
+	    							objDoc.write( '<td class="notes">Notes</td>');
+	    						}else{
+	    							return false;
+	    						}
+	    					});
+	    				objDoc.write( '</tr></table></td></tr>');
+	    			objDoc.write( '</table>');
+	    		objDoc.write( '</div>');
+    		objDoc.write( '</div>');
+    		
+    		//page-footer
+    		objDoc.write( '<div class="locallist-print-container-footer">');
+    			//objDoc.write( '<div class="locallist-print-container-footer-buffer"></div>');
+    			objDoc.write( '<div class="locallist-print-container-footer-content">');
+					objDoc.write('<table border="0" width="100%" height="100%">');
+					objDoc.write( '<tr><td>Report Generated : '+moment().format()+'</td></tr>');
+					objDoc.write( '</table>');
+				objDoc.write( '</div>');
+			objDoc.write( '</div>');
+    		
+			objDoc.write( '<div class="page locallist-print-container-body">');
+			//objDoc.write( '<div class="locallist-print-container-body-buffer"></div>');
+			objDoc.write( '<div class="locallist-print-container-body-content">');
+    		objDoc.write('<table class="cdis-print-display" border="0" width="100%">');
+    			objDoc.write( '<thead><tr><td>');
+    				objDoc.write('<div class="page-header-space"></div>');
+    			objDoc.write( '</td></tr></thead>');
 
+    			
+    			objDoc.write( '<tbody><tr><td>');	
+	    			objDoc.write( '<table border="0" width="100%" height="100%">');
+	    			$.each(printBodyRowsDivs,function(index, row){
+	    				objDoc.write( '<tr class="page-body-line">');
+		    				//objDoc.write( '<td class="patient-details">');
+	    					var v1 = "";
+	    					var v2 = "";
+		    				$.each($(row).find(".value"), function(i, v){
+		    					if($(v).hasClass("chart")){
+		    						objDoc.write('<td class="chart"><b>'+$(v).text()+'</b></td>');
+		    					}else if($(v).hasClass("age")){
+		    						objDoc.write('<td class="age">'+$(v).text()+'</td>');
+		    					}else if($(v).hasClass("last_hba1c")){
+		    						v1 = $(v).text();
+		    					}else if($(v).hasClass("secondlast_hba1c")){
+		    						v2 = $(v).text();
+		    					}else if($(v).hasClass("fullname")){
+		    						objDoc.write('<td class="name"><b>'+$(v).text()+'</b></td>');
+		    					}else if($(v).hasClass("last_hba1c_collecteddate")){
+		    						objDoc.write('<td class="mrv">'+v1+'<br>('+$(v).text()+')</td>');
+		    					}else if($(v).hasClass("secondlast_hba1c_collecteddate")){
+		    						objDoc.write('<td class="mrv">'+v2+'<br>('+$(v).text()+')</td>');
+		    					}else{
+		    					}
+		    				});
+		    				//objDoc.write( '</td>');
+		    				objDoc.write( '<td class="notes">&nbsp;</td>');
+	    				objDoc.write( '</tr>');
+	    			});
+	    			objDoc.write( '</table>');
+    			objDoc.write( '</td></tr></tbody>');
+    			
+    			objDoc.write( '<tfoot><tr><td>');
+    			objDoc.write('<div class="page-footer-space"></div>');
+    			objDoc.write( '</td></tr></tfoot>');
+			objDoc.write( '</table>');
+			objDoc.write( '</div>');//div content 
+			objDoc.write( '</div>'); // div body
+			
+    	objDoc.write( "</body>" );
+    	objDoc.write( "</html>" );
+    	objDoc.close();
+    }, 1000);
+    
+    
+	setTimeout(function() {var objFrame = window.frames[ strFrameName ];objFrame.focus();objFrame.print();}, 2750);
+
+	// Have the frame remove itself in about a minute so that
+	// we don't build up too many of these frames.
+	setTimeout(function(){
+		jFrame.empty();
+		jFrame.remove();
+		},
+		(60 * 1000)
+		);
+}

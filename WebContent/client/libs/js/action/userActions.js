@@ -1,6 +1,6 @@
 function logoutUser(sid){
 	var request = $.ajax({
-		  url: "/ncdis/service/data/logoutSession?sid="+sid+"&language=en",
+		  url: "/ncdis/service/data/logoutSession?sid="+sid+"&language=en&ts="+moment(),
 		  type: "GET",
 		  async : false,
 		  dataType: "json"
@@ -22,7 +22,7 @@ function logoutUser(sid){
 function getSession(iduser){
 	var sid = "";
 	var request = $.ajax({
-		  url: "/ncdis/service/data/getUserSession?iduser="+iduser+"&language=en",
+		  url: "/ncdis/service/data/getUserSession?iduser="+iduser+"&language=en&ts="+moment(),
 		  type: "GET",
 		  async : false,
 		  dataType: "json"
@@ -40,7 +40,19 @@ function getSession(iduser){
 	return sid;
 }
 
-
+function setEvent(eventcode){
+	var request = $.ajax({
+		  url: "/ncdis/service/action/setEvent?sid="+sid+"&eventcode="+eventcode+"&language=en&ts="+moment(),
+		  type: "GET",
+		  dataType: "json"
+		});
+		request.done(function( json ) {
+			var sObj = json.objs[0];
+		});
+		request.fail(function( jqXHR, textStatus ) {
+		  alert( "Request failed: " + textStatus );
+		});
+}
 
 function getUser(iduser){
 	var uObj = null;
@@ -160,7 +172,6 @@ function isUserLoged(sessionId){
 		});
 		request.done(function( json ) {
 			var sObj = json.objs[0];
-			//alert(sObj.idsession);
 			if(sObj != null){
 				if((sObj.idsession != null) && (sObj.idsession != "") ){
 					userObj = getUserBySession(sObj.idsession);
@@ -234,8 +245,82 @@ function getUserNotes(sessionid){
 		request.fail(function( jqXHR, textStatus ) {
 		  alert( "Request failed: " + textStatus );
 		});
+	//console.log("usernotes");
+	//console.log(result);
 	return result;
 }
+
+
+function refreshUserNotes(sessionid){
+	var request = $.ajax({
+		  url: "/ncdis/service/action/getUserNotes?language=en&sid="+sessionid,
+		  type: "GET",
+		  async : true,
+		  cache : false,
+		  dataType: "json"
+		});
+		request.done(function( json ) {
+			userNotes = json.objs[0];
+			if(userNotes.length > 0 ){
+				$(".menu .messages").show();
+				var cn = null;
+				if($(".menu .messages .number").length > 0 ){
+					cn = $(".menu .messages .number");
+				}else{
+					cn = $("<div>",{class:"number"}).appendTo($(".menu .messages"));
+				}
+				
+				cn.text(userNotes.length);
+				prepareMessageWidget(userNotes);
+			}else{
+				$(".menu .messages").hide();
+			}
+			setTimeout(refreshUserNotes,5000,sessionid);
+		});
+		request.fail(function( jqXHR, textStatus ) {
+		  alert( "Request failed: " + textStatus );
+		});
+}
+
+function prepareMessageWidget(notes){
+	if($(".menu .messages").length > 0 ){
+		var mw = $(".menu .messages");
+		var meev = getEvents(mw[0]);
+		
+		if(typeof(meev) == "undefined" || meev.mouseover.length <= 1 ){
+			mw.on("mouseenter",function(){
+				if($(".messages-details-container").length > 0){
+					$(".messages-details-container").remove();
+				}
+				var mdc = $("<div>",{class:"messages-details-container"}).appendTo($("#wraper"));
+				mdc.empty();
+				mdc.append($("<div>",{class:"arrow-up"})).append($("<div>",{class:"messages-details"}));
+				//console.log(userNotes.length);
+				$.each(userNotes,function(i,not){
+					var uzer = getUser(not.iduser);
+					var patient = getPatientInfo(not.idpatient);
+					$("<div>",{class:"message"})
+						.append($("<span>").html("New message from <b>"+uzer.firstname+" "+uzer.lastname+ "</b> for the patient <b>"+patient.ramq+"</b>"))
+						.append($("<div>",{class:"cisbutton"}).text("View").click(function(){
+							gtc(sid,"en",patient.ramq,"notes");
+						}))
+					.appendTo($(".messages-details"));
+				});
+				$(".messages-details-container").show("fade",600);
+			}).on("mouseleave",function(){
+				setTimeout(function(){
+					if($(".messages-details-container:hover").length > 0){
+						$(".messages-details-container").on("mouseleave",function(){$(".messages-details-container").remove();});
+					}else{
+						$(".messages-details-container").remove();
+					}
+				},700);
+			});
+		}
+	}
+}
+
+
 
 
 function getUserActionsTop5Dataset(){
@@ -638,7 +723,7 @@ function getPatientNotes(section){
 	mes.done(function( json ) {
 		notes = json.objs[0];
 		var loggedUser = userObj[0];
-		console.log(userProfileObj);
+		//console.log(userProfileObj);
 		
 		
 		if(section != "notes" && section != "patient"){

@@ -11,16 +11,16 @@
 
  
 <div class="cdisheader uss">
-	<div class="logo">CDIS</div>
-	
+	<div class="logo"></div>
+	<div class="name">CDIS</div>
+	<div class="title">Admin</div>
+	<div class="">&nbsp;</div>
 	<ul class="menu">
-		<li class="personalinfo ubs" title="Personal Info"></li>
-		<!-- <li class="messages ubs" onclick="setTemplate('messages')"></li><div class="label messageslabel uss">Messages</div> -->
-		<li class="users ubs" title="Users Administration"></li>
-		<li class="frontpage ubs" title="Front page message"></li>
-		<!-- <li class="uoptions ubs" title="Settings"></li> -->
-		<li class="audit ubs" title="Users action log"></li>
-	</ul>
+		<li class="messages ubs" data-toggle="tooltip" data-placement="left" title="Patient Messages"><i class="fa fa-envelope"></i></li>
+		<li class="personalinfo ubs" data-toggle="tooltip" data-placement="left" title="Personal Info"><i class="fa fa-user"></i></li>
+		<li class="users ubs" data-toggle="tooltip" data-placement="left" title="Users Administration"><i class="fa fa-users"></i></li>
+		<li class="frontpage ubs" data-toggle="tooltip" data-placement="left" title="Front page message"><i class="fa fa-comment"></i></li>
+		<li class="audit ubs" data-toggle="tooltip" data-placement="left" title="Users action log"><i class="fa fa-list"></i></li>	</ul>
 </div>
 
 <div class="cdisfooter-left">
@@ -41,4 +41,5 @@
 	},function(){
 		$(".leftfootermenu").toggle("fade");
 	});
+	refreshUserNotes(sid);
 </script>

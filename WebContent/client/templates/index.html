@@ -323,12 +323,17 @@ $("#loginbutton").click(function() {
 		  dataType: "json"
 		});
 		request.done(function( json ) {
+			console.log("json");
+			console.log(json);
+			
 		  if(json.status == "0"){
 			  $("#errortext").text(json.message);
 		  }else{
 			 userObj = json.objs[0];
 			 sid = getSession(userObj.iduser);
+			 console.log(sid);
 			 var ramq = $.cookie('ramq');
+			 console.log(ramq);
 			 if((ramq != null) && (ramq != "")){
 				 //window.location = "cdis.html?section=patient&ramq="+ramq+"&sid="+sid+"&language=en";
 				 //window.location = "search.html?sid="+sid+"&language=en";

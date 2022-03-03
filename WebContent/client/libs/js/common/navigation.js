@@ -73,27 +73,27 @@ function initNavigation() {
 
 	function gti(){window.location = "index.html";}/*go to index*/
 	function gts(s,l){
-		var p = window.btoa("sid="+sid+"&language="+l);
+		var p = window.btoa("sid="+sid+"&language="+l+"&ts="+moment());
 		window.location = "search.html?"+p;
 	}/*go to search*/
 	function gtc(s,l,r,sec){
-		var p = window.btoa("sid="+sid+"&language="+l+"&section="+sec+"&ramq="+r);
+		var p = window.btoa("sid="+sid+"&language="+l+"&section="+sec+"&ramq="+r+"&ts="+moment());
 		window.location = "cdis.html?"+p;
 	}/*go to cdis*/
 	function gtr(s,l,rid){
-		var p = window.btoa("sid="+sid+"&language="+l+"&reportid="+rid);
+		var p = window.btoa("sid="+sid+"&language="+l+"&reportid="+rid+"&ts="+moment());
 		window.location = "reports.html?"+p;
 	}/*go to reports*/
 	function gto(s,l,sec){
-		var p = window.btoa("sid="+sid+"&language="+l+"&section="+sec);
+		var p = window.btoa("sid="+sid+"&language="+l+"&section="+sec+"&ts="+moment());
 		window.location = "options.html?"+p;
 	}/*go to options*/
 	function gta(s,l,sec){
-		var p = window.btoa("sid="+sid+"&language="+l+"&section="+sec);
+		var p = window.btoa("sid="+sid+"&language="+l+"&section="+sec+"&ts="+moment());
 		window.location = "admin.html?"+p;
 	}/*go to admin*/
 	function gtn(s,l,r,idn){
-		var p = window.btoa("sid="+sid+"&language="+l+"&section=notes&ramq="+r+"&idnote="+idn);
+		var p = window.btoa("sid="+sid+"&language="+l+"&section=notes&ramq="+r+"&idnote="+idn+"&ts="+moment());
 		window.location = "cdis.html?"+p;
 	}/*go to admin*/
 	
@@ -109,5 +109,7 @@ function initNavigation() {
 */
 	
 	
-
+window.addEventListener("beforeunload", function (e) {
+	logout(sid);
+});
 	
