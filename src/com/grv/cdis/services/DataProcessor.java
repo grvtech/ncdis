@@ -1,6 +1,5 @@
 package com.grv.cdis.services;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -841,226 +840,18 @@ public class DataProcessor {
 
 		int periodNumber = Integer.parseInt(period);
 		
-		boolean isMoreCommunities = false;
-		String[] parts = null;
-		if(idcommunity.indexOf("_") >= 0){
-			parts = idcommunity.split("_");
-			isMoreCommunities = true;
-		}
-		
 		ArrayList<Object> obs = new ArrayList<>();
 		if(stats.equals("trend")){
-			if(isMoreCommunities){
-				for(int i=0;i<parts.length;i++){
-					Hashtable<String, ArrayList<Object>> serie = db.getHbA1cTrendItem(periodNumber,parts[i],sex,dtype, age, hba1c);
-					obs.add(serie);
-				}
-			}else{
-				Hashtable<String, ArrayList<Object>> serie = db.getHbA1cTrendItem(periodNumber,idcommunity,sex,dtype, age, hba1c);
-				obs.add(serie);
-			}
-			
+			Hashtable<String, ArrayList<Object>> serie = db.getHbA1cTrendItem(periodNumber,idcommunity,sex,dtype, age, hba1c);
+			obs.add(serie);
 		}else if(stats.equals("period")){
-			if(isMoreCommunities){
-				for(int i=0;i<parts.length;i++){
-					Hashtable<String, ArrayList<Object>> serie = db.getHbA1cPeriodItem(periodNumber,parts[i],sex,dtype,age, hba1c);
-					obs.add(serie);
-				}
-			}else{
-				Hashtable<String, ArrayList<Object>> serie = db.getHbA1cPeriodItem(periodNumber,idcommunity,sex,dtype,age, hba1c);
-				obs.add(serie);
-			}
+			Hashtable<String, ArrayList<Object>> serie = db.getHbA1cPeriodItem(periodNumber,idcommunity,sex,dtype,age, hba1c);
+			obs.add(serie);
 		}else if(stats.equals("value")){
-			if(isMoreCommunities){
-				for(int i=0;i<parts.length;i++){
-					if(hba1c.equals("0") && dtype.equals("1_2")){
-						Hashtable<String, ArrayList<Object>> serie1 = db.getHbA1cValueItem(periodNumber,parts[i],sex,dtype,age, "0.07");
-						obs.add(serie1);
-						Hashtable<String, ArrayList<Object>> serie2 = db.getHbA1cValueItem(periodNumber,parts[i],sex,dtype,age, "0.08");
-						obs.add(serie2);
-					}else if(!hba1c.equals("0") && dtype.equals("1_2")){
-						Hashtable<String, ArrayList<Object>> serie1 = db.getHbA1cValueItem(periodNumber,parts[i],sex,dtype,age, "0.07");
-						obs.add(serie1);
-						Hashtable<String, ArrayList<Object>> serie2 = db.getHbA1cValueItem(periodNumber,parts[i],sex,dtype,age, hba1c);
-						obs.add(serie2);
-					}else{
-						Hashtable<String, ArrayList<Object>> serie = db.getHbA1cValueItem(periodNumber,parts[i],sex,dtype,age, hba1c);
-						obs.add(serie);
-					}
-				}
-			}else{
-				if(hba1c.equals("0") && dtype.equals("1_2")){
-					Hashtable<String, ArrayList<Object>> serie1 = db.getHbA1cValueItem(periodNumber,idcommunity,sex,dtype,age, "0.07");
-					obs.add(serie1);
-					Hashtable<String, ArrayList<Object>> serie2 = db.getHbA1cValueItem(periodNumber,idcommunity,sex,dtype,age, "0.08");
-					obs.add(serie2);
-				}else if(hba1c.equals("0") && dtype.equals("3")){
-					Hashtable<String, ArrayList<Object>> serie1 = db.getHbA1cValueItem(periodNumber,idcommunity,sex,dtype,age, "0.06");
-					obs.add(serie1);
-				}else if(!hba1c.equals("0") && dtype.equals("1_2")){
-					Hashtable<String, ArrayList<Object>> serie2 = db.getHbA1cValueItem(periodNumber,idcommunity,sex,dtype,age, "0.07");
-					obs.add(serie2);
-					Hashtable<String, ArrayList<Object>> serie3 = db.getHbA1cValueItem(periodNumber,idcommunity,sex,dtype,age, hba1c);
-					obs.add(serie3);
-				}else if(!hba1c.equals("0") && dtype.equals("3")){
-					Hashtable<String, ArrayList<Object>> serie1 = db.getHbA1cValueItem(periodNumber,idcommunity,sex,dtype,age, hba1c);
-					obs.add(serie1);
-				}
-				
-			}
-		}
-		
-		result = json.toJson(new MessageResponse(true,"en",obs));
-		
-		return result;
-	}
-	
-	/*
-	 *  /ncdis/service/data/getNumberOfPatients
-	 * */
-	public String getNumberOfPatients(Hashtable<String, String[]> args){
-		Gson json = new Gson();
-		String result = "";
-		CdisDBridge db = new CdisDBridge();
-		
-		String idcommunity = ((String[])args.get("idcommunity"))[0];
-		String sex = ((String[])args.get("sex"))[0];
-		String dtype = ((String[])args.get("dtype"))[0];
-		String age = ((String[])args.get("age"))[0];
-		String period = ((String[])args.get("period"))[0];
-
-		int periodNumber = Integer.parseInt(period);
-		ArrayList<Object> obs = new ArrayList<>();
-		boolean isMoreCommunities = false;
-		String[] parts = null;
-		if(idcommunity.indexOf("_") >= 0){
-			parts = idcommunity.split("_");
-			isMoreCommunities = true;
-		}
-		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date now = new Date();
-		
-		
-		Hashtable<String, ArrayList<Hashtable<String, String>>> serie = new Hashtable<>();
-		if(isMoreCommunities){
-			for(int i=0;i<parts.length;i++){
-				ArrayList<Hashtable<String, String>> comm = new ArrayList<>();
-				for( int j=0 ; j<periodNumber ; j++){
-					Hashtable<String, String> elements = new Hashtable<>();
-					Calendar calStart = Calendar.getInstance();
-					calStart.setTime(now);
-					calStart.add(Calendar.MONTH, -1 ); 
-					calStart.add(Calendar.MONTH, j*-1 ); // we go back period number and 1 month more because we exclude current month
-					calStart.set(Calendar.DAY_OF_MONTH, calStart.getActualMaximum(Calendar.DAY_OF_MONTH));
-					String since = sdf.format(calStart.getTime());
-					int n = db.getNumberOfPatients(parts[i], since, sex, dtype, age);
-					elements.put("total", Integer.toString(n));
-					elements.put("sex", sex);
-					elements.put("age", age);
-					elements.put("dtype", dtype);
-					elements.put("since", since);
-					comm.add(elements);
-				}
-				serie.put("idcommunity_"+parts[i], comm);
-				obs.add(serie);
-			}
-		}else{
-			ArrayList<Hashtable<String, String>> comm = new ArrayList<>();
-			for( int j=0 ; j<periodNumber ; j++){
-				Hashtable<String, String> elements = new Hashtable<>();
-				Calendar calStart = Calendar.getInstance();
-				calStart.setTime(now);
-				calStart.add(Calendar.MONTH, -1 ); 
-				calStart.add(Calendar.MONTH, j*-1 ); // we go back period number and 1 month more because we exclude current month
-				calStart.set(Calendar.DAY_OF_MONTH, calStart.getActualMaximum(Calendar.DAY_OF_MONTH));
-				String since = sdf.format(calStart.getTime());
-				int n = db.getNumberOfPatients(idcommunity, since, sex, dtype, age);
-				elements.put("total", Integer.toString(n));
-				elements.put("sex", sex);
-				elements.put("age", age);
-				elements.put("dtype", dtype);
-				elements.put("since", since);
-				comm.add(elements);
-			}
-			serie.put("idcommunity_"+idcommunity, comm);
+			Hashtable<String, ArrayList<Object>> serie = db.getHbA1cValueItem(periodNumber,idcommunity,sex,dtype,age, hba1c);
 			obs.add(serie);
 		}
-		result = json.toJson(new MessageResponse(true,"en",obs));
-		return result;
-	}
-	
-	/*
-	 *  /ncdis/service/data/getPvalidationData
-	 * */
-	public String getPvalidationData(Hashtable<String, String[]> args){
-		Gson json = new Gson();
-		String result = "";
-		CdisDBridge db = new CdisDBridge();
-		String idlist = ((String[])args.get("idlist"))[0];
-		ArrayList<Object> obs = new ArrayList<>();
 		
-		Hashtable<String, ArrayList<Object>> serie = db.getPValidationData(idlist);
-		obs.add(serie);
-		result = json.toJson(new MessageResponse(true,"en",obs));
-		
-		return result;
-	}
-
-	
-	/*
-	 *  /ncdis/service/data/getStatsData
-	 * */
-	public String getPandiNow(Hashtable<String, String[]> args){
-		Gson json = new Gson();
-		String result = "";
-		CdisDBridge db = new CdisDBridge();
-		
-		String idcommunity = ((String[])args.get("idcommunity"))[0];
-		String sex = ((String[])args.get("sex"))[0];
-		String dtype = ((String[])args.get("dtype"))[0];
-		String age = ((String[])args.get("age"))[0];
-		
-		ArrayList<Object> obs = new ArrayList<>();
-		
-		Hashtable<String, ArrayList<Object>> serie1 = db.getPrevalenceNow(idcommunity,sex,dtype, age);
-		obs.add(serie1);
-		Hashtable<String, ArrayList<Object>> serie2 = db.getIncidenceNow(idcommunity,sex,dtype, age);
-		obs.add(serie2);
-		
-		Hashtable<String, ArrayList<Object>> serie3 = db.getPrevalenceNowLastYear(idcommunity,sex,dtype, age);
-		obs.add(serie3);
-		Hashtable<String, ArrayList<Object>> serie4 = db.getIncidenceNowLastYear(idcommunity,sex,dtype, age);
-		obs.add(serie4);
-		result = json.toJson(new MessageResponse(true,"en",obs));
-		
-		return result;
-	}
-	
-	/*
-	 *  /ncdis/service/data/getStatsData
-	 * */
-	public String getPandiHistory(Hashtable<String, String[]> args){
-		Gson json = new Gson();
-		String result = "";
-		CdisDBridge db = new CdisDBridge();
-		
-		String idcommunity = ((String[])args.get("idcommunity"))[0];
-		String sex = ((String[])args.get("sex"))[0];
-		String dtype = ((String[])args.get("dtype"))[0];
-		String age = ((String[])args.get("age"))[0];
-		String since = ((String[])args.get("since"))[0];
-		
-		ArrayList<Object> obs = new ArrayList<>();
-		
-		Hashtable<String, ArrayList<Object>> serie1 = db.getPrevalenceHistory(idcommunity,sex,dtype, age, since);
-		obs.add(serie1);
-		Hashtable<String, ArrayList<Object>> serie2 = db.getIncidenceHistory(idcommunity,sex,dtype, age,since);
-		obs.add(serie2);
-		Hashtable<String, ArrayList<Object>> serie3 = db.getPrevalenceHistory(idcommunity,"0",dtype,"0", since);
-		obs.add(serie3);
-		Hashtable<String, ArrayList<Object>> serie4 = db.getIncidenceHistory(idcommunity,"0",dtype,"0",since);
-		obs.add(serie4);
 		
 		result = json.toJson(new MessageResponse(true,"en",obs));
 		

@@ -72,13 +72,10 @@ public class ActionProcessor {
 			String idsession = DigestUtils.md5Hex(combination);
 
 			userSession = new Session(idsession, user.getIduser(), ip, 0, 0, Integer.parseInt(reswidth),Integer.parseInt(resheight),1);
-			
 			userSession.setSession();
-			
 			ArrayList<Object> obs = new ArrayList<>();
 			obs.add(user);
 			result = json.toJson(new MessageResponse(act,true,language,obs));
-			
 			Event.registerEvent(user.getIduser(), act.getIdaction(), 1, userSession.getIdsession());
 		}else{
 			result = json.toJson(new MessageResponse(act,false,language,null));
@@ -705,27 +702,6 @@ public class ActionProcessor {
 		return result;
 	}
 	
-	
-	public String setEvent(Hashtable<String, String[]> args){
-		Gson json = new Gson();
-		ChbDBridge chbdb = new ChbDBridge();
-		String result = "";
-		String language = ((String[])args.get("language"))[0];
-		String sid = ((String[])args.get("sid"))[0];
-		String eventCode = ((String[])args.get("eventcode"))[0];
-		User user = new User(sid);
-		Action a = new Action(eventCode);
-		Session session = chbdb.isValidSession(sid);
-		if(session != null){
-			session.setSession();
-		}
-		chbdb.setEvent(user.getIduser(), a.getIdaction(), 1, sid);
-		ArrayList<Object> obs = new ArrayList<Object>();
-		result = json.toJson(new MessageResponse(true,language,obs));
-		return result;
-	}
-	
-	
 	public String deletePatientNote(Hashtable<String, String[]> args){
 		Gson json = new Gson();
 		ChbDBridge chbdb = new ChbDBridge();
@@ -878,22 +854,6 @@ public class ActionProcessor {
 			e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-	
-	public void writeOutcomeFile(String outcomeFile, String content){
-		InitialContext ic;
-		try {
-			ic = new InitialContext();
-			String rf = (String) ic.lookup("reports-folder");
-			File reportFile = new File(rf+System.getProperty("file.separator")+"outcomes"+System.getProperty("file.separator")+outcomeFile);
-			Writer writer = new FileWriter(reportFile);
-			writer.write(content);
-			writer.close();
-		}catch(NamingException e){
-			e.printStackTrace();
-		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -1203,153 +1163,4 @@ public class ActionProcessor {
 		return result;
 	}
 
-	
-	public String generateDataOutcomes(Hashtable<String, String[]> args){
-		
-		CdisDBridge db = new CdisDBridge();
-		String result = "";
-		JsonParser jp = new JsonParser();
-		
-		InitialContext ic;
-		try {
-			ic = new InitialContext();
-			Gson gson = new Gson();
-
-		    Hashtable<String,ArrayList<Hashtable<String,String>>> t12 = db.getHbA1cTrend("1_2");
-		    Iterator<String> t12keys = t12.keySet().iterator();
-		    Hashtable<String, String> t12totals = new Hashtable<>();
-		    while(t12keys.hasNext()){
-		    	String key = t12keys.next();
-		    	ArrayList<Hashtable<String,String>> month = t12.get(key);
-		    	int tt = 0;
-		    	for(int i=0;i<month.size();i++){
-		    		Hashtable<String, String> line = month.get(i);
-		    		tt+=Integer.parseInt(line.get("n"));
-		    	}
-		    	t12totals.put(key, Integer.toString(tt));
-		    	String outcomeFile = "t."+key.replace("m", "")+".1_2";
-		    	String content = gson.toJson(month);
-		    	writeOutcomeFile(outcomeFile, content);
-		    }
-		    String t12tout  = "tt.1_2";
-		    String t12tcontent = gson.toJson(t12totals);
-		    writeOutcomeFile(t12tout, t12tcontent);
-		    
-		    Hashtable<String,ArrayList<Hashtable<String,String>>> tpdm = db.getHbA1cTrend("3");
-		    Iterator<String> tpdmkeys = tpdm.keySet().iterator();
-		    Hashtable<String, String> tpdmtotals = new Hashtable<>();
-		    while(tpdmkeys.hasNext()){
-		    	String key = tpdmkeys.next();
-		    	ArrayList<Hashtable<String,String>> month = tpdm.get(key);
-		    	int tt = 0;
-		    	for(int i=0;i<month.size();i++){
-		    		Hashtable<String, String> line = month.get(i);
-		    		tt+=Integer.parseInt(line.get("n"));
-		    	}
-		    	tpdmtotals.put(key, Integer.toString(tt));
-		    	String outcomeFile = "t."+key.replace("m", "")+".3";
-		    	String content = gson.toJson(month);
-		    	writeOutcomeFile(outcomeFile, content);
-		    }
-		    String tpdmtout  = "tt.3";
-		    String tpdmtcontent = gson.toJson(tpdmtotals);
-		    writeOutcomeFile(tpdmtout, tpdmtcontent);
-		    
-		    
-		    Hashtable<String,ArrayList<Hashtable<String,String>>> p12 = db.getHbA1cPeriod("1_2");
-		    Iterator<String> p12keys = p12.keySet().iterator();
-		    Hashtable<String, String> p12totals = new Hashtable<>();
-		    while(p12keys.hasNext()){
-		    	String key = p12keys.next();
-		    	ArrayList<Hashtable<String,String>> month = p12.get(key);
-		    	int tt = 0;
-		    	for(int i=0;i<month.size();i++){
-		    		Hashtable<String, String> line = month.get(i);
-		    		tt+=Integer.parseInt(line.get("n"));
-		    	}
-		    	p12totals.put(key, Integer.toString(tt));
-		    	String outcomeFile = "p."+key.replace("m", "")+".1_2";
-		    	String content = gson.toJson(month);
-		    	writeOutcomeFile(outcomeFile, content);
-		    }
-		    String p12tout  = "tp.1_2";
-		    String p12tcontent = gson.toJson(p12totals);
-		    writeOutcomeFile(p12tout, p12tcontent);
-		    
-
-		    Hashtable<String,ArrayList<Hashtable<String,String>>> ppdm = db.getHbA1cPeriod("3");
-		    Iterator<String> ppdmkeys = ppdm.keySet().iterator();
-		    Hashtable<String, String> ppdmtotals = new Hashtable<>();
-		    while(ppdmkeys.hasNext()){
-		    	String key = ppdmkeys.next();
-		    	ArrayList<Hashtable<String,String>> month = ppdm.get(key);
-		    	int tt = 0;
-		    	for(int i=0;i<month.size();i++){
-		    		Hashtable<String, String> line = month.get(i);
-		    		tt+=Integer.parseInt(line.get("n"));
-		    	}
-		    	ppdmtotals.put(key, Integer.toString(tt));
-		    	String outcomeFile = "p."+key.replace("m", "")+".3";
-		    	String content = gson.toJson(month);
-		    	writeOutcomeFile(outcomeFile, content);
-		    }
-		    String ppdmtout  = "tp.3";
-		    String ppdmtcontent = gson.toJson(ppdmtotals);
-		    writeOutcomeFile(ppdmtout, ppdmtcontent);
-
-		    
-		    Hashtable<String,ArrayList<Hashtable<String,String>>> v12 = db.getHbA1cValue("1_2");
-		    Iterator<String> v12keys = v12.keySet().iterator();
-		    Hashtable<String, String> v12totals = new Hashtable<>();
-		    while(v12keys.hasNext()){
-		    	String key = v12keys.next();
-		    	ArrayList<Hashtable<String,String>> month = v12.get(key);
-		    	int tt = 0;
-		    	for(int i=0;i<month.size();i++){
-		    		Hashtable<String, String> line = month.get(i);
-		    		tt+=Integer.parseInt(line.get("n"));
-		    	}
-		    	v12totals.put(key, Integer.toString(tt));
-		    	String outcomeFile = "v."+key.replace("m", "")+".1_2";
-		    	String content = gson.toJson(month);
-		    	writeOutcomeFile(outcomeFile, content);
-		    }
-		    String v12tout  = "tv.1_2";
-		    String v12tcontent = gson.toJson(v12totals);
-		    writeOutcomeFile(v12tout, v12tcontent);
-		    
-
-		    Hashtable<String,ArrayList<Hashtable<String,String>>> vpdm = db.getHbA1cValue("3");
-		    Iterator<String> vpdmkeys = vpdm.keySet().iterator();
-		    Hashtable<String, String> vpdmtotals = new Hashtable<>();
-		    while(vpdmkeys.hasNext()){
-		    	String key = vpdmkeys.next();
-		    	ArrayList<Hashtable<String,String>> month = vpdm.get(key);
-		    	int tt = 0;
-		    	for(int i=0;i<month.size();i++){
-		    		Hashtable<String, String> line = month.get(i);
-		    		tt+=Integer.parseInt(line.get("n"));
-		    	}
-		    	vpdmtotals.put(key, Integer.toString(tt));
-		    	String outcomeFile = "v."+key.replace("m", "")+".3";
-		    	String content = gson.toJson(month);
-		    	writeOutcomeFile(outcomeFile, content);
-		    }
-		    String vpdmtout  = "tv.3";
-		    String vpdmtcontent = gson.toJson(vpdmtotals);
-		    writeOutcomeFile(vpdmtout, vpdmtcontent);
-		    
-		    
-		    System.out.println("-------------------------------------------------");
-		    System.out.println("outcome files generated");
-			System.out.println("-------------------------------------------------");
-			
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}
-		return "Outcome files GENERATED";
-	}
-	
-	
-	
 }
