@@ -10,8 +10,6 @@ SEARCH PAGE CSS
 .search .sbutton{position:absolute;right:0px;width:90px;height:100%;margin: 0;border: 1px solid #4b3b3b;background:no-repeat url(../images/ic_search_wht_24dp_r1.png) #4b3b3b center center;top:1px;}
 .search .ssearch .searchtext{width:100%;height:40px;color:#000000;margin:0px;padding-left:10px;border-left:none;border-bottom:1px solid #4b3b3b;border-top:1px solid #4b3b3b;border-right:1px solid #4b3b3b;font-family: Sans-Serif,Tahoma,Verdana,Arial,sans-serif;font-size: 100%;text-transform: uppercase;text-align: left;}
 */
-
-
 .search{width:1000px;height:150px;margin:auto;padding:0px;display:flex;flex-direction:row;flex-wrap:nowrap;}
 .search .ssearch{flex:1 0;}
 .search .ssearch .label{width:auto; text-align:center;font-size:220%;color:#ffffff;margin:0px;}

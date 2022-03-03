@@ -46,8 +46,6 @@
 				
 			<div class="panel-full">
 				<div class="dashboard-menu">
-					<div class="cisbutton"  id="pvalidation-button" data-toggle="tooltip" title="Open patient validation tool">Patient Validation Tool</div>
-					<div class="cisbutton"  id="surveillance-button" data-toggle="tooltip" title="Open reports surveillance page">Indicators and Outcomes</div>
 					<div class="cisbutton"  id="locallist-button" data-toggle="tooltip" title="Open local patient list">Local Patient List</div>
 					<div class="cisbutton"  id="reports-button" data-toggle="tooltip" title="Execute reports">Reports</div> 
 					<div class="cisbutton"  id="addpatient-button" data-toggle="tooltip" title="Add new patient">Add Patient</div> 
@@ -80,16 +78,13 @@
 
  
 <div class="cdisheader uss">
-	<div class="logo"></div>
-	<div class="name">CDIS</div>
-	<div class="title">Search Patient</div>
-	<div class="">&nbsp;</div>
+	<div class="logo">CDIS</div>
 	<ul class="menu">
-		<li class="messages ubs" data-toggle="tooltip" data-placement="left" title="Patient Messages"><i class="fa fa-envelope"></i></li>
-		<li class="personalinfo ubs" data-toggle="tooltip" data-placement="left" title="Personal Info"><i class="fa fa-user"></i></li>
-		<li class="users ubs" data-toggle="tooltip" data-placement="left" title="Users Administration"><i class="fa fa-users"></i></li>
-		<li class="frontpage ubs" data-toggle="tooltip" data-placement="left" title="Front page message"><i class="fa fa-comment"></i></li>
-		<li class="audit ubs" data-toggle="tooltip" data-placement="left" title="Users action log"><i class="fa fa-list"></i></li>	</ul>
+		<li class="personalinfo ubs" title="Personal information"></li>
+		<li class="users ubs" title="Users Administration"></li>
+		<li class="frontpage ubs" title="Front page message"></li>
+		<li class="audit ubs" title="Users actions log"></li>
+	</ul>
 </div>
 
 <div class="cdisfooter-left">
@@ -116,7 +111,7 @@
 		$(".personal-patients").hide();
 	}
 	
-	refreshUserNotes(sid);
+	
 	if(userNotes.length > 0){
 		$(".notes-alert").show();
 		$.each(userNotes, function(i,not){
@@ -257,19 +252,9 @@
 			$(ul).css("overflow-x","hidden");
 			return $liline;
 		};
-		
-		
-		$('#surveillance-button').click(function(){
-			gtr(sid,applanguage,"surveillance");
-		});
-		
-		$('#pvalidation-button').click(function(){
-			gtr(sid,applanguage,"pvalidation");
-		});
-		
 </script>
-<link type="text/css" rel="stylesheet" href="client/libs/css/locallist.css?refreshcss=1&ts=1625680126">
-<link type="text/css" rel="stylesheet" href="client/libs/css/locallist-print.css?refreshcss=1&ts=1625680126" media="print">
+<link type="text/css" rel="stylesheet" href="client/libs/css/locallist.css">
+<link type="text/css" rel="stylesheet" href="client/libs/css/locallist-print.css" media="print">
 <link type="text/css" rel="stylesheet" href="client/libs/js/jquery/jqplot/dist/jquery.jqplot.min.css">
 <script src="client/libs/js/jquery/jqplot/dist/jquery.jqplot.js" type="text/javascript"></script>
 <script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.cursor.min.js"></script>
@@ -288,7 +273,7 @@
 <script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.highlighter.min.js"></script>
 <script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.enhancedLegendRenderer.min.js"></script>
 <script type="text/javascript" src="client/libs/js/jquery/print/jqprint.js"></script>
-<script src="client/libs/js/pages/locallist.js?ts=1625680126" type="text/javascript"></script>
-<script src="client/libs/js/pages/patient.js?ts=1625680126" type="text/javascript"></script>
+<script src="client/libs/js/pages/locallist.js" type="text/javascript"></script>
+<script src="client/libs/js/pages/patient.js" type="text/javascript"></script>
 
 	

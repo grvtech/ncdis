@@ -2,24 +2,23 @@
  * link event to button to open the list
  * */
 $('#locallist-button').click(function(){
-	setTimeout(setEvent,100,"LLIST");
 	openList();
 });
 
 /*
- * global variable for list
+ * global variable fo list
  * */
-
-var toolbarConfig = {"container":"locallist-toolbar","lists":[{"id":"list101","title":"HbA1c trend","selected":"false"},{"id":"list102","title":"Patients with no HbA1C in the ","selected":"false"},{"id":"list103","title":"Patients by HbA1c","selected":"false"}],"options":[]};
+var containerApp = $('#wraper');
+var toolbarConfig = {"container":"locallist-toolbar","lists":[{"id":"list101","title":"HbA1c trend","selected":"false"},{"id":"list102","title":"Patients with no HbA1C in the last 12 months","selected":"false"},{"id":"list103","title":"Patients with HbA1c value over ","selected":"false"}],"options":[]};
 //var toolbarConfig = {"container":"locallist-toolbar","lists":[{"id":"list101","title":"Trend of HBA1c value","selected":"false"},{"id":"list102","title":"Patients with old HBA1c value collected","selected":"false"},{"id":"list103","title":"Patients with high HBA1c value","selected":"false"},{"id":"list104","title":"Patients with no HBA1c value","selected":"false"}],"options":[]};
 var dataperiodValues = [6,12,24,60];
 const listConfig = {
 		"container":"locallist-list",
-		"initFilter":{"list":"list101","idcommunity":"0","dp":"12","dtype":"1_2","age":"0","hba1c":"0","sex":"0","users":"0"},
-		"list101":{"header":["fullname","ramq","chart","age","dduration","trend","last_hba1c","last_hba1c_collecteddate","secondlast_hba1c","secondlast_hba1c_collecteddate"]},
-		"list102":{"header":["fullname","ramq","chart","age","dduration","last_hba1c","last_hba1c_collecteddate"]},
-		"list103":{"header":["fullname","ramq","chart","age","dduration","last_hba1c","last_hba1c_collecteddate"]},
-		"list104":{"header":["fullname","ramq","chart","age","dduration","idcommunity","sex"]}
+		"initFilter":{"list":"list101","idcommunity":"0","dp":"12","dtype":"1_2","age":"0","hba1c":"1","sex":"0","users":"0"},
+		"list101":{"header":["fullname","ramq","chart","age","dtype","trend","last_hba1c","last_hba1c_collecteddate","secondlast_hba1c","secondlast_hba1c_collecteddate"]},
+		"list102":{"header":["fullname","ramq","chart","age","dtype","last_hba1c","last_hba1c_collecteddate"]},
+		"list103":{"header":["fullname","ramq","chart","age","dtype","last_hba1c","last_hba1c_collecteddate"]},
+		"list104":{"header":["fullname","ramq","chart","age","dtype","idcommunity","sex"]}
 };
 var statsConfig = {"container":"locallist-stats"};
 var appFilter = listConfig.initFilter;
@@ -37,14 +36,18 @@ function openList(){
 	//create the modal window
 	var id = "locallist";
 	appFilter = initFilter(listConfig.initFilter);
-	var modal = $('<div>',{id:"fullscreen_"+id,class:"fullscreen-modal"}).appendTo($("#wraper"));
+	var modal = $('<div>',{id:"fullscreen_"+id,class:"fullscreen-modal"}).appendTo(containerApp);
 	buildFrameList(modal);
 	setTimeout(loadReport, 10, "locallist");
-	//setTimeout(loadNoHbA1cPatients,100);
-	//console.log("filter in open list");
-	//console.log(appFilter);
-	//console.log(listConfig.initFilter);
+	setTimeout(loadNoHbA1cPatients,100);
+	console.log("filter in open list");
+	console.log(appFilter);
+	console.log(listConfig.initFilter);
+	
 }
+
+
+
 
 /*
  * function to open the window of the report
@@ -52,6 +55,7 @@ function openList(){
  * 1 on the left - filters and choises 
  * 2 the main list
  * 3 on the bottom - stats of the list
+ * 
  * */
 
 function initFilter(initialFilter){
@@ -70,20 +74,13 @@ function buildFrameList(container){
 	var header = $('<div>',{class:"fullscreen-modal-header"}).appendTo(container);
 	$('<div>',{class:"fullscreen-modal-header-logo"}).appendTo(header);
 	$('<div>',{class:"fullscreen-modal-header-cdis"}).text("CDIS").appendTo(header);
-	$('<div>',{class:"fullscreen-modal-header-title"}).text("Local Patient List").appendTo(header);
+	$('<div>',{class:"fullscreen-modal-header-title"}).text("Patient Local List").appendTo(header);
 	$('<div>',{class:"fullscreen-modal-header-close"}).html($('<i>',{class:"fa fa-times"})).click(function(){container.remove();}).appendTo(header);
 	var body = $('<div>',{class:"fullscreen-modal-body"}).appendTo(container);
-	
-	$('<div>',{class:"gap"}).appendTo(body);
 	$('<div>',{"id":"locallist-toolbar",class:"fullscreen-modal-toolbar"}).appendTo(body);
-	$('<div>',{class:"gap"}).appendTo(body);
-	
-	
-	$('<div>',{class:"gap"}).appendTo(body);
 	var c = $('<div>',{"id":"locallist-list",class:"fullscreen-modal-list"}).appendTo(body);
-	$('<div>',{class:"gap"}).appendTo(body);
 	showProgress(c);
-	//$('<div>',{"id":"locallist-stats",class:"fullscreen-modal-stats"}).appendTo(body);
+	$('<div>',{"id":"locallist-stats",class:"fullscreen-modal-stats"}).appendTo(body);
 	$('<div>',{class:"fullscreen-modal-footer"}).appendTo(container);
 }
 
@@ -112,22 +109,6 @@ function hideProgress(container){
 		progressOn=false;
 	});
 }
-
-function getAllPatients(report, community){
-	var result =0 ;
-	$.each(report.data.datasets,function(i,v){
-		if( community == "0"){
-			result++;
-		}else{
-			if(community == v.idcommunity){
-				result++;
-			}
-		}
-	});
-	return result;
-}
-
-
 /*
  * function to load the report in the JSON object
  * */
@@ -177,10 +158,9 @@ function loadNoHbA1cPatients(){
  * */
 function displayData(report){
 	setTimeout(drawToolbar,100, toolbarConfig);
-	//setTimeout(drawStats,50, statsConfig, report);
+	setTimeout(drawStats,50, statsConfig, report);
 	setTimeout(drawList,200, appFilter.list, listConfig, report);
-	//refreshStats();
-	
+	refreshStats();
 }
 function drawToolbar(toolbarConfig){
 	var c = $("#"+toolbarConfig.container);
@@ -200,7 +180,7 @@ function drawToolbarFilters(container){
 	var gr2col1 = $("<div>",{class:"gr-2col2"}).appendTo(container);
 	//community
 	var grComm = $("<div>",{"id":"toolbarFilterCommunity",class:"gr-comm"}).appendTo(gr2col);
-	$("<div>",{"for":"comm-filter",class:"label-filter"}).text("Community").appendTo(grComm);
+	$("<div>",{"for":"comm-filter"}).text("Community").appendTo(grComm);
 	var grCommS = $("<select>",{"id":"comm-filter",class:""}).appendTo(grComm);
 	$.each(tool_idcommunity, function(j,com){
 		$("<option>",{"value":j}).text(com).appendTo(grCommS);
@@ -213,7 +193,7 @@ function drawToolbarFilters(container){
 	
 	//gender
 	var grGen = $("<div>",{"id":"toolbarFilterGender",class:"gr-gen"}).appendTo(gr2col);
-	$("<div>",{"for":"gen-filter",class:"label-filter"}).text("Gender").appendTo(grGen);
+	$("<div>",{"for":"gen-filter"}).text("Gender").appendTo(grGen);
 	var grGenS = $("<select>",{"id":"gen-filter",class:""}).appendTo(grGen);
 	$.each(report_sex, function(j,gen){
 		$("<option>",{"value":j}).text(gen).appendTo(grGenS);
@@ -225,7 +205,7 @@ function drawToolbarFilters(container){
 
 	//users
 	var grUsr = $("<div>",{"id":"toolbarFilterUsers",class:"gr-usr"}).appendTo(gr2col);
-	$("<div>",{"for":"usr-filter",class:"label-filter"}).text("Health Care Workers").appendTo(grUsr);
+	$("<div>",{"for":"usr-filter"}).text("Health Care Workers").appendTo(grUsr);
 	var grUsrS = $("<select>",{"id":"usr-filter",class:""}).appendTo(grUsr);
 	$("<option>",{"value":0}).text("All users").appendTo(grUsrS);
 	if(linkedUsers.length > 0 ){
@@ -244,7 +224,7 @@ function drawToolbarFilters(container){
 	
 	//data period
 	var grDp = $("<div>",{"id":"toolbarFilterDataperiod",class:"gr-dp"}).appendTo(gr2col);
-	$("<div>",{"for":"dp-filter",class:"label-filter"}).text("Data period").appendTo(grDp);
+	$("<div>",{"for":"dp-filter"}).text("Data period").appendTo(grDp);
 	var grDpS = $("<select>",{"id":"dp-filter"}).appendTo(grDp);
 	$.each(report_dp, function(x,dp){
 		$("<option>",{"value":dataperiodValues[x]}).text(dp).appendTo(grDpS);
@@ -256,29 +236,31 @@ function drawToolbarFilters(container){
 	
 	//dtype
 	var grDtype = $("<div>",{"id":"toolbarFilterDtype",class:"gr-dtype"}).appendTo(gr2col);
-	$("<div>",{class:"label-filter"}).text("Type of diabetes").appendTo(grDtype);
+	$("<div>").text("Type of diabetes").appendTo(grDtype);
 	var grDtypeC = $("<div>",{class:"gr-dtype-checkbox"}).appendTo(grDtype);
 	$("<div>",{"id":"dtype-filter-1",class:"gr-radio","grv-data":"1_2"}).appendTo(grDtypeC).text("Type1 and Type 2");
-	$("<div>",{"id":"dtype-filter-2",class:"gr-radio last","grv-data":"3"}).appendTo(grDtypeC).text("Pre DM");
-	//$("<div>",{"id":"dtype-filter-3",class:"gr-radio last","grv-data":"4"}).appendTo(grDtypeC).text("GDM");
+	$("<div>",{"id":"dtype-filter-2",class:"gr-radio","grv-data":"3"}).appendTo(grDtypeC).text("Pre DM");
+	$("<div>",{"id":"dtype-filter-3",class:"gr-radio last","grv-data":"4"}).appendTo(grDtypeC).text("GDM");
 	$(".gr-dtype-checkbox div").click(function(){
 		var dValue = appFilter.dtype;
 		var rv = $(this).attr("grv-data");
-		if(!$(this).hasClass("selected")){
-			$(".gr-dtype-checkbox div").removeClass("selected");
+		if($(this).hasClass("selected")){
+			$(this).removeClass("selected");
+			dValue = dValue.replace(rv,'');
+		}else{
 			$(this).addClass("selected");
-			dValue = rv;
+			dValue = dValue+rv;
 		}
 		appFilter['dtype'] = dValue;
 	});
 	//age
 	var grAge = $("<div>",{"id":"toolbarFilterAge",class:"gr-age"}).appendTo(gr2col1);
-	$("<div>",{class:"label-filter"}).text("Age").appendTo(grAge);
+	$("<div>").text("Age").appendTo(grAge);
 	var grAgeC = $("<div>",{class:"gr-age-radio gr"}).appendTo(grAge);
 	$("<div>",{"id":"age-filter-1",class:"gr-radio","grv-data":"1"}).appendTo(grAgeC).text("All");
 	$("<div>",{"id":"age-filter-2",class:"gr-radio last","grv-data":"2"}).appendTo(grAgeC).text("Custom");
 	var grAgeCustom = $("<div>",{class:"gr-age-custom gr-custom"}).appendTo(grAgeC);
-	$("<label>",{}).appendTo(grAgeCustom).text("Between min");
+	$("<label>",{}).appendTo(grAgeCustom).text("Between age min");
 	$("<input>",{"type":"text","id":"age-custom-min"}).appendTo(grAgeCustom);
 	$("<label>",{}).appendTo(grAgeCustom).text(" and max");
 	$("<input>",{"type":"text","id":"age-custom-max"}).appendTo(grAgeCustom);
@@ -288,8 +270,7 @@ function drawToolbarFilters(container){
 		$(this).addClass("selected");
 		if($(this).attr("grv-data") == "2"){
 			$(".gr-age-custom").css("visibility","visible");
-			grDpS.val(60);
-			appFilter["dp"] = 60;
+			
 		}else{
 			$(".gr-age-custom").css("visibility","hidden");
 			appFilter["age"] = "0";
@@ -306,18 +287,15 @@ function drawToolbarFilters(container){
 		appFilter["age"] = min+"_"+max;
 		//draw data
 	});
-	
-	//no display since only all values is present
 	//a1c
 	var grA1c = $("<div>",{"id":"toolbarFilterA1c",class:"gr-a1c"}).appendTo(gr2col1);
-	//$("<div>",{class:"label-filter"}).text("HbA1c").appendTo(grA1c);
-	//var grA1cC = $("<div>",{class:"gr-a1c-radio gr"}).appendTo(grA1c);
+	$("<div>").text("HbA1c").appendTo(grA1c);
+	var grA1cC = $("<div>",{class:"gr-a1c-radio gr"}).appendTo(grA1c);
 	//$("<div>",{"id":"a1c-filter-0",class:"gr-radio","grv-data":"0"}).appendTo(grA1cC).text("All values");
-	//$("<div>",{"id":"a1c-filter-1",class:"gr-radio","grv-data":"1"}).appendTo(grA1cC).text("Latest value >= 0.075");
-	//$("<div>",{"id":"a1c-filter-2",class:"gr-radio last","grv-data":"2"}).appendTo(grA1cC).text("Custom values");
-	/*
+	$("<div>",{"id":"a1c-filter-1",class:"gr-radio","grv-data":"1"}).appendTo(grA1cC).text("Latest value >= 0.075");
+	$("<div>",{"id":"a1c-filter-2",class:"gr-radio last","grv-data":"2"}).appendTo(grA1cC).text("Custom values");
 	var grA1cCustom = $("<div>",{class:"gr-a1c-custom gr-custom"}).appendTo(grA1cC);
-	$("<label>",{}).appendTo(grA1cCustom).text("Between min");
+	$("<label>",{}).appendTo(grA1cCustom).text("Between value min");
 	$("<input>",{"type":"text","id":"a1c-custom-min"}).appendTo(grA1cCustom);
 	$("<label>",{}).appendTo(grA1cCustom).text(" and max");
 	$("<input>",{"type":"text","id":"a1c-custom-max"}).appendTo(grA1cCustom);
@@ -343,21 +321,18 @@ function drawToolbarFilters(container){
 		appFilter["hba1c"] = min+"_"+max;
 		//draw data
 	});
-	*/
 }
 function drawToolbarButtons(container){
+	
 	//buttons
 	$("<div>",{class:"gr-gap"}).appendTo(container);
-	$("<div>",{class:"gr-gap"}).appendTo(container);
-	
-	$("<div>",{class:"gr-gap"}).appendTo($(".gr-2col2"));
-	var genBtn = $("<button>",{class:"cisbutton"}).text("Generate List").appendTo($(".gr-2col2"));
+	var genBtn = $("<button>",{class:"cisbutton"}).text("Generate List").appendTo(container);
 	//genBtn.prop("disabled","true");
 	genBtn.click(function(){
-		//console.log("global");
-		//console.log(globalReport);
-		//console.log("filter");
-		//console.log(appFilter);
+		console.log("global");
+		console.log(globalReport);
+		console.log("filter");
+		console.log(appFilter);
 		showProgress($("#locallist-list"));
 		
 		if($("#age-filter-2").hasClass("selected")){
@@ -375,14 +350,13 @@ function drawToolbarButtons(container){
 			$("#a1c-custom-max").val(max);
 			appFilter["hba1c"] = min+"_"+max;
 		}
-		$("#list-list102").text(toolbarConfig.lists[1].title+report_dp[dataperiodValues.indexOf(Number(appFilter.dp))]);
+		
+		
+		
 		setTimeout(drawList,100, appFilter.list, listConfig, globalReport) ;
-		//refreshStats();
+		refreshStats();
+		
 	});
-	
-	$("<button>",{class:"cisbutton"}).text("Back to Search").appendTo($(".gr-2col2")).click(function(){$("#fullscreen_locallist").remove();});
-	
-	
 	$("<div>",{class:"gr-gap other-buttons"}).appendTo(container);
 	var expBtn = $("<button>",{class:"cisbutton"}).text("Export list to CSV").appendTo(container);
 	expBtn.click(function(){
@@ -394,28 +368,15 @@ function drawToolbarButtons(container){
 	
 	var prtBtn = $("<button>",{class:"cisbutton"}).text("Print list").appendTo(container);
 	prtBtn.click(function(){
-		var bconfig = {"width":"300","height":"250"};
-		var bbut = [{"text":"Close","action":"closeGRVPopup"},{"text":"Print","action":"prt"}];
-		var txt = "<p><center><span style='color:red;font-size:35px;'><i class='fa fa-exclamation-circle'></i></span><br><b>The list you are about to print contains confidental information.</b></center></p>";
-		showGRVPopup("Confidential information!",txt,bbut,bconfig);
-
+		$(".list-container").printCDISLocalList();
 	});
-	/*
 	var prtGBtn = $("<button>",{class:"cisbutton"}).text("Print graphs").appendTo(container);
 	prtGBtn.click(function(){
 		$(".stats-container").printCDISLocalListGraphs();
 		//$("#trend-graph").jqplotViewImage();
 	});
-	*/
-	$("<div>",{class:"gr-gap"}).appendTo(container);
 	$("<div>",{class:"gr-gap"}).appendTo(container);
 }
-
-function prt(){
-	$(".list-container").printCDISLocalList();
-	return true;
-};
-
 function drawToolbarLists(container){
 	container.empty();
 	container.append($("<div>",{class:"list-gap"}))
@@ -424,17 +385,14 @@ function drawToolbarLists(container){
 	.append($("<div>",{class:"list-button"}))
 	.append($("<div>",{class:"list-gap"}));
 	$.each(toolbarConfig.lists, function(i, list){
-		var tt = list.title;
-		if(list.id == "list102"){
-			tt += report_dp[dataperiodValues.indexOf(Number(appFilter.dp))];
-		}
-		$("<div>",{"id":"list-"+list.id,class:"list-tab"}).appendTo($(".list-tabs")).text(tt).click(function(){
+		
+		$("<div>",{"id":"list-"+list.id,class:"list-tab"}).appendTo($(".list-tabs")).text(list.title).click(function(){
 			$(".list-container").css("visibility","hiden");
-			//console.log(appFilter);
+			console.log(appFilter);
 			$(".list-tab").removeClass("selected");
 			$(this).addClass("selected");
 			appFilter["list"] = $(this).attr("id").replace("list-",""); 
-			//console.log(appFilter);
+			console.log(appFilter);
 			showProgress($("#locallist-list"));
 			//$(".list-container").trigger("myCustomEvent",[ list.id, listConfig, globalReport ] );
 			setTimeout(drawList,1000,appFilter.list, listConfig, globalReport);
@@ -505,7 +463,7 @@ function drawStats(statsConfig, report){
 }
 
 function drawList(listid,listConfig,report){
-	//console.log("start draw list : "+ moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
+	console.log("start draw list : "+ moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
 	
 	if($(".list-container").length){
 		$(".list-container").remove();
@@ -524,20 +482,19 @@ function drawList(listid,listConfig,report){
 	var headerContainer = $("<div>",{class:"list-header-container"}).appendTo(listContainer);
 	var bodyContainer = $("<div>",{"id":"list-body",class:"list-body-container"}).appendTo(listContainer);
 	
-	
 	drawListHeader(dataContainer, listid);
 	
-	//console.log("before filter "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
-	//console.log(appFilter);
+	console.log("before filter "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
+	console.log(appFilter);
 	var r = applyFilter(report,appFilter);
-	nowReport = getReport(r);
-	//console.log("after filter "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
-	//console.log("before header "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
+	nowReport = r;
+	console.log("after filter "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
+	console.log("before header "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
 	
 	drawListTableHeader(headerContainer,r,listid);
 	
-	//console.log("after header "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
-	//console.log("before body "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
+	console.log("after header "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
+	console.log("before body "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
 	
 	var stats = drawListTableBody(bodyContainer,r,listid);
 	refreshHeaderStats(stats);
@@ -550,25 +507,21 @@ function drawListHeader(container, listid){
 	$("<div>",{class:"search-button search-"+listid}).appendTo(container).html('<i class="fa fa-search"></i>');
 	if(listid == "list101"){
 		$("<div>",{class:"list-data-container-panel panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Total")).append($("<div>",{class:"pvalue","id":"pTotal"}));
-		$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Decreased")).append($("<div>",{class:"pvalue","id":"pImproved"})).append($("<div>",{class:"prvalue","id":"prImproved"}));
+		$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Improved")).append($("<div>",{class:"pvalue","id":"pImproved"})).append($("<div>",{class:"prvalue","id":"prImproved"}));
 		$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Increased")).append($("<div>",{class:"pvalue","id":"pSetback"})).append($("<div>",{class:"prvalue","id":"prSetback"}));
 		$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("No Change")).append($("<div>",{class:"pvalue","id":"pConstant"})).append($("<div>",{class:"prvalue","id":"prConstant"}));
 		//$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Male")).append($("<div>",{class:"pvalue","id":"pMale"})).append($("<div>",{class:"prvalue","id":"prMale"}));
 		//$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Female")).append($("<div>",{class:"pvalue","id":"pFemale"})).append($("<div>",{class:"prvalue","id":"prFemale"}));
 	}else if(listid == "list102"){
-		$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Total")).append($("<div>",{class:"pvalue","id":"pTotal"})).append($("<div>",{class:"prvalue","id":"prTotal"}));
-		//$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("More than 5 years")).append($("<div>",{class:"pvalue","id":"pMorethan5"})).append($("<div>",{class:"prvalue","id":"prMorethan5"}));
-		//$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("More that 10 years")).append($("<div>",{class:"pvalue","id":"pMorethan10"})).append($("<div>",{class:"prvalue","id":"prMorethan10"}));
+		$("<div>",{class:"list-data-container-panel panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Total")).append($("<div>",{class:"pvalue","id":"pTotal"}));
+		$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Last month")).append($("<div>",{class:"pvalue","id":"pLastmonth"})).append($("<div>",{class:"prvalue","id":"prLastmonth"}));
+		//$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Male")).append($("<div>",{class:"pvalue","id":"pMale"})).append($("<div>",{class:"prvalue","id":"prMale"}));
 		//$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Female")).append($("<div>",{class:"pvalue","id":"pFemale"})).append($("<div>",{class:"prvalue","id":"prFemale"}));
 	}else if(listid == "list103"){
-		$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Total")).append($("<div>",{class:"pvalue","id":"pTotal"})).append($("<div>",{class:"prvalue","id":"prTotal"}));
-		if(appFilter.dtype == "3"){
-			$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Less than 0.06")).append($("<div>",{class:"pvalue","id":"pUnder6"})).append($("<div>",{class:"prvalue","id":"prUnder6"}));
-		}else{
-			$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Less than 0.07")).append($("<div>",{class:"pvalue","id":"pUnder7"})).append($("<div>",{class:"prvalue","id":"prUnder7"}));
-			$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Less than 0.08")).append($("<div>",{class:"pvalue","id":"pUnder8"})).append($("<div>",{class:"prvalue","id":"prUnder8"}));
-		}
-		//$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("> 0.07")).append($("<div>",{class:"pvalue","id":"pOver"})).append($("<div>",{class:"prvalue","id":"prOver"}));
+		$("<div>",{class:"list-data-container-panel panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Total")).append($("<div>",{class:"pvalue","id":"pTotal"}));
+		$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("< 0.06")).append($("<div>",{class:"pvalue","id":"pUnder"})).append($("<div>",{class:"prvalue","id":"prUnder"}));
+		$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("< 0.06 and > 0.07")).append($("<div>",{class:"pvalue","id":"pBetween"})).append($("<div>",{class:"prvalue","id":"prBetween"}));
+		$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("> 0.07")).append($("<div>",{class:"pvalue","id":"pOver"})).append($("<div>",{class:"prvalue","id":"prOver"}));
 		//$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Male")).append($("<div>",{class:"pvalue","id":"pMale"})).append($("<div>",{class:"prvalue","id":"prMale"}));
 		//$("<div>",{class:"list-data-container-panel-pr panel-cell"}).appendTo(container).append($("<div>",{class:"plabel"}).text("Female")).append($("<div>",{class:"pvalue","id":"pFemale"})).append($("<div>",{class:"prvalue","id":"prFemale"}));
 	}else if(listid == "list104"){
@@ -630,8 +583,8 @@ function drawListHeader(container, listid){
 }
 function searchListTerm(report){
 	var result = {};
-	//console.log("report before search");
-	//console.log(report);
+	console.log("report before search");
+	console.log(report);
 	var fullnameSearch = $("#text-input-name").val();
 	var chartSearch = $("#text-input-chart").val();
 	var hasName = false;
@@ -671,8 +624,8 @@ function searchListTerm(report){
 		}
 		
 	});
-	//console.log("after search");
-	//console.log(result);
+	console.log("after search");
+	console.log(result);
 	return result;
 }
 function applyFilter(report,filter){
@@ -683,8 +636,8 @@ function applyFilter(report,filter){
 	var dsresultNoDataFilter = [];
 	result["data"] = {};
 	result["data"]["header"] = report.data.header; 
-	//console.log("report before filter");
-	//console.log(report);
+	console.log("report before filter");
+	console.log(report);
 	
 	
 	$.each(ds, function(i,obj){
@@ -721,9 +674,6 @@ function applyFilter(report,filter){
 			var filterDate = moment().subtract(dpValue, 'months');
 			var reportDate = moment(obj.last_hba1c_collecteddate);
 			hasDate = moment(reportDate).isAfter(moment(filterDate));
-			if(filter.list == "list102"){
-				hasDate = moment(reportDate).isBefore(moment(filterDate));
-			}
 			//alert(moment(reportDate).format("YYYY-MM-DD")+"     "+moment(filterDate).format("YYYY-MM-DD") + "    "+ hasDate);
 		}else{
 			//no data period filter = all time
@@ -739,7 +689,7 @@ function applyFilter(report,filter){
 		var hasAge = false;
 		if(filter.age.indexOf("_") >= 0){
 			var ages = filter.age.split("_");
-			if(Number(obj.age) >= Number(ages[0]) && Number(obj.age) <= Number(ages[1])){
+			if(obj.age >= ages[0] && obj.age <= ages[1]){
 				hasAge = true;
 			}
 		}else{
@@ -777,48 +727,28 @@ function applyFilter(report,filter){
 	});
 	
 	//the values for data dates should always be calculated excluding data date filter
-	//console.log("result before sort ");
-	//console.log(dsresult);
+	console.log("result before sort ");
+	console.log(dsresult);
 	
 	if(filter.list == "list101"){dsresult.sort(compareDeltaDesc);}
 	if(filter.list == "list102"){dsresult.sort(compareLastDateDesc);}
 	if(filter.list == "list103"){dsresult.sort(compareHBA1cDesc);}
-	//console.log("result after sort ");
-	//console.log(dsresult);
+	console.log("result after sort ");
+	console.log(dsresult);
 	
 	result["data"]["datasets"] = dsresult;
-	//console.log("report after filter");
-	//console.log(result);
+	console.log("report after filter");
+	console.log(result);
 	
 	
 	return result;
 	/**/
 }
-function compareDDurationAsc(a,b) {
-	  if (Number(a.dduration) < Number(b.dduration)){
-		  return -1;
-	  }
-	  if (Number(a.dduration) > Number(b.dduration)){
-		  return 1;
-	  }
-	  return 0;
-}
-function compareDDurationDesc(a,b) {
-	  if (Number(a.dduration) > Number(b.dduration)){
-		  return -1;
-	  }
-	  if (Number(a.dduration) < Number(b.dduration)){
-		  return 1;
-	  }
-	  return 0;
-}
-
 function compareDeltaAsc(a,b) {
   if (Number(a.delta) < Number(b.delta))return -1;
   if (Number(a.delta) > Number(b.delta))return 1;
   return 0;
 }
-
 function compareDeltaDesc(a,b) {
 	if (Number(a.delta) < Number(b.delta))return 1;
 	if (Number(a.delta) > Number(b.delta))return -1;
@@ -855,40 +785,7 @@ function drawListTableHeader(container, report, listid){
 		}else{
 			var cls = "";
 			if(column == "fullname") cls = "fullname";
-			if(column == "dduration"){
-				var s = $("<div>",{class:"head "+cls,"title":"Click to sort list by duration of diabetes"}).html(hconf.display+"<span data='0'>&nbsp;</span>").appendTo(container);
-				s.click(function(){
-					var d = $(this).find("span").attr("data");
-					if(d == "0"){
-						$(this).addClass("sortable");
-						var rep = {"data":{"header":{},"datasets":[]}};
-						rep["data"]["header"] = report.data.header;
-						rep["data"]["datasets"] = report["data"]["datasets"];
-						var dset = rep["data"]["datasets"];
-						rep["data"]["datasets"] = dset.sort(compareDDurationAsc);
-						$(this).find("span").html("&uarr;");
-						$(this).find("span").attr("data",1);
-						drawListTableBody($("#list-body"), rep, listid);
-					}else if(d == "1"){
-						var rep = {"data":{"header":{},"datasets":{}}};
-						rep["data"]["header"] = report.data.header;
-						rep["data"]["datasets"] = report["data"]["datasets"];
-						var dset = rep["data"]["datasets"];
-						rep["data"]["datasets"] = dset.sort(compareDDurationDesc);
-						$(this).find("span").html("&darr;");
-						$(this).find("span").attr("data",2);
-						drawListTableBody($("#list-body"), rep, listid);
-					}else if(d == "2"){
-						$(this).removeClass("sortable");
-						drawListTableBody($("#list-body"), nowReport, listid);
-						$(this).find("span").html("&nbsp;");
-						$(this).find("span").attr("data",0);
-					}
-				});
-			}else{
-				$("<div>",{class:"head "+cls}).text(hconf.display).appendTo(container);
-			}
-			
+			$("<div>",{class:"head "+cls}).text(hconf.display).appendTo(container);
 		}
 	});
 }
@@ -915,12 +812,8 @@ function drawListTableBody(container,report,listid){
 	
 	var bc = document.getElementById("list-body");
 	var c = document.createDocumentFragment();
-	console.log("list body");
-	console.log(bc);
-	var totalTotal = getAllPatients(globalReport, appFilter.idcommunity);
 	
 	var pTotal = 0;
-	var prTotal=0;
 	var pMale = 0;
 	var prMale = 0;
 	var pFemale = 0;
@@ -939,16 +832,6 @@ function drawListTableBody(container,report,listid){
 	var prOver = 0;
 	var pLastmonth = 0;
 	var prLastmonth = 0;
-	var pUnder7=0;
-	var prUnder7=0;
-	var pUnder6=0;
-	var prUnder6=0;
-	var pUnder8=0;
-	var prUnder8=0;
-	var pMorethan5=0;
-	var prMorethan5=0;
-	var pMorethan10=0;
-	var prMorethan10=0;
 	
 	$.each(reportBody,function(i,row){
 		var e = document.createElement("div");
@@ -985,27 +868,21 @@ function drawListTableBody(container,report,listid){
 		});
 		
 		pTotal++;
-		
 		if(row.sex == "1"){pMale++;}else{pFemale++;}
 		if(row.delta < 0 ){pImproved++;}
 		if(row.delta > 0 ){pSetback++;}
 		if(row.delta == 0 ){pConstant++;}
 		if(row.last_hba1c < 0.06){pUnder++;}else if(row.last_hba1c >= 0.06 && row.last_hba1c <= 0.07){pBetween++;}else if(row.last_hba1c > 0.07){pOver++;}
 		if(moment(row.last_hba1c_collecteddate).isAfter(moment().subtract(1,'month'))){pLastmonth++;}
-		if(row.last_hba1c <= 0.07){pUnder7++;}
-		if(row.last_hba1c <= 0.06){pUnder6++;}
-		if(row.last_hba1c <= 0.08){pUnder8++;}
-		if(moment(row.last_hba1c_collecteddate).isBefore(moment().subtract(5,'year'))){pMorethan5++;}
-		if(moment(row.last_hba1c_collecteddate).isBefore(moment().subtract(10,'year'))){pMorethan10++;}
+		
 	});
-	//console.log("after body "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
+	console.log("after body "+moment().format('MMMM Do YYYY, h:mm:ss.SSS a'));
 	
 	dataHeaderStats["pImproved"]=pImproved;
 	dataHeaderStats["prImproved"]=Math.round((pImproved/pTotal)*100)+"%";
 	dataHeaderStats["pConstant"]=pConstant;
 	dataHeaderStats["prConstant"]=Math.round(100*pConstant/pTotal)+"%";
 	dataHeaderStats["pTotal"]=pTotal;
-	dataHeaderStats["prTotal"] = Math.round(100*pTotal/totalTotal)+"%";
 	dataHeaderStats["pSetback"]=pSetback;
 	dataHeaderStats["prSetback"]=Math.round(100*pSetback/pTotal)+"%";
 	dataHeaderStats["pMale"]=pMale;
@@ -1020,16 +897,7 @@ function drawListTableBody(container,report,listid){
 	dataHeaderStats["prOver"]=Math.round(100*pOver/pTotal)+"%";
 	dataHeaderStats["pBetween"]=pBetween;
 	dataHeaderStats["prBetween"]=Math.round(100*pBetween/pTotal)+"%";
-	dataHeaderStats["pUnder7"]=pUnder7;
-	dataHeaderStats["pUnder6"]=pUnder6;
-	dataHeaderStats["prUnder7"]=Math.round(100*pUnder7/pTotal)+"%";
-	dataHeaderStats["prUnder6"]=Math.round(100*pUnder6/pTotal)+"%";
-	dataHeaderStats["pUnder8"]=pUnder8;
-	dataHeaderStats["prUnder8"]=Math.round(100*pUnder8/pTotal)+"%";
-	dataHeaderStats["pMorethan5"]=pMorethan5;
-	dataHeaderStats["prMorethan5"]=Math.round(100*pMorethan5/pTotal)+"%";
-	dataHeaderStats["pMorethan10"]=pMorethan10;
-	dataHeaderStats["prMorethan10"]=Math.round(100*pMorethan10/pTotal)+"%";
+	
 	
 	$(".list-body-container-line").on("click",function(){
 		var lid = $(this).attr("id");
@@ -1168,16 +1036,7 @@ function renderValue(value,valueConfig){
 		if(valueConfig.format.indexOf("N.") >=0 ){ 
 			return Number(value).toFixed(valueConfig.format.replace("N.","").length);
 		}else{
-			//exeption for duration of diabetes
-			if(valueConfig.name == "dduration"){
-				if(value == 0){
-					value = "< 1";
-				}
-				return value;
-			}else{
-				return value;
-			}
-			
+			return value;
 		}
 	}else if(valueConfig.type == "date" ){
 		return moment(value).format(valueConfig.format);
@@ -1194,7 +1053,6 @@ function refreshHeaderStats(stats){
 	});
 	
 }
-
 function refreshStats(){
 	trendStatsDataFlag=false;
 	setTimeout(getTrendSeries, 100);
@@ -1222,15 +1080,15 @@ function getTrendSeries(){
 		  data : data,
 		  dataType: "json"
 		}).done(function( json ) {
-			//console.log("object stats");
-			//console.log(json.objs[0]);
+			console.log("object stats");
+			console.log(json.objs[0]);
 			trendStatsData = json.objs[0];
 			//drawStatsTrendSeries($("#s1"), trendStatsData);
 			$("#trend-graph").css("background","#cdcdcd");
 			drawAreaGraph($("#trend-graph"), trendStatsData);
 		}).fail(function( jqXHR, textStatus ) {
 		  alert( "Request failed: " + textStatus );
-		  //console.log(this.url);
+		  console.log(this.url);
 		});	
 }
 function getPeriodSeries(){
@@ -1251,15 +1109,15 @@ function getPeriodSeries(){
 		  data : data,
 		  dataType: "json"
 		}).done(function( json ) {
-			//console.log("object stats period");
-			//console.log(json.objs[0]);
+			console.log("object stats period");
+			console.log(json.objs[0]);
 			periodStatsData = json.objs[0];
 			//drawStatsPeriodSeries($("#s2"), periodStatsData);
 			$("#period-graph").css("background","#cdcdcd");
 			drawLineGraph($("#period-graph"), periodStatsData);
 		}).fail(function( jqXHR, textStatus ) {
 		  alert( "Request failed: " + textStatus );
-		  //console.log(this.url);
+		  console.log(this.url);
 		});	
 }
 function getValueSeries(){
@@ -1290,8 +1148,8 @@ function getValueSeries(){
 		  data : data,
 		  dataType: "json"
 		}).done(function( json ) {
-			//console.log("object stats value");
-			//console.log(json.objs[0]);
+			console.log("object stats value");
+			console.log(json.objs[0]);
 			valueStatsData = json.objs[0];
 			
 			//drawStatsValueSeries($("#s3"), valueStatsData);
@@ -1300,7 +1158,7 @@ function getValueSeries(){
 			hideProgress($("#value-graph"));
 		}).fail(function( jqXHR, textStatus ) {
 		  alert( "Request failed: " + textStatus );
-		  //console.log(this.url);
+		  console.log(this.url);
 		});	
 }
 function exportToCsv(filename, rows, header) {
@@ -1434,14 +1292,5 @@ function getReportTitle(filter, type){
 	return result;
 }
 
-function getReport(report){
-	var result = {};
-	result["data"] = {};
-	result["data"]["header"] = report.data.header;
-	result["data"]["datasets"] = [];
-	$.each(report.data.datasets, function(i,row){
-		result["data"]["datasets"].push(row);
-	});
-	return result;
-}
+
 

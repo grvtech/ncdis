@@ -622,10 +622,12 @@ function initAutocompleteHcp(obj){
 			
 		}
 	}).data("ui-autocomplete")._renderItem = function(ul, item) {
+		var $line = $("<a>");
+		var $container = $("<div>").appendTo($line);
+		$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
 		var $liline = $("<li>");
-		$("<div>",{class:'searchname'}).appendTo($liline).append($("<span>").html(item.name));
-		$liline.appendTo(ul);
-		$(ul).height(180);
+		$liline.append($line).appendTo(ul);
+		$(ul).height(200);
 		return $liline;
 	};
 

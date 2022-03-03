@@ -113,6 +113,7 @@
 			var savepass = $.ajax({
 				  url: "/ncdis/service/data/setUserPassword?sid="+sid+"&language=en&iduser="+ob.iduser+"&",
 				  type: "POST",
+				  async : false,
 				  data : data,
 				  dataType: "json",
 				  beforeSend: function(xhr, opts){

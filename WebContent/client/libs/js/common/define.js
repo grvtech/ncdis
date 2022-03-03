@@ -12,8 +12,6 @@ var backArrayIndex = 0;
 var $body = $("body");
 var usersArray = getUsers();
 var userNotes = getUserNotes(sid);
-var containerApp = $('#wraper');
-
 dbp_dec=0;
 sbp_dec=0;
 weight_dec=0;
