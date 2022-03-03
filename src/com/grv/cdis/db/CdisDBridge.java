@@ -1325,6 +1325,8 @@ public class CdisDBridge {
 					
 				//System.out.println(sql);
 				
+				
+				
 				try {
 					initContext = new InitialContext();
 					ds = (DataSource)initContext.lookup("jdbc/ncdis");
