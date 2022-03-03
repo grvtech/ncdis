@@ -1319,8 +1319,6 @@ public class CdisDBridge {
 									+ " and nn.iddata = '"+criteria.getIddata()+"' "
 									+ " "+ criteriaStr+ " "
 											+ "order by nn.idpatient asc";
-					
-					
 				}
 					
 				//System.out.println(sql);
