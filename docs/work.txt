@@ -1,0 +1,197 @@
+2 sections
++ filter tab
+
+age groups + all
+communities + all
+t1_t2 GDm Pre DM + all
+gender + all
+
+p and i now
+
+
+
+
+
+p and i historic
+
+
+
+
+/****** Script for SelectTopNRows command from SSMS  ******/
+SELECT [idpatient]
+      ,[ramq]
+      ,[jbnqa]
+      ,[fname]
+      ,[lname]
+      ,[dob]
+      ,[dod]
+      ,[idcommunity]
+      ,[iscree]
+      ,[chart]
+      ,[band]
+      ,[death_cause]
+      ,[active]
+	  , case
+		when sex = 1 then 'male'
+		when sex = 2 then 'female'
+	  end as gender
+	  ,case
+		when dod is null or dod = '1900-01-01' then 'no'
+		when dod = '1900-01-01' and death_cause is not null then 'yes'
+		when dod != '1900-01-01' then 'yes' 
+	  end as deceased
+  FROM [ncdis].[ncdis].[patient]
+  where active = 1;
+
+  select p.idpatient,cv.datevalue as 'Date of diagnostic',
+  case 
+	when cv.value=1 then 'Type 1'
+	when cv.value=2 then 'Type 2'
+	when cv.value=3 or cv.value=10 then 'PRE DM'
+	when cv.value=4 or cv.value=11 then 'GDM'
+	end as 'Type of diabetes'
+  from ncdis.ncdis.cdis_value cv
+  inner join 
+	( SELECT idpatient FROM ncdis.ncdis.patient where active = 1) as p
+	on cv.idpatient = p.idpatient
+  where cv.iddata=1;
+
+   select *  from ncdis.ncdis.users;
+
+  select u.iduser,u.lname,u.fname,u.email,u.phone,
+	case
+		when u.idprofesion = 1 then 'MD'
+		when u.idprofesion = 2 then 'NURSE'
+		when u.idprofesion = 3 then 'NUTRITIONIST'
+		when u.idprofesion = 4 then 'CHR'
+	end as profession,
+	case
+		when p.idrole = 1 then 'ADMIN'
+		when p.idrole = 2 then 'USER'
+		when p.idrole = 3 then 'GUEST'
+	end as role,
+	case
+		when u.idcommunity = 0 then 'All communities'
+		when u.idcommunity != 0 then c.name_en
+	end as community
+  from ncdis.ncdis.users u
+	left join 
+		(select idcommunity, name_en from  ncdis.ncdis.community ) as c
+		on u.idcommunity = c.idcommunity
+	left join 
+		(select iduser,idrole from ncdis.ncdis.profile) as p
+		on u.iduser = p.iduser
+  where u.active = 1
+  ;
+  
+  
+  
+  update ncdis.ncdis.session 
+set active=0 where 
+idsession in (
+select idsession from ncdis.ncdis.session
+group by idsession
+having  
+datediff(minute, max(modified), GETDATE()) > (Select convert(int,value) from ncdis.ncdis.configuration where keia='session'));
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  select *
+from
+(SELECT  
+	sum(case when a.deltavalue < 0  and a.idcommunity > 0   and ( a.dtype=1 or a.dtype=2  )   and a.sex > 0   and a.age > 0   and a.isgood =1  then 1 else 0 end) as nTotal
+	,a.age
+	,a.sex
+	,a.idcommunity
+from 
+	(select 
+		tt1.idpatient
+		, tt1.value as value1
+		, tt2.value as value2 
+		, tt1.datevalue as date1
+		, tt2.datevalue as date2  
+		, datediff(year, p.dob, getdate()) as age   
+		, round(try_convert(float, tt1.value) - try_convert(float, tt2.value), 3) as deltavalue  
+		, case  
+			when try_convert(float, tt1.value) >= 0.07 OR try_convert(float, tt2.value) >= 0.07 		then 1		else 0	
+		end as isgood 
+		, p.idcommunity 
+		, p.sex,tt3.value as dtype 
+		, tt3.datevalue as ddate  
+	from 
+		(select 
+			aa.datevalue, 
+			aa.value, 
+			aa.idpatient, 
+			aa.seqnum 
+		from 
+			(select 
+				cd.* , 
+				row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+			from 
+				ncdis.ncdis.cdis_value cd 
+			where 
+				cd.iddata=27 
+				and cd.datevalue between '2021-03-01' and '2021-03-30'
+			) aa 
+		where 
+			aa.seqnum = 1
+		) as tt1 
+	left join 
+		(select 
+			aa.datevalue, 
+			aa.value, 
+			aa.idpatient, 
+			aa.seqnum 
+		from 
+			(select 
+				cd.* , 
+				row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+			from 
+				ncdis.ncdis.cdis_value cd 
+			where 
+				cd.iddata=27 
+				and cd.datevalue <= '2021-03-30' 
+			) aa 
+		where 
+			aa.seqnum = 2
+		) as tt2 
+		on tt1.idpatient = tt2.idpatient 
+		
+		left join 
+			ncdis.ncdis.patient p 
+			on  tt1.idpatient = p.idpatient and p.active=1 and (p.dod is null or p.dod='1900-01-01') 
+		left join 
+			(select 
+				aa.datevalue, 
+				aa.value, 
+				aa.idpatient, 
+				aa.seqnum 
+			from 
+				(select 
+					cd.* , 
+					row_number() over (partition by cd.idpatient order by datevalue desc) as seqnum 
+				from 
+					ncdis.ncdis.cdis_value cd 
+				where 
+					cd.iddata=1 
+					and cd.datevalue <= '2021-03-30'
+				) aa 
+			where 
+				aa.seqnum = 1
+			) as tt3 
+			on tt1.idpatient = tt3.idpatient  
+		where  
+			tt2.value is not null  
+			and p.idcommunity != 10  
+	) as a
+group by a.age,a.sex,a.idcommunity
+) as b
+where b.nTotal != 0
+  
