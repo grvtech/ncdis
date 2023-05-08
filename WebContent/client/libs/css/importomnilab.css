@@ -1,0 +1,41 @@
+.reportsbody-importomnilab{
+	padding:10px;
+	min-height:500px;
+}
+.importomnilab-wraper{
+	display:grid;
+	height:90%;
+	grid-template-columns: 200px auto;
+}
+.importomnilab-files{
+	
+	background:#cdcdcd;
+	height:100%;
+}
+.importomnilab-files-header{
+	background:#4b3b3b;
+	color:#ffffff;
+	line-height:35px;
+	font-weight:bold; 	
+}
+.importomnilab-files-elements .felem{
+	font-weight:bold;
+	cursor:pointer;
+	padding:5px 0px 5px 0px; 
+}
+
+.importomnilab-files-elements .felem:hover{
+	color:#ffffff;
+	background:red;
+	
+}
+.importomnilab-files-elements .felem.selected{
+	color:#ffffff;
+	background:black;
+	
+}
+.importomnilab-report{
+	display:grid;
+	height:90%;
+	grid-template-columns: 40% 40%;
+}
