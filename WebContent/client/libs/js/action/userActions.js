@@ -1,6 +1,6 @@
 function logoutUser(sid){
 	var request = $.ajax({
-		  url: "/ncdis/service/data/logoutSession?sid="+sid+"&language=en",
+		  url: "/ncdis/service/data/logoutSession?sid="+sid+"&language=en&ts="+moment(),
 		  type: "GET",
 		  async : false,
 		  dataType: "json"
@@ -19,10 +19,11 @@ function logoutUser(sid){
 }
 
 
+
 function getSession(iduser){
 	var sid = "";
 	var request = $.ajax({
-		  url: "/ncdis/service/data/getUserSession?iduser="+iduser+"&language=en",
+		  url: "/ncdis/service/data/getUserSession?iduser="+iduser+"&language=en&ts="+moment(),
 		  type: "GET",
 		  async : false,
 		  dataType: "json"
@@ -40,7 +41,19 @@ function getSession(iduser){
 	return sid;
 }
 
-
+function setEvent(eventcode){
+	var request = $.ajax({
+		  url: "/ncdis/service/action/setEvent?sid="+sid+"&eventcode="+eventcode+"&language=en&ts="+moment(),
+		  type: "GET",
+		  dataType: "json"
+		});
+		request.done(function( json ) {
+			var sObj = json.objs[0];
+		});
+		request.fail(function( jqXHR, textStatus ) {
+		  alert( "Request failed: " + textStatus );
+		});
+}
 
 function getUser(iduser){
 	var uObj = null;
@@ -82,7 +95,6 @@ function getPatientInfo(idpatient){
 		});
 		request.done(function( json ) {
 			pObj = json.objs[0];
-			//console.log(pObj);
 		});
 
 		request.fail(function( jqXHR, textStatus ) {
@@ -160,10 +172,10 @@ function isUserLoged(sessionId){
 		});
 		request.done(function( json ) {
 			var sObj = json.objs[0];
-			//alert(sObj.idsession);
 			if(sObj != null){
 				if((sObj.idsession != null) && (sObj.idsession != "") ){
 					userObj = getUserBySession(sObj.idsession);
+					if(userObj[0].username=="demo")isDemo=true;
 					userProfileObj = getUserProfile(sObj.iduser, 1);
 					result = true;
 				}else{
@@ -238,6 +250,77 @@ function getUserNotes(sessionid){
 }
 
 
+function refreshUserNotes(sessionid){
+	var request = $.ajax({
+		  url: "/ncdis/service/action/getUserNotes?language=en&sid="+sessionid,
+		  type: "GET",
+		  async : true,
+		  cache : false,
+		  dataType: "json"
+		});
+		request.done(function( json ) {
+			userNotes = json.objs[0];
+			if(userNotes.length > 0 ){
+				$(".menu .messages").show();
+				var cn = null;
+				if($(".menu .messages .number").length > 0 ){
+					cn = $(".menu .messages .number");
+				}else{
+					cn = $("<div>",{class:"number"}).appendTo($(".menu .messages"));
+				}
+				
+				cn.text(userNotes.length);
+				prepareMessageWidget(userNotes);
+			}else{
+				$(".menu .messages").hide();
+			}
+			setTimeout(refreshUserNotes,5000,sessionid);
+		});
+		request.fail(function( jqXHR, textStatus ) {
+		  alert( "Request failed: " + textStatus );
+		});
+}
+
+function prepareMessageWidget(notes){
+	if($(".menu .messages").length > 0 ){
+		var mw = $(".menu .messages");
+		var meev = getEvents(mw[0]);
+		
+		if(typeof(meev) == "undefined" || meev.mouseover.length <= 1 ){
+			mw.on("mouseenter",function(){
+				if($(".messages-details-container").length > 0){
+					$(".messages-details-container").remove();
+				}
+				var mdc = $("<div>",{class:"messages-details-container"}).appendTo($("#wraper"));
+				mdc.empty();
+				mdc.append($("<div>",{class:"arrow-up"})).append($("<div>",{class:"messages-details"}));
+				$.each(userNotes,function(i,not){
+					var uzer = getUser(not.iduser);
+					var patient = getPatientInfo(not.idpatient);
+					$("<div>",{class:"message"})
+						.append($("<span>").html("New message from <b>"+uzer.firstname+" "+uzer.lastname+ "</b> for the patient <b>"+patient.ramq+"</b>"))
+						.append($("<div>",{class:"cisbutton"}).text("View").click(function(){
+							gtc(sid,"en",patient.ramq,"notes");
+						}))
+					.appendTo($(".messages-details"));
+				});
+				$(".messages-details-container").show("fade",600);
+			}).on("mouseleave",function(){
+				setTimeout(function(){
+					if($(".messages-details-container:hover").length > 0){
+						$(".messages-details-container").on("mouseleave",function(){$(".messages-details-container").remove();});
+					}else{
+						$(".messages-details-container").remove();
+					}
+				},700);
+			});
+		}
+	}
+}
+
+
+
+
 function getUserActionsTop5Dataset(){
 	var result = [];
 	var request = $.ajax({
@@ -286,8 +369,6 @@ function resetForm($form){
 }
 
 function populateForm($form, data){
-    //resetForm($form);
-	//console.log(data);
 	
     $.each(data, function(key, value) {
     	if(typeof value == "object" && value != null){
@@ -604,7 +685,6 @@ function readNote(noteid){
 			
 	});
 	mes.fail(function( jqXHR, textStatus ) {
-	  console.log(this.url);
 	});	
 }
 
@@ -620,7 +700,6 @@ function deleteNote(noteid){
 			
 	});
 	mes.fail(function( jqXHR, textStatus ) {
-	  console.log(this.url);
 	});	
 }
 
@@ -638,13 +717,9 @@ function getPatientNotes(section){
 	mes.done(function( json ) {
 		notes = json.objs[0];
 		var loggedUser = userObj[0];
-		console.log(userProfileObj);
-		
 		
 		if(section != "notes" && section != "patient"){
-			//var notesPanelSide = $(".panel-notes");
 			$(".panel-notes").empty();
-			//console.log(notes);
 			$.each(notes,function(index,objNote){
 				var iduser = objNote.iduser;
 				var user = getUser(iduser);
@@ -715,7 +790,6 @@ function getPatientNotes(section){
 		
 	});
 	mes.fail(function( jqXHR, textStatus ) {
-	  console.log(this.url);
 	});	
 }
 
@@ -837,16 +911,18 @@ function loadRecomandation(recObj){
 		}
 		if($(window).height() < h){
 			$("<div>",{class:"title"}).text(rObj.title).appendTo(rcontainer);
-			var tub = $("<div>",{class:"thumbnail",style:"text-align:right;"}).append($("<img>",{src:"/ncdis/client/libs/images/"+rObj.thumbnail,height:"55px",width:"30px;"})).appendTo(rcontainer);
+			var tub = $("<div>",{class:"thumbnail",style:"text-align:right;"}).append($("<img>",{src:"/ncdis/client/libs/images/"+rObj.thumbnail+"?_"+moment().format('X'),height:"55px",width:"30px;"})).appendTo(rcontainer);
 		}else{
 			$("<div>",{class:"title"}).text(rObj.title).appendTo(rcontainer);
-			var tub = $("<div>",{class:"thumbnail"}).append($("<img>",{src:"/ncdis/client/libs/images/"+rObj.thumbnail,height:"60px"})).appendTo(rcontainer);
+			var tub = $("<div>",{class:"thumbnail"}).append($("<img>",{src:"/ncdis/client/libs/images/"+rObj.thumbnail+"?_"+moment().format('X'),height:"60px"})).appendTo(rcontainer);
 		}
 		
 		rcontainer.click(function(){
-			var modalWidth = 850;
-			if(rObj.thumbnail == 'recomandation_ckd_thumbnail.png'){
+			var modalWidth = 980;
+			if(rObj.source == 'recomandation_ckd.html'){
 				modalWidth = 950; 
+			}else if(rObj.source == 'recomandation.renalfunction.html'){
+				modalWidth = 1000; 
 			}
 			$("#recomandation-modal").remove();
 			$("<div>",{id:"recomandation-modal",title:rObj.title}).appendTo($("body"));
@@ -926,9 +1002,61 @@ function setScheduleVisit(scheduleid,iduser,idpatient,scheduledate,idprofesion,f
 			
 	});
 	mes.fail(function( jqXHR, textStatus ) {
-	  console.log(this.url);
 	});	
 }
+
+
+function randomDate(start, end) {
+	  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
+}
+
+//const d = randomDate(new Date(2012, 0, 1), new Date());
+
+function demoData(dataObject, context){
+	if(context == "search"){
+		var obArr = dataObject.objs;
+		var term = $("#search").text();
+		$.each(obArr, function(i,ob){
+			ob.lastname = "Patient "+i;
+			ob.firstname = "Full name";
+			ob["realramq"] = ob.ramq;
+			//ob.ramq = makelid(4)+makenid(8);
+			ob.ramq = "XXXX12345678";
+			//ob.chart = makenid(4);
+			ob.chart = "0000";
+			//ob.giu = makenid(5);
+			ob.giu = "1111";
+		});
+		dataObject["objs"] = obArr;
+	} else if(context == "userpatients"){
+		$.each(dataObject, function(i,ob){
+			ob.fullname = "Full name" + " Patient "+i ;
+			ob["realramq"] = ob.ramq;
+			//ob.ramq = makelid(4)+makenid(8);
+			ob.ramq = "XXXX12345678";
+			//ob.chart = makenid(4);
+			ob.chart = "0000";
+		});
+	}else if(context == "patient"){
+		dataObject[0].fname = "First name";
+		dataObject[0].lname = "Last name";
+		//dataObject[0].chart = makenid(4);
+		dataObject[0].chart = "0000";
+		//dataObject[0].ramq = makelid(4)+makenid(8);
+		dataObject[0].ramq = "XXXX12345678";
+		//dataObject[0].dob = moment(new Date(+(new Date()) - Math.floor(Math.random()*10000000000))).format('MM/DD/YYYY');
+		dataObject[0].dob = "01-01-2022";
+		//dataObject[0].jbnqa = makenid(5);
+		dataObject[0].jbnqa = "99999";
+		//dataObject[0].giu = makenid(5);
+		dataObject[0].giu = "1111";
+	}
+	
+	return dataObject;
+}
+
+
+
 
 function getUserPatients(userId,hcpcat){
 	
@@ -941,12 +1069,15 @@ function getUserPatients(userId,hcpcat){
 		});
 		request.done(function( json ) {
 			var obArr = json.objs;
-			//console.log(obArr);
 			if(obArr.length === 0){
 				$("<tr>",{class:"notvisits"}).appendTo($(".personal-patients table tbody"))
 				.append($("<td>",{colspan:5,align:"center",style:"font-weight:bold;"}).text("No patient linked to this user!"));
 				
 			}else{
+				
+				if(isDemo)obArr = demoData(obArr,"userpatients");
+				
+				
 				$.each(obArr,function(index,obj){
 					var dd = "";
 					var now = moment();
@@ -960,6 +1091,7 @@ function getUserPatients(userId,hcpcat){
 								.append($("<td>").text(obj.community))
 								.append($("<td>").text(dd.format("MMM YYYY")))
 								.click(function(){
+									if(isDemo)obj.ramq = obj.realramq;
 									gtc(sid,"en", obj.ramq,"patient");
 								});
 						}
@@ -977,6 +1109,7 @@ function getUserPatients(userId,hcpcat){
 								.append($("<td>").text(obj.ramq))
 								.append($("<td>").text(obj.community))
 								.append($("<td>").text(dd.format("MMM YYYY"))).click(function(){
+									if(isDemo)obj.ramq = obj.realramq;
 									gtc(sid,"en", obj.ramq,"patient");
 								});
 
@@ -986,7 +1119,6 @@ function getUserPatients(userId,hcpcat){
 				$.each(obArr,function(index,obj){
 					var dd = "";
 					var now = moment();
-					//console.log(obj);
 					if(typeof(obj.datevisit)  == "undefined" ){
 							$("<tr>",{class:"notvisits"}).appendTo($(".personal-patients table tbody"))
 								.append($("<td>").text(obj.fullname))
@@ -994,6 +1126,7 @@ function getUserPatients(userId,hcpcat){
 								.append($("<td>").text(obj.ramq))
 								.append($("<td>").text(obj.community))
 								.append($("<td>").text("Not scheduled")).click(function(){
+									if(isDemo)obj.ramq = obj.realramq;
 									gtc(sid,"en", obj.ramq,"patient");
 								});
 

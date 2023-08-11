@@ -25,7 +25,9 @@
 
  
 <div class="cdisheader uss">
-	<div class="logo">CDIS</div>
+	<div class="logo"></div>
+	<div class="name">CDIS</div>
+	<div class="title">Patient</div>
 	<div class="search">
 			<div id="criteria">CHART</div>
 		  	<div id="radios" class="scriteria btn-group-vertical" data-toggle="buttons"">
@@ -38,10 +40,11 @@
 	</div>
 	
 	<ul class="menu">
-		<li class="personalinfo ubs" data-toggle="tooltip" data-placement="left" title="Personal Info"></li>
-		<li class="users ubs" data-toggle="tooltip" data-placement="left" title="Users Administration"></li>
-		<li class="frontpage ubs" data-toggle="tooltip" data-placement="left" title="Front page message"></li>
-		<li class="audit ubs" data-toggle="tooltip" data-placement="left" title="Users action log"></li>
+		<li class="messages ubs" data-toggle="tooltip" data-placement="left" title="Patient Messages"><i class="fa fa-envelope"></i></li>
+		<li class="personalinfo ubs" data-toggle="tooltip" data-placement="left" title="Personal Info"><i class="fa fa-user"></i></li>
+		<li class="users ubs" data-toggle="tooltip" data-placement="left" title="Users Administration"><i class="fa fa-users"></i></li>
+		<li class="frontpage ubs" data-toggle="tooltip" data-placement="left" title="Front page message"><i class="fa fa-comment"></i></li>
+		<li class="audit ubs" data-toggle="tooltip" data-placement="left" title="Users action log"><i class="fa fa-list"></i></li>
 	</ul>
 </div>
  
@@ -81,9 +84,18 @@
 		var sclass = $(this).children("span").attr("class");
 		var sec = sclass.substring(0,sclass.indexOf("_icon"));
 		$(this).click(function() {
-			//selectSection(sec);
-			//window.location="cdis.html?section="+sec+"&ramq="+patientObj.ramq+"&sid="+sid+"&language=en";
-			gtc(sid,"en",patientObj.ramq,sec);
+			if(isDemo){
+				if(sec == "notes"){
+					alert("This function si not available in demo mode");
+				}else{
+					gtc(sid,"en",getParameterByName("ramq"),sec);	
+				}
+			}else{
+				//selectSection(sec);
+				//window.location="cdis.html?section="+sec+"&ramq="+patientObj.ramq+"&sid="+sid+"&language=en";
+				gtc(sid,"en",patientObj.ramq,sec);	
+			}
+			
 		});
 	});
 	
@@ -93,9 +105,9 @@
 		$(".leftfootermenu").toggle("fade");
 	});
 	
+	refreshUserNotes(sid);
 	
-	
-	
+	if(isDemo){$("#search").attr("type","password");}
 	var optionSelected = false;
 	$("#search").autocomplete({
 		delay: 300,
@@ -112,6 +124,7 @@
 					sid: sid
 				},
 				success: function( data ) {
+					if(isDemo){data = demoData(data,"search");}
 					response( $.map( data.objs, function( item ) {
 						return {
 							idpatient : item.idpatient,
@@ -119,6 +132,7 @@
 							firstname : item.firstname,
 							chart : item.chart,
 							ramq : item.ramq,
+							realramq : (isDemo)?item.realramq:item.ramq,
 							community: item.community,
 							giu: item.giu,
 							criteria : $("#radios :radio:checked").attr('id'),
@@ -132,6 +146,7 @@
 			optionSelected = true;
 			clearSections();
 			patientSearchObj = ui.item;
+			if(isDemo)patientSearchObj.ramq = patientSearchObj.realramq;
 			gtc(sid,"en",patientSearchObj.ramq,"patient");
 			return false;
 		},
@@ -151,7 +166,7 @@
 			if(item.criteria == "fnamelname"){
 				var fn = (item.firstname+" "+item.lastname).toString().toLowerCase();
 				fn = replaceAll(fn,item.term.toLowerCase(), "<strong>"+item.term.toLowerCase()+"</strong>");
-				$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(fn.toUpperCase()));
+				$("<div>",{class:'searchname criteria'}).appendTo($container).append($("<span>").html(fn.toUpperCase()));
 			}else{
 				$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html((item.firstname+" "+item.lastname).toUpperCase()));
 			}
@@ -159,14 +174,14 @@
 			if(item.criteria == "chart"){
 				var cn = item.chart.toString();
 				cn = replaceAll(cn,item.term, "<strong>"+item.term+"</strong>");
-				$("<div>",{class:'searchchart'}).html("<span> "+cn+" </span>").appendTo($container);
+				$("<div>",{class:'searchchart criteria'}).html("<span> "+cn+" </span>").appendTo($container);
 			}else{
 				$("<div>",{class:'searchchart'}).html("<span>"+item.chart+"</span>").appendTo($container);
 			}
 			if(item.criteria == "ramq"){
 				var ran = (item.ramq).toString().toLowerCase();
 				ran = replaceAll(ran, item.term.toLowerCase(), "<strong>"+item.term.toLowerCase()+"</strong>");
-				$("<div>",{class:'searchramq'}).html("<span>"+ran.toUpperCase()+"</span>").appendTo($container);
+				$("<div>",{class:'searchramq criteria'}).html("<span>"+ran.toUpperCase()+"</span>").appendTo($container);
 			}else{
 				$("<div>",{class:'searchramq'}).html("<span>"+item.ramq+"</span>").appendTo($container);
 			}
@@ -174,7 +189,7 @@
 			if(item.criteria == "ipm"){
 				var gan = (item.giu).toString().toLowerCase();
 				gan = replaceAll(gan, item.term.toLowerCase(), "<strong>"+item.term.toLowerCase()+"</strong>");
-				$("<div>",{class:'searchgiu'}).html("<span>"+gan.toUpperCase()+"</span>").appendTo($container);
+				$("<div>",{class:'searchgiu criteria'}).html("<span>"+gan.toUpperCase()+"</span>").appendTo($container);
 			}else{
 				$("<div>",{class:'searchgiu'}).html("<span>"+item.giu+"</span>").appendTo($container);
 			}

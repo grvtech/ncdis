@@ -236,42 +236,31 @@ public class ChbDBridge {
 		ResultSet rs = null;
 		PreparedStatement cs=null;
 		Connection conn = null;
-
+		Statement st = null;
 		try {
 			initContext = new InitialContext();
-			//Context envContext  = (Context)initContext.lookup("java:comp/env");
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
-		    cs=conn.prepareStatement("update ncdis.ncdis.users set fname=?, lname=?, phone=?, email=?, password=?, active=?, idcommunity=?, idprofesion=? where iduser = ?");
-		    cs.setEscapeProcessing(true);
-		    cs.setQueryTimeout(90);
-		    cs.setString(1, user.getFirstname());
-		    cs.setString(2, user.getLastname());
-		    cs.setString(3, user.getPhone());
-		    cs.setString(4, user.getEmail());
-		    cs.setString(5, user.getPassword());
-		    cs.setString(6, user.getActive());
-		    cs.setString(7, user.getIdcommunity());
-		    cs.setString(8, user.getIdprofesion());
-		    cs.setInt(9, Integer.parseInt(user.getIduser()));
+			
+			String sql = "update ncdis.ncdis.users set fname='"+user.getFirstname()+"', "
+					+ "lname='"+user.getLastname()+"', "
+					+ "phone='"+user.getPhone()+"', "
+					+ "email='"+user.getEmail()+"', "
+					+ "password='"+user.getPassword()+"', "
+					+ "active='"+user.getActive()+"', "
+					+ "idcommunity='"+user.getIdcommunity()+"', "
+					+ "idprofesion='"+user.getIdprofesion()+"' "
+					+ "where iduser = "+Integer.parseInt(user.getIduser())+" ";
 		    
-		    cs.executeUpdate();
-		    /*
-		    while (rs.next()) {
-		    	int cols = rs.getMetaData().getColumnCount();
-		    	for(int i=1;i<=cols;i++){
-		    		result.put(rs.getMetaData().getColumnName(i), rs.getString(i));
-		    	}
-		    }
-		    */
+			st = conn.createStatement();
+		    st.executeUpdate(sql);
 		}catch (SQLException se) {
 		        se.printStackTrace();
 	    } catch (NamingException e) {
 			e.printStackTrace();
 		} finally {
 	        try {
-	            
-	            cs.close();
+	            st.close();
 	            conn.close();
 	        } catch (SQLException ex) {
 	            ex.printStackTrace();
@@ -705,7 +694,7 @@ public class ChbDBridge {
 		//ResultSet rs = null;
 		PreparedStatement cs=null;
 		Connection conn = null;
-
+		validateAllSessions();
 		try {
 			initContext = new InitialContext();
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -744,7 +733,39 @@ public class ChbDBridge {
 		return result;
 	}
 	
+	public boolean validateAllSessions(){
+		boolean result = false;
+		Context initContext;
+		DataSource ds;
+		//ResultSet rs = null;
+		PreparedStatement cs=null;
+		Connection conn = null;
 
+		try {
+			initContext = new InitialContext();
+			ds = (DataSource)initContext.lookup("jdbc/ncdis");
+			conn = ds.getConnection();
+			//   idsystem system_name system_code idrole
+		    cs=conn.prepareStatement("update ncdis.ncdis.session set active=? where idsession in ( select idsession from ncdis.ncdis.session group by idsession  having datediff(minute, max(modified), GETDATE()) > (Select convert(int,value) from ncdis.ncdis.configuration where keia='session'))");
+		    cs.setEscapeProcessing(true);
+		    cs.setInt(1,0);
+		    cs.executeUpdate();
+		    result = true;
+		}catch (SQLException se) {
+		    se.printStackTrace();
+	    } catch (NamingException e) {
+			e.printStackTrace();
+		} finally {
+	        try {
+	            //rs.close();
+	            cs.close();
+	            conn.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	   }
+		return result;
+	}
 	public Session getUserSession(int iduser, String ip){
 		Session result = null;
 		Context initContext;

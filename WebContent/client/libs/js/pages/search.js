@@ -1,3 +1,4 @@
+
 if (!isUserLoged(sid)){
 	logoutUser(sid);
 }else{

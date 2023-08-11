@@ -98,7 +98,6 @@ public class FtpTool {
 	        	return false;
 	        }
 		
-       
  
         FTPClient ftpClient = new FTPClient();
         try {

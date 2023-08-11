@@ -9,12 +9,32 @@ var graphtype_line = {title:'Data Graph', axes:{xaxis:{renderer:$.jqplot.DateAxi
 var graphtype_bar =  {title:'Data Graph',seriesDefaults:{renderer:$.jqplot.BarRenderer},axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}};
 var graphtype_pie =  {title:'Data Graph',gridPadding: {top:0, bottom:38, left:0, right:0},seriesDefaults:{renderer:$.jqplot.PieRenderer,trendline:{ show:false },rendererOptions: { padding: 8, showDataLabels: true }},legend:{show:true,placement: 'outside',rendererOptions: {numberRows: 1},location:'s',marginTop: '15px'}};
 var exportImage = null;
+var isSurveillance = false;
+var isPvalidation = false;
+var showPopupFlag = true;
+var pvalidationPopupTitle = "Patient Validation";
+var pvalidationText = "<p>Patient Validation is a tool that allows CDIS users to screen for patients whose information may require updating (e.g. change of diagnosis, patient deceased, permanently moved from region).</p>"
+						+"<ul><li>No data in last 5 years (unless GDM)</li>"
+						+"<li>Age > 95</li>"
+						+"<li>Duplicate name</li>"
+						+"<li>Predm and value > 0.065 X 2 : if reclassifying as diabetic first verify that patient is aware of diagnosis</li></ul>"
+						+"<span>Corrections can be done by CDIS users. For deletions, an email explaining the problem must be sent to support@grvtech.ca</span>";
+
+
 //var dashboard_graph_data = [['2008-08-12 4:00PM',4], ['2008-09-12 4:00PM',6.5], ['2008-10-12 4:00PM',5.7], ['2008-11-12 4:00PM',9], ['2008-12-12 4:00PM',8.2]];
 //var dahsboard_graph_options = {title:'Data Graph', axes:{xaxis:{renderer:$.jqplot.DateAxisRenderer} },series:[{lineWidth:4, markerOptions:{style:'square'}}]};
 
 if (!isUserLoged(sid)){
 	logoutUser(sid);
 }else{
+	if(getParameterByName("reportid") == "surveillance"){
+		isSurveillance = true;
+	}else if(getParameterByName("reportid") == "pvalidation"){
+		isPvalidation = true;
+	}else{
+		isSurveillance = false;
+		isPvalidation = false;
+	}
 	loadTemplate(page,loadReportsTemplate);
 }	
 
@@ -32,8 +52,6 @@ function loadReportsTemplate(){
 				
 				$.each(predefinedReports, function(k, vObj){
 					var raport = prepareDefinedReport(vObj.code);
-					//console.log(vObj.code);
-					//console.log(raport);
 					reportObjectToExecute = loadReport(raport);
 					list.append(
 							$("<div>",{class:"dashboard-item-"+reportObjectToExecute.class+" uss",id:reportObjectToExecute.id})
@@ -44,6 +62,55 @@ function loadReportsTemplate(){
 					renderReport(reportObjectToExecute);
 				});
 			}
+			
+			//load surveillance tabs as well
+			$("#surveillance").load("/ncdis/client/templates/reports.sur.html",function(){
+				setTimeout(setEvent,100,"SUR");
+				initSurveillance(1);
+				
+			});
+			
+			if(isDemo){
+				alert("This function is not available in demo mode");
+			}else{
+				//load patient validation tool
+				$("#pvalidation").load("/ncdis/client/templates/reports.patv.html",function(){
+					//setTimeout(setEvent,100,"PATV");
+					initPvalidation();
+				});
+			}
+			
+			//load patient validation tool
+			$("#pandi").load("/ncdis/client/templates/reports.pandi.html",function(){
+				//setTimeout(setEvent,100,"PANDI");
+				reportsSection = "pandi";
+				initPandi();
+			});
+			
+			if(isDemo){
+				//alert("This function si not available in demo mode");
+			}else{
+				//load import omnilab
+				$("#importomnilab").load("/ncdis/client/templates/reports.importomnilab.html",function(){
+					reportsSection = "importomnilab";
+					initImportOmnilab();
+				});
+			}
+			
+			if(isSurveillance){
+				reportsSection = "surveillance";
+				isSurveilance = false;
+				$("#tabs").tabs({"active":2});
+			}
+			
+			if(isPvalidation){
+				if(!isDemo){
+					reportsSection = "pvalidation";
+					isPvalidation = false;
+					$("#tabs").tabs({"active":3});
+				}
+			}
+			
 			initPage();
 		});
 	}else{
@@ -54,41 +121,207 @@ function loadReportsTemplate(){
 function renderReport(reportObj){
 	$("#"+reportObj.id+" > .title").append($("<div>",{style:"display:inline-block;width:90%;"}).text(reportObj.title));
 	
-	$("#"+reportObj.id+" > .title").append($("<div>",{class:"cisbutton",'data-toggle':"tooltip",title:"Print Graph",id:"print-"+reportObj.id}).html("<i class='fa fa-print' aria-hidden='true'></i>"));
-	$("#print-"+reportObj.id).click(function(){
-		$("#"+reportObj.id).printJQPlot(reportObj.title);
-	});
-	//console.log(reportObj);
-	
 	if($.type(reportObj.input) === "array"){
 		$.each(reportObj.input,function(i,v){
 			var cinputForm = $("<div>",{class:"form-item"});
 			cinputForm.append($("<div>",{class:"form-label"}).text(v.display));
-			var ri = $("<select>",{id:"form-field-"+v.name});
-			ri.change(function(){
-				var subObj = reportObj["subcriteria"][i];
-				var vv = ri.val();
-				if(subObj.subsection == "1"){
-					if(vv == "0"){
-						subObj["suboperator"] = "more than";
-					}else{
-						subObj["suboperator"] = "equal";
+			var rid = reportObj.id;
+			$("#"+rid+" > .form").append(cinputForm);
+			if(v.name == "idcommunity" ){
+				$("<div>",{class:"ms"+rid}).appendTo(cinputForm);
+				var voptions = {"container":"ms"+rid,"maxSelect":"2","defaultSelected":"0","idrole":userProfileObj.role.idrole};
+				var vlist = [{"name":"All Communities","value":"0"},
+				            {"name":"Chisasibi","value":"1"},
+				            {"name":"Eastmain","value":"2"},
+				            {"name":"Mistissini","value":"3"},
+				            {"name":"Nemaska","value":"4"},
+				            {"name":"Oujebougoumou","value":"5"},
+				            {"name":"Waskaganish","value":"6"},
+				            {"name":"Waswanipi","value":"7"},
+				            {"name":"Wemindji","value":"8"},
+				            {"name":"Whapmagoostui","value":"9"}];
+				
+				var ms = new GRVMSelect(vlist,voptions);
+				$(ms.object).change(function(){
+					var v = ms.getValue();
+					$(ms.element).attr("value",v);
+					var subObj = reportObj["subcriteria"][i];
+					var vv = v;
+					if(subObj.subsection == "1"){
+						if(vv == "0"){
+							subObj["suboperator"] = "more than";
+						}else{
+							subObj["suboperator"] = "equal";
+						}
 					}
+					subObj["subvalue"] = v;
+					reportObj["subcriteria"][i] = subObj;
+					
+					if($("#form-field-cvalue-REP3").val() == "on" && ($(reportObj).attr("id")).indexOf("REP3") >=0 ){
+						if(!isDecimal($("#form-field-cvalue-REP3-cvalue-value").val())){
+							$("#form-item-cvalue-REP3-cvalue .form-label").addClass("txtErrorRed");
+							$("#form-field-cvalue-REP3-cvalue-value").addClass("inputErrorRed");
+						}else{
+							renderGraphReport3CustomValue($("#form-field-dtype-REP3").val(),$(".msREP3").attr("value"), $("#form-field-cvalue-REP3-cvalue-value").val(),$("#REP3 > .graph"));
+						}
+					}else if($("#form-field-filter-REP4").val() == "on" && ($(reportObj).attr("id")).indexOf("REP4") >=0 ){
+						renderGraphReport4CustomValue($("#form-field-dtype-REP4").val(),$(".msREP4").attr("value"), "sens", "value",$("#REP4 > .graph"));
+					}else{
+						renderGraphReport(reportObj, $("#"+reportObj.id+" > .graph"));
+					}
+					
+				});
+			}else{
+				var ri = $("<select>",{id:"form-field-"+v.name+"-"+reportObj.id});
+				ri.change(function(){
+					var subObj = reportObj["subcriteria"][i];
+					var vv = ri.val();
+					if(subObj.subsection == "1"){
+						if(vv == "0"){
+							subObj["suboperator"] = "more than";
+						}else{
+							subObj["suboperator"] = "equal";
+						}
+					}
+					subObj["subvalue"] = ri.val();
+					reportObj["subcriteria"][i] = subObj;
+					
+					if($("#form-field-cvalue-REP3").val() == "on" && ($(this).attr("id")).indexOf("REP3") >=0 ){
+						if(!isDecimal($("#form-field-cvalue-REP3-cvalue-value").val())){
+							$("#form-item-cvalue-REP3-cvalue .form-label").addClass("txtErrorRed");
+							$("#form-field-cvalue-REP3-cvalue-value").addClass("inputErrorRed");
+						}else{
+							renderGraphReport3CustomValue($("#form-field-dtype-REP3").val(),$(".msREP3").attr("value"), $("#form-field-cvalue-REP3-cvalue-value").val(),$("#REP3 > .graph"));
+						}
+					}else if($("#form-field-filter-REP4").val() == "on" && ($(this).attr("id")).indexOf("REP4") >=0 ){
+						renderGraphReport4CustomValue($("#form-field-dtype-REP4").val(),$(".msREP4").attr("value"), "sens", "value",$("#REP4 > .graph"));
+						
+					}else{
+						
+						renderGraphReport(reportObj, $("#"+reportObj.id+" > .graph"));
+					}
+					
+					
+				});
+				var ric = $("<div>",{class:"field-container"}).append(ri);
+				cinputForm.append(ric);
+				$.each(v.values, function (i, item) {
+				    ri.append($('<option>', { 
+				       value: i,
+				        text : item 
+				    }));
+				});
+				
+				//all dtype should be default at Type 1 anf type 2 DM 
+				if(v.name == "dtype"){
+					$(ri).val(1);
+					var subObj = reportObj["subcriteria"][i];
+					var vv = ri.val();
+					if(subObj.subsection == "1"){
+						if(vv == "0"){
+							subObj["suboperator"] = "more than";
+						}else{
+							subObj["suboperator"] = "equal";
+						}
+					}
+					subObj["subvalue"] = ri.val();
+					reportObj["subcriteria"][i] = subObj;
 				}
-				subObj["subvalue"] = ri.val();
-				reportObj["subcriteria"][i] = subObj;
-				renderGraphReport(reportObj, $("#"+reportObj.id+" > .graph"));
-			});
-			var ric = $("<div>",{class:"field-container"}).append(ri);
-			cinputForm.append(ric);
-			$.each(v.values, function (i, item) {
-			    ri.append($('<option>', { 
-			       value: i,
-			        text : item 
-			    }));
-			});
-			$("#"+reportObj.id+" > .form").append(cinputForm);
+			}
+			
 		});
+		//out of input loop
+		// add checkbox to include custom value
+		if(reportObj.id == "REP3"){
+			var cc = $("<div>",{class:"form-item"});
+			cc.append($("<div>",{class:"form-label"}).text("Custom value"));
+			var chekri = $("<input>",{type:"checkbox",id:"form-field-cvalue-REP3",value:"off",style:"vertical-align: middle;position: relative;bottom: 1px;"}).appendTo(cc);
+			$("#"+reportObj.id+" > .form").append(cc);
+			
+			chekri.change(function(){
+				if($("#form-field-cvalue-REP3").val() == "off"){
+					
+					$("#form-field-cvalue-REP3").val("on");
+					
+					if($("#form-item-cvalue-REP3-cvalue").length <= 0){
+						var hfb = $("#"+reportObj.id+" .form").height();
+						var c = $("<div>",{class:"form-item",id:"form-item-cvalue-REP3-cvalue"}).appendTo($("#"+reportObj.id+" > .form"));
+						var l = $("<div>",{class:"form-label"}).text("Value");
+						c.append(l);
+						var input = $("<input>",{type:"text",id:"form-field-cvalue-REP3-cvalue-value",style:"width:50px;padding:2px;"}); 
+						c.append(input);
+						input.focus(function(){
+							$("#form-item-cvalue-REP3-cvalue .form-label").removeClass("txtErrorRed");
+							$("#form-field-cvalue-REP3-cvalue-value").removeClass("inputErrorRed");
+						});
+						var b = $("<div>",{class:"cisbutton",style:"color:#fff;margin-left:10px;padding:5px;"}).text("Graph");
+						c.append(b);
+						b.click(function(){
+							if(!isDecimal($(input).val())){
+								$("#form-item-cvalue-REP3-cvalue .form-label").addClass("txtErrorRed");
+								$("#form-field-cvalue-REP3-cvalue-value").addClass("inputErrorRed");
+							}else{
+								renderGraphReport3CustomValue($("#form-field-dtype-REP3").val(),$(".msREP3").attr("value"), $("#form-field-cvalue-REP3-cvalue-value").val(),$("#REP3 > .graph"));
+							}
+						});
+						
+						var hfa = $("#"+reportObj.id+" .form").height();
+						var hg = $("#"+reportObj.id+" .graph").height();
+						if(hfa > hfb ){
+							$("#"+reportObj.id+" .graph").height(hg - (hfa - hfb));
+						}
+						renderGraphReport(reportObj, $("#"+reportObj.id+" > .graph"));
+						
+					}else{
+						if(!isDecimal($("#form-field-cvalue-REP3-cvalue-value").val())){
+							$("#form-item-cvalue-REP3-cvalue .form-label").addClass("txtErrorRed");
+							$("#form-field-cvalue-REP3-cvalue-value").addClass("inputErrorRed");
+						}else{
+							renderGraphReport3CustomValue($("#form-field-dtype-REP3").val(),$(".msREP3").attr("value"), $("#form-field-cvalue-REP3-cvalue-value").val(),$("#REP3 > .graph"));
+						}
+						
+					}
+					
+				}else{
+					var hfb = $("#"+reportObj.id+" .form").height();
+					$("#form-field-cvalue-REP3").val("off");
+					$("#form-item-cvalue-REP3-cvalue").remove();
+					var hfa = $("#"+reportObj.id+" .form").height();
+					var hg = $("#"+reportObj.id+" .graph").height();
+					if(hfa < hfb ){
+						$("#"+reportObj.id+" .graph").height(hg + (hfb - hfa));
+					}
+					renderGraphReport(reportObj, $("#"+reportObj.id+" > .graph"));
+				}
+			});
+			
+			
+			
+		}else if(reportObj.id == "REP4"){
+			var hfb = $("#"+reportObj.id+" .form").height();
+			var cc = $("<div>",{class:"form-item"});
+			cc.append($("<div>",{class:"form-label"}).text("Filter"));
+			var chekfilter = $("<input>",{type:"checkbox",id:"form-field-filter-REP4",value:"off",style:"vertical-align: middle;position: relative;bottom: 1px;"}).appendTo(cc);
+			$("<div>",{class:"form-label"}).text("Reduction of LDL by 50% from baseline").appendTo(cc);
+			$("#"+reportObj.id+" > .form").append(cc);
+			
+			var hfa = $("#"+reportObj.id+" .form").height();
+			var hg = $("#"+reportObj.id+" .graph").height();
+			if(hfa > hfb ){
+				$("#"+reportObj.id+" .graph").height(hg - (hfa - hfb));
+			}
+			
+			chekfilter.change(function(){
+				if($("#form-field-filter-REP4").val() == "off"){
+					$("#form-field-filter-REP4").val("on");
+					renderGraphReport4CustomValue($("#form-field-dtype-REP4").val(),$(".msREP4").attr("value"), "sens", "value",$("#REP4 > .graph"));
+				}else{
+					$("#form-field-filter-REP4").val("off");
+					renderGraphReport(reportObj, $("#"+reportObj.id+" > .graph"));
+				}
+			});
+		}
+		
 	}else{
 		$("#"+reportObj.id+" > .form").hide();
 		if(reportObj.class == "half"){
@@ -105,14 +338,37 @@ function renderGraphReport(reportObj, divObj){
 	if($.type(reportObj.data) === "object"){
 		var obset = [];
 		for(var i=0;i<reportObj.subcriteria.length;i++){
-			if(obset.length == 0 ) {obset = reportObj;}
+			if(obset.length == 0 ) {
+				obset = reportObj;
+			}
+			
 			var iname = reportObj.subcriteria[i].subname;
 			var ival = reportObj.subcriteria[i].subvalue;
-			obset = getObjects(obset,iname,ival);
+			if(ival.indexOf("_") >= 0){
+				var parts = ival.split("_");
+				var obsett = obset;
+				var obs = [];
+				for(var j=0;j<parts.length;j++){
+					ival = parts[j];
+					obset = getObjects(obsett,iname,ival);
+					obs.push(obset);
+				}
+				obset = obs;
+			}else{
+				obset = getObjects(obset,iname,ival);
+			}
 		} 
+		var ds = null;
+		var r = [];
+		for(var k=0;k<obset.length;k++){
+			ds = obset[k];
+			r.push(ds.set);
+		}
+
 		var set = obset[0];
 		var obj ={};
-		obj["objs"] = [{"dataset":[set.set],"header":reportObj.data.header}];
+		obj["objs"] = [{"dataset":r,"header":reportObj.data.header}];
+		
 		drawGraphReport(obj,reportObj,divObj);
 	}else{
 		$.ajax({
@@ -132,6 +388,36 @@ function renderGraphReport(reportObj, divObj){
 }
 
 
+function renderGraphReport3CustomValue(dtype, idcommunity, customValue, divObj){
+	$.ajax({
+	    url: "/ncdis/service/action/executeReport3CustomValue?language=en&cvalue="+customValue+"&idcommunity="+idcommunity+"&dtype="+dtype,
+	    type: 'GET',
+	    contentType: 'application/json; charset=utf-8',
+	    dataType: 'json',
+	    async: true,
+	    success: function(data){
+	    	var rob = {"graphtype":"pie","subcriteria":[],"id":"REP3"};
+	    	var dob = divObj;
+	    	drawGraphReport(data,rob,dob);
+	    }
+	});
+}
+
+function renderGraphReport4CustomValue(dtype, idcommunity, sens, pvalue, divObj){
+	$.ajax({
+	    url: "/ncdis/service/action/executeReport4CustomValue?language=en&sens="+sens+"&pvalue="+pvalue+"&idcommunity="+idcommunity+"&dtype="+dtype,
+	    type: 'GET',
+	    contentType: 'application/json; charset=utf-8',
+	    dataType: 'json',
+	    async: true,
+	    success: function(data){
+	    	var rob = {"graphtype":"pie","subcriteria":[],"id":"REP4"};
+	    	var dob = divObj;
+	    	drawGraphReport(data,rob,dob);
+	    }
+	});
+}
+
 
 function drawGraphReport(msg,reportObj, divObj) {
     dataset = msg.objs[0];
@@ -139,16 +425,38 @@ function drawGraphReport(msg,reportObj, divObj) {
     if($.type(dataset) === "object"){
 		var ds = dataset.dataset;
 		var dh = dataset.header;
+		var labels = [];
+		var datalabels = [];
+		var multiSerie = false;
+		if(ds.length > 1)multiSerie = true;
+		
 		if(ds.length > 0){
+			if($.type(ds[0]) != "array"){ds = [ds];}
 			$(divObj).empty();
 			var series = [];
+			var totals = [];
 			var total = 0;
-			for(var j=0;j<dh.length;j++){
-				total += Number(ds[0][j]);
+			
+			for(var x=0;x<ds.length;x++){
+				var tt = 0;
+				for(var j=0;j<dh.length;j++){
+					total += Number(ds[x][j]);
+					tt += Number(ds[x][j]);
+				}
+				totals.push(tt);
 			}
+			
 			var graphOptions=null;
 			var axes = null;
+			
 			if(reportObj.graphtype == "bar"){
+				//add to series the percentage 
+				var getPercentage = false;
+				var pmax = 0;
+				if(reportObj.id == "REP3" || reportObj.id == "REP2" || reportObj.id == "REP6"){
+					getPercentage = true;
+				}
+				
 				if(reportObj.subcriteria.length > 0 ){
 					if(reportObj.subcriteriatype == "single"){
 						for(var k=0;k<reportObj.subcriteria.length;k++){
@@ -160,11 +468,33 @@ function drawGraphReport(msg,reportObj, divObj) {
 							series.push(s);
 						}
 					}else{
-						for(var i=0;i<dh.length;i++){
-							var serie = [dh[i], Number(ds[0][i]) ];
-							series.push(serie);
+						for(var x=0;x<ds.length;x++){
+							var labelp = [];
+							if(getPercentage){
+								//var pserie = [];
+								var nserie = [];
+								for(var i=0;i<dh.length;i++){
+									var p = Number(100*Number(ds[x][i])/totals[x]).toFixed(2);
+									pmax = Math.max(pmax,Number(ds[x][i]));
+									//pserie.push([dh[i], p]);
+									nserie.push([dh[i], Number(ds[x][i])]);
+									labelp.push(Number(ds[x][i])+" - "+p+"%");
+								}
+								series.push(nserie);
+								//series.push(pserie);
+								var o = $(".ms"+reportObj.id+" .grvmselect-bar .grvmselect-item-container");
+								var lselect = $(o[x]).find(".grvmselect-item-label").text();
+								labels.push(lselect);
+								//labels.push("Percentage "+lselect);
+							}else{
+								var nserie = [];
+								for(var i=0;i<dh.length;i++){
+									nserie.push([dh[i], Number(ds[x][i])]);
+								}
+								series.push(nseries);
+							}
+							datalabels.push(labelp);
 						}
-						series = [series];
 					}
 				}else{
 					for(var i=0;i<dh.length;i++){
@@ -173,54 +503,127 @@ function drawGraphReport(msg,reportObj, divObj) {
 					}
 					series = [series];
 				}
+				
 				graphOptions = {
-						grid:{
-							 background:'transparent',
-							 drawBorder:false,
-							 shadow:false,
-							 borderWidth: 1 
-						},
-				        seriesDefaults:{
-				            renderer:$.jqplot.BarRenderer,
-				            pointLabels: { show: true },
-				            rendererOptions: {
-				                // Set the varyBarColor option to true to use different colors for each bar.
-				                // The default series colors are used.
-				                varyBarColor: true
-				            }
-				        },
-				        axes:{
-				            xaxis:{
-				                renderer: $.jqplot.CategoryAxisRenderer
-				            }
-				        }
+						grid:{background:'transparent',drawBorder:false,shadow:false,borderWidth: 1},
+						seriesColors:['#9ddb86','#00749F', '#C7754C', '#17BDB8','#85802b','#7ca1d9', '#73C774', '#00749F'],
+						seriesDefaults:{renderer:$.jqplot.BarRenderer,pointLabels: { show: true },rendererOptions: {varyBarColor: true}},
+				        axes:{xaxis:{renderer: $.jqplot.CategoryAxisRenderer}}
 				    };
-			}else if(reportObj.graphtype == "pie"){
-				graphOptions = {
-										 grid:{
-											 background:'transparent',
-											 drawBorder:false,
-											 shadow:false,
-											 borderWidth: 1 
-										},
-										gridPadding: {top:0, bottom:0, left:0, right:0},
-								        seriesDefaults:{
-								            renderer:$.jqplot.PieRenderer, 
-								            trendline:{ show:true },
-								            rendererOptions: { padding: 4, sliceMargin: 2, showDataLabels: true }
-								        },
-								        legend:{
-								            show:true, 
-								            placement: 'inside', 
-								            location:'e'
-								            
-								        }       				
-				    };
-				for(var i=0;i<dh.length;i++){
-					var serie = [dh[i]+" "+Number(((Number(ds[0][i])*100)/total).toFixed(2))+"% ["+ds[0][i]+"]",  Number(((Number(ds[0][i])*100)/total).toFixed(2))  ];
-					series.push(serie);
+				
+				if(getPercentage && series.length == 1){
+					var ymax = Math.round(pmax+Number(pmax*0.2));
+					graphOptions = {
+							grid:{background:'transparent',drawBorder:false,shadow:false,borderWidth: 1},
+							seriesColors:['#9ddb86','#00749F', '#C7754C', '#17BDB8','#85802b','#7ca1d9', '#73C774', '#00749F'],
+							series:[
+							        {renderer:$.jqplot.BarRenderer,
+							        	pointLabels: { 
+							        		show: true , location:'n',
+							        		labels:datalabels[0]
+							        		}
+							        ,rendererOptions: {varyBarColor: true,highlightMouseDown: false,highlightMouseOver: false}}
+							        
+							],
+					        axes:{
+					            xaxis:{renderer: $.jqplot.CategoryAxisRenderer},
+					            yaxis:{label: 'No patients',max:ymax,labelRenderer: $.jqplot.CanvasAxisLabelRenderer,tickOptions: { formatString: "%'d" }}
+					        }
+					    };
+				}else if(getPercentage && series.length == 2){
+					var ymax = Math.round(pmax+Number(pmax*0.2));
+					graphOptions = {
+							grid:{background:'transparent',drawBorder:false,shadow:false,borderWidth: 1},
+							seriesColors:['#9ddb86','#00749F', '#C7754C', '#17BDB8','#85802b','#7ca1d9', '#73C774', '#00749F'],
+							series:[
+							        {renderer:$.jqplot.BarRenderer,pointLabels: { show: true , location:'n',labels:datalabels[0]},rendererOptions: {varyBarColor: false,highlightMouseDown: false,highlightMouseOver: false},yaxis:'yaxis',
+							        	seriesColors:['#9ddb86','#00749F', '#C7754C', '#17BDB8','#85802b','#7ca1d9', '#73C774', '#00749F']
+							        },
+							        {renderer:$.jqplot.BarRenderer,pointLabels: { show: true , location:'n',labels:datalabels[1]},rendererOptions: {varyBarColor: false,highlightMouseDown: false,highlightMouseOver: false},yaxis:'yaxis',
+							        	seriesColors:['#9ddb86','#00749F', '#C7754C', '#17BDB8','#85802b','#7ca1d9', '#73C774', '#00749F']
+							        }
+							        
+							],
+							legend: {
+						    	renderer: $.jqplot.EnhancedLegendRenderer,
+						    	labels : labels,
+						        show: true,
+						        location:'s',
+						        border : 'none',
+						        placement: 'outsideGrid',
+						        fontSize:'0.6vw',
+						        rowSpacing:'0.7em',
+						        background:'transparent',
+						        marginRight:'5px',
+						        rendererOptions: {
+						            numberRows: 1,
+						            numberColumns: 4,
+						        }
+						       },
+					        axes:{
+					            xaxis:{renderer: $.jqplot.CategoryAxisRenderer},
+					            yaxis:{label: 'No patients',max:ymax,labelRenderer: $.jqplot.CanvasAxisLabelRenderer,tickOptions: { formatString: "%'d" }}
+						        
+					        }
+					    };
 				}
-			series = [series];
+			}else if(reportObj.graphtype == "pie"){
+				if(ds.length > 1){
+					
+					var labels = [];
+					for(var i=0;i<dh.length;i++){
+						labels.push(dh[i]);
+					}
+					
+					for(var x=0;x<ds.length;x++){
+						var s = []; 
+						var o = $(".ms"+reportObj.id+" .grvmselect-bar .grvmselect-item-container");
+						var lselect = $(o[x]).find(".grvmselect-item-label").text();
+						for(var i=0;i<dh.length;i++){
+							var serie = [dh[i]+" "+lselect+" "+Number(((Number(ds[x][i])*100)/totals[x]).toFixed(2))+"% ["+ds[x][i]+"]",  Number(((Number(ds[x][i])*100)/totals[x]).toFixed(2))  ];
+							labels[i] = labels[i] +" "+ lselect + ":[<b> "+ds[x][i]+" "+Number(((Number(ds[x][i])*100)/totals[x]).toFixed(2))+"% </b>] "
+							s.push(serie);
+						}
+						series.push(s);
+					}
+					graphOptions = {
+							grid:{background:'transparent',drawBorder:false,shadow:false,borderWidth: 1},
+							seriesColors:['#9ddb86','#00749F', '#C7754C', '#17BDB8','#85802b','#7ca1d9', '#73C774', '#fa756b'],
+							gridPadding: {top:0, bottom:0, left:0, right:0},
+							seriesDefaults: {
+							      // make this a donut chart.
+							      renderer:$.jqplot.DonutRenderer,
+							      rendererOptions:{
+							        // Donut's can be cut into slices like pies.
+							        sliceMargin: 3,
+							        // Pies and donuts can start at any arbitrary angle.
+							        startAngle: -90,
+							        showDataLabels: true,
+							        // By default, data labels show the percentage of the donut/pie.
+							        // You can show the data 'value' or data 'label' instead.
+							        dataLabels: 'value',
+							        dataLabelFormatString : "%'d%"
+							      }
+							},
+							legend:{show:true,placement: 'inside',location:'e',labels:labels}
+					};
+					
+				}else{
+					graphOptions = {
+							grid:{background:'transparent',drawBorder:false,shadow:false,borderWidth: 1},
+							seriesColors:['#9ddb86','#00749F', '#C7754C', '#17BDB8','#85802b','#7ca1d9', '#73C774', '#fa756b'],
+							gridPadding: {top:0, bottom:0, left:0, right:0},
+							seriesDefaults:{renderer:$.jqplot.PieRenderer,trendline:{ show:true },rendererOptions: { padding: 4, sliceMargin: 2, showDataLabels: true }},
+							legend:{show:true,placement: 'inside',location:'e'}       				
+					};
+					for(var i=0;i<dh.length;i++){
+						var serie = [dh[i]+" "+Number(((Number(ds[0][i])*100)/total).toFixed(2))+"% ["+ds[0][i]+"]",  Number(((Number(ds[0][i])*100)/total).toFixed(2))  ];
+						series.push(serie);
+					}
+					series = [series];
+				}
+				
+			
 			}else if(reportObj.graphtype == "line"){
 				if(reportObj.subcriteria.length > 0 ){
 					if(reportObj.subcriteriatype == "single"){
@@ -299,18 +702,16 @@ function getReports(sid){
 		});
 		reps.done(function( json ) {
 			result = json.objs[0];
+			
 		});
 		reps.fail(function( jqXHR, textStatus ) {
 		  alert( "Request failed: " + textStatus );
-		  console.log(this.url);
 		});
-		/**/
-	//result = {"admin":[{"id":"1","code":"ADMIN-1","name":"Admin report number 1","owner":"admin"},{"id":"1","code":"ADMIN-3","name":"Admin report number 2","owner":"admin"}],"personal":[{"id":"1","code":"REP1","name":"Personal report number only data 1","owner":"radu"}],"predefined":[{"id":"1","code":"ADMIN-1","name":"Predefined report number 1","owner":"radu"},{"id":"2","code":"ADMIN-2","name":"Predefined report number 2","owner":"radu"}]};
 	return result;
 }
 
 function prepareDefinedReport(reportID){
-	var url = "/ncdis/client/reports/report."+reportID;
+	var url = "/ncdis/client/reports/report."+reportID+"?ts="+moment().format('X');
 	var result = null;
 	var req1 = $.ajax({
 		  dataType: "json",
@@ -403,6 +804,9 @@ function getReportObjectFromCriterias(){
 					var criteria = {};
 					criteria["name"] = "dtype";
 					criteria["section"] = "2";
+					
+					criteria["value"] = index;
+					/*
 					if(index == "3"){
 						criteria["value"] = "10";
 					}else if(index == "4"){
@@ -410,7 +814,7 @@ function getReportObjectFromCriterias(){
 					}else{
 						criteria["value"] = index;
 					}
-					
+					*/
 					criteria["operator"] = "equal";
 					criteria["display"] = value;
 					criteria["date"] = "no";
@@ -640,7 +1044,6 @@ function buildReportToolbar(divToolbarObj, reportObject){
 	*/
 	
 	$exportTo.click(function(){
-		console.log(reportObject);
 		if(reportObject.type != "list"){
 			html2canvas($(".raportBody"), {
 				onrendered: function(canvas) {										
@@ -1251,7 +1654,6 @@ function createCD(objItem){
 
 function getCriterias(cObject){
 	var result = [];
-	console.log($.type(cObject));
 	if($.type(cObject) === "array"){
 		//there is no id for object it mus be a div object
 		result = cObject;
@@ -1268,9 +1670,9 @@ function getCriterias(cObject){
 			if($(item).attr("type") == "select"){
 				if(idname == "dtype"){
 					if(v == "PRE DM"){
-						v ="10";
+						v ="3";
 					}else if(v == "GDM"){
-						v = "11";
+						v = "4";
 					}else if(v == "All"){
 						v = "-1";
 					}else{
@@ -1340,7 +1742,6 @@ function prepareCustomReport(reportObject){
 
 function executeAsyncReport(reportObject){
 	buildAsyncReport(reportObject);
-	console.log(reportObject);
 	$.ajax({
 	    url: "/ncdis/service/action/executeReport?language=en&idreport="+reportObject.id+"&owner="+reportObject.owner+"&type="+reportObject.type+"&graphtype="+reportObject.graphtype+"&subcriteriatype="+reportObject.subcriteriatype,
 	    type: 'POST',
@@ -1351,19 +1752,15 @@ function executeAsyncReport(reportObject){
 	    success: function(msg) {
 	    	var dataset = msg.objs[0];
 	    	$("#loadingLineTr").remove();
-	    	//console.log(dataset);
 	    	if($.type(dataset) === "object"){
 	    		var ds = dataset.dataset;
 	    		if(reportObject.type == "graph"){
 	    			drawReportGraph(reportObject,dataset);
 	    		}
 	    		if(ds.length > 0){
-	    			//console.log(dataset.header);
-	    			//buildReport(report, dataset);
 	    			$.each(dataset.header,function(qq, value){
 	    				$("<th>").text(value).appendTo($("#headLineTr"));
 	    			});
-	    			//console.log(dataset.dataset);
 	    			$.each(dataset.dataset,function(index, arrLine){
 	    				var rline = $("<tr>").appendTo($("#reportBodyTable"));
 	    				$.each(arrLine,function(ii, arrValue){
@@ -1401,3 +1798,53 @@ function buildAsyncReport(ro){
 	var reportHeadLine = $("<tr>",{id:"headLineTr"}).appendTo(thead);
 	
 }
+
+
+var progressOn=false;
+function showProgress(container){
+	if(!progressOn){
+		var p = $('<div>',{id:"progress",class:"fullscreen-progress"}).appendTo(container);
+		var c = $('<div>',{class:"fullscreen-progress-container"}).appendTo(p);
+		var l = $('<div>',{class:"fullscreen-progress-container-logo"}).appendTo(c);
+		var t = $('<div>',{class:"fullscreen-progress-container-text"}).appendTo(c);
+		progressOn=true;
+	}
+}
+
+function hideProgress(container){
+	$(container).find($("#progress")).fadeOut(500, function(){
+		$(container).find($("#progress")).remove();
+		progressOn=false;
+	}).delay(500, function(){
+		$(container).find($("#progress")).remove();
+		progressOn=false;
+	});
+}
+
+
+function showPopupMessage(title,text){
+	var id = moment();
+	$("body").css("overflow-y","hidden");
+	var modal = $('<div>',{id:"fullscreen_"+id,class:"popupmessage-fullscreen-modal"}).appendTo($("#wraper"));
+	var sett = $('<div>',{class:"popupmessage-window"}).appendTo(modal);
+	var settH = $('<div>',{class:"popupmessage-window-header"}).appendTo(sett);
+	var settB = $('<div>',{class:"popupmessage-window-body"}).appendTo(sett);
+	var settBB = $('<div>',{class:"popupmessage-window-body-body"}).appendTo(settB);
+	var settBF = $('<div>',{class:"popupmessage-window-body-footer"}).appendTo(settB);
+	
+	$('<div>',{class:"gap"}).appendTo(settBF);
+	var cb = $('<button>',{class:"cisbutton"}).text("Close").appendTo(settBF);
+	cb.click(function(){
+		$(".popupmessage-fullscreen-modal").remove();
+		$("body").css("overflow-y","auto");
+	});
+	settBB.html(text);
+	$('<div>',{class:"popupmessage-window-header-title"}).text(title).appendTo(settH);
+	var settHC = $('<div>',{class:"popupmessage-window-header-close"}).html("<i class='fa fa-times'></i>").appendTo(settH);
+	settHC.click(function(){
+		$(".popupmessage-fullscreen-modal").remove();
+		$("body").css("overflow-y","auto");
+	});
+	
+}
+

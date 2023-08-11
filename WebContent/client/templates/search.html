@@ -44,8 +44,11 @@
 				</form>
 			</div>
 				
+				
 			<div class="panel-full">
 				<div class="dashboard-menu">
+					<div class="cisbutton"  id="pvalidation-button" data-toggle="tooltip" title="Open patient validation tool">Patient Validation Tool</div>
+					<div class="cisbutton"  id="surveillance-button" data-toggle="tooltip" title="Open reports surveillance page">Indicators and Outcomes</div>
 					<div class="cisbutton"  id="locallist-button" data-toggle="tooltip" title="Open local patient list">Local Patient List</div>
 					<div class="cisbutton"  id="reports-button" data-toggle="tooltip" title="Execute reports">Reports</div> 
 					<div class="cisbutton"  id="addpatient-button" data-toggle="tooltip" title="Add new patient">Add Patient</div> 
@@ -78,13 +81,16 @@
 
  
 <div class="cdisheader uss">
-	<div class="logo">CDIS</div>
+	<div class="logo"></div>
+	<div class="name">CDIS</div>
+	<div class="title">Search Patient</div>
+	<div class="">&nbsp;</div>
 	<ul class="menu">
-		<li class="personalinfo ubs" title="Personal information"></li>
-		<li class="users ubs" title="Users Administration"></li>
-		<li class="frontpage ubs" title="Front page message"></li>
-		<li class="audit ubs" title="Users actions log"></li>
-	</ul>
+		<li class="messages ubs" data-toggle="tooltip" data-placement="left" title="Patient Messages"><i class="fa fa-envelope"></i></li>
+		<li class="personalinfo ubs" data-toggle="tooltip" data-placement="left" title="Personal Info"><i class="fa fa-user"></i></li>
+		<li class="users ubs" data-toggle="tooltip" data-placement="left" title="Users Administration"><i class="fa fa-users"></i></li>
+		<li class="frontpage ubs" data-toggle="tooltip" data-placement="left" title="Front page message"><i class="fa fa-comment"></i></li>
+		<li class="audit ubs" data-toggle="tooltip" data-placement="left" title="Users action log"><i class="fa fa-list"></i></li>	</ul>
 </div>
 
 <div class="cdisfooter-left">
@@ -99,7 +105,7 @@
 
 
 <script>
-
+	
 	$('#search').focus();
 
 	if(typeof(userObj[0].idprofesion) != "undefined"){
@@ -111,7 +117,7 @@
 		$(".personal-patients").hide();
 	}
 	
-	
+	refreshUserNotes(sid);
 	if(userNotes.length > 0){
 		$(".notes-alert").show();
 		$.each(userNotes, function(i,not){
@@ -132,7 +138,7 @@
 	}
 	
 	
-	
+	if(isDemo){$("#search").attr("type","password");}
 	/**/
 	$("#radios .btn").focusin(function() {
 		$("#search").val("");
@@ -160,7 +166,6 @@
 	initNavigation();
 	
 	
-	
 	var optionSelected = false;
 	$("#search").autocomplete({
 		delay: 300,
@@ -177,7 +182,7 @@
 					sid: sid
 				},
 				success: function( data ) {
-					
+					if(isDemo){data = demoData(data,"search");}
 					response( $.map( data.objs, function( item ) {
 						return {
 							idpatient : item.idpatient,
@@ -185,6 +190,7 @@
 							firstname : item.firstname,
 							chart : item.chart,
 							ramq : item.ramq,
+							realramq : (isDemo)?item.realramq:item.ramq,
 							community: item.community,
 							giu: item.giu,
 							criteria : $("#radios :radio:checked").attr('id'),
@@ -197,6 +203,7 @@
 		select: function( event, ui ) {
 			optionSelected = true;
 			patientSearchObj = ui.item;
+			if(isDemo)patientSearchObj.ramq = patientSearchObj.realramq;
 			$.cookie('ramq',patientSearchObj.ramq);
 			gtc(sid,"en",patientSearchObj.ramq,"patient");
 			return false;
@@ -217,7 +224,7 @@
 			if(item.criteria == "fnamelname"){
 				var fn = (item.firstname+" "+item.lastname).toString().toLowerCase();
 				fn = replaceAll(fn,item.term.toLowerCase(), "<strong>"+item.term.toLowerCase()+"</strong>");
-				$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(fn.toUpperCase()));
+				$("<div>",{class:'searchname criteria'}).appendTo($container).append($("<span>").html(fn.toUpperCase()));
 			}else{
 				$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html((item.firstname+" "+item.lastname).toUpperCase()));
 			}
@@ -226,15 +233,15 @@
 				var cn = item.chart.toString();
 				cn = replaceAll(cn,item.term, "<strong>"+item.term+"</strong>");
 				//$("<div>",{class:'searchchart'}).html("<label>Chart Number :</label> <span>"+cn+"</span>").appendTo($container);
-				$("<div>",{class:'searchchart'}).html("<span> "+cn+" </span>").appendTo($container);
+				$("<div>",{class:'searchchart criteria'}).html("<span> "+cn+" </span>").appendTo($container);
 			}else{
 				//$("<div>",{class:'searchchart'}).html("<label>Chart Number :</label> <span>"+item.chart+"</span>").appendTo($container);
-				$("<div>",{class:'searchchart'}).html("<span>[ "+item.chart+" ]</span>").appendTo($container);
+				$("<div>",{class:'searchchart'}).html("<span>"+item.chart+"</span>").appendTo($container);
 			}
 			if(item.criteria == "ramq"){
 				var ran = (item.ramq).toString().toLowerCase();
 				ran = replaceAll(ran, item.term.toLowerCase(), "<strong>"+item.term.toLowerCase()+"</strong>");
-				$("<div>",{class:'searchramq'}).html("<span>"+ran.toUpperCase()+"</span>").appendTo($container);
+				$("<div>",{class:'searchramq criteria'}).html("<span>"+ran.toUpperCase()+"</span>").appendTo($container);
 			}else{
 				$("<div>",{class:'searchramq'}).html("<span>"+item.ramq+"</span>").appendTo($container);
 			}
@@ -242,7 +249,7 @@
 			if(item.criteria == "ipm"){
 				var gan = (item.giu).toString().toLowerCase();
 				gan = replaceAll(gan, item.term.toLowerCase(), "<strong>"+item.term.toLowerCase()+"</strong>");
-				$("<div>",{class:'searchgiu'}).html("<span>"+gan.toUpperCase()+"</span>").appendTo($container);
+				$("<div>",{class:'searchgiu criteria'}).html("<span>"+gan.toUpperCase()+"</span>").appendTo($container);
 			}else{
 				$("<div>",{class:'searchgiu'}).html("<span>"+item.giu+"</span>").appendTo($container);
 			}
@@ -252,9 +259,23 @@
 			$(ul).css("overflow-x","hidden");
 			return $liline;
 		};
+		
+		
+		$('#surveillance-button').click(function(){
+			gtr(sid,applanguage,"surveillance");
+		});
+		
+		$('#pvalidation-button').click(function(){
+			if(isDemo){
+				alert("This function si not available in demo mode");
+			}else{
+				gtr(sid,applanguage,"pvalidation");	
+			}
+		});
+		
 </script>
-<link type="text/css" rel="stylesheet" href="client/libs/css/locallist.css">
-<link type="text/css" rel="stylesheet" href="client/libs/css/locallist-print.css" media="print">
+<link type="text/css" rel="stylesheet" href="client/libs/css/locallist.css?refreshcss=1&ts=1625680126">
+<link type="text/css" rel="stylesheet" href="client/libs/css/locallist-print.css?refreshcss=1&ts=1625680126" media="print">
 <link type="text/css" rel="stylesheet" href="client/libs/js/jquery/jqplot/dist/jquery.jqplot.min.css">
 <script src="client/libs/js/jquery/jqplot/dist/jquery.jqplot.js" type="text/javascript"></script>
 <script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.cursor.min.js"></script>
@@ -273,7 +294,7 @@
 <script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.highlighter.min.js"></script>
 <script type="text/javascript" src="client/libs/js/jquery/jqplot/plugins/jqplot.enhancedLegendRenderer.min.js"></script>
 <script type="text/javascript" src="client/libs/js/jquery/print/jqprint.js"></script>
-<script src="client/libs/js/pages/locallist.js" type="text/javascript"></script>
-<script src="client/libs/js/pages/patient.js" type="text/javascript"></script>
+<script src="client/libs/js/pages/locallist.js?ts=1625680126" type="text/javascript"></script>
+<script src="client/libs/js/pages/patient.js?ts=1625680126" type="text/javascript"></script>
 
 	

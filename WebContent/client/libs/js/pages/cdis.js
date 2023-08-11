@@ -308,7 +308,6 @@ function drawSectionRecord(arr){
 			
 			if(keys[i] == "sbp" || keys[i] == "dbp"){
 				if(f){
-					console.log(sectionObj);
 					var valO1 = sectionObj.sbp;
 					var valO2 = sectionObj.dbp;
 					buildWidget('sbp_and_dbp',[valO1.values,valO2.values],$("#sbp_and_dbp"));
@@ -423,8 +422,12 @@ function drawPatientRecord(pObj){
 		
 	});
 	$("#editpatient-button, #editpatient-button-second").click(function() {
-		gtc(sid,"en",patientObj.ramq,"editpatient");
-		//window.location = "cdis.html?section=editpatient&ramq="+patientObj.ramq+"&sid="+sid+"&language=en";
+		if(isDemo){
+			alert("This function si not available in demo mode");
+		}else{
+			gtc(sid,"en",patientObj.ramq,"editpatient");
+			//window.location = "cdis.html?section=editpatient&ramq="+patientObj.ramq+"&sid="+sid+"&language=en";
+		}
 	});
 }
 	
@@ -472,13 +475,11 @@ function loadPatientObject(key,value){
 		});
 		patient.done(function( json ) {
 			patientObjArray = json.objs;
+			if(isDemo){patientObjArray = demoData(patientObjArray,"patient");}
 			patientObj = patientObjArray[0];
-			console.log("object patient");
-			console.log(patientObjArray);
 		});
 		patient.fail(function( jqXHR, textStatus ) {
 		  alert( "Request failed: " + textStatus );
-		  console.log(this.url);
 		});	
 }
 
@@ -486,11 +487,7 @@ function getValueSectionArray(section, value, arr){
 	//cdisSection = section;
 	//var objSection = getObjectSection(arr);
 	var objSection = getObjectArray(section,arr);
-	//console.log('object section - '+section+'  -  value:'+value);
-	//console.log(objSection);
 	var objValue = eval("objSection."+value);
-	
-	//console.log(objValue);
 	if(typeof(objValue) != 'undefined'){
 		return objValue.values;
 	}else{
@@ -512,6 +509,11 @@ function getValueObject(section, value, arr){
 
 function saveValue(idvalue, section, valueName, dValue, vValue, patientObjectArray){
 	var po = patientObjectArray[0];
+	if(valueName == "hba1c"){
+		if(vValue >= 1){
+			vValue = (vValue / 100).toFixed(3);
+		}
+	}
 	var valueResult = $.ajax({
 		  url: "/ncdis/service/data/saveValue?sid="+sid+"&language=en&valueName="+valueName+"&value="+vValue+"&date="+dValue+"&idpatient="+po.idpatient+"&idvalue="+idvalue,
 		  type: "GET",
@@ -525,7 +527,6 @@ function saveValue(idvalue, section, valueName, dValue, vValue, patientObjectArr
 		});
 	valueResult.fail(function( jqXHR, textStatus ) {
 	  alert( "Request failed: " + textStatus );
-	  console.log(this.url);
 	});	
 }
 
@@ -544,7 +545,6 @@ function deleteValue(idvalue,patientObjectArray){
 		});
 		value.fail(function( jqXHR, textStatus ) {
 			 alert( "Request failed: " + textStatus );
-			  console.log(this.url);
 		});	
 	
 }
@@ -622,12 +622,10 @@ function initAutocompleteHcp(obj){
 			
 		}
 	}).data("ui-autocomplete")._renderItem = function(ul, item) {
-		var $line = $("<a>");
-		var $container = $("<div>").appendTo($line);
-		$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
 		var $liline = $("<li>");
-		$liline.append($line).appendTo(ul);
-		$(ul).height(200);
+		$("<div>",{class:'searchname'}).appendTo($liline).append($("<span>").html(item.name));
+		$liline.appendTo(ul);
+		$(ul).height(180);
 		return $liline;
 	};
 

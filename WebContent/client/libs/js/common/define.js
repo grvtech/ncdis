@@ -1,3 +1,9 @@
+if(location.hostname !== 'localhost' && location.hostname.toLowerCase() !== 'cdis.reg18.rtss.qc.ca'){
+	location.replace('https://cdis.reg18.rtss.qc.ca/ncdis');
+}else if (location.protocol !== 'https:') {
+    location.replace(`https:${location.href.substring(location.protocol.length)}`);
+}
+
 var page = getPage();
 var applanguage="en";
 var userObj = null;
@@ -12,6 +18,9 @@ var backArrayIndex = 0;
 var $body = $("body");
 var usersArray = getUsers();
 var userNotes = getUserNotes(sid);
+var containerApp = $('#wraper');
+var isDemo=false;
+
 dbp_dec=0;
 sbp_dec=0;
 weight_dec=0;
@@ -36,10 +45,10 @@ tchdl_dec=2;
 
 var recomandation_lipid = {'section':"lipid",'recomandations':[{'title':"Guideline",'thumbnail':"recomandation_lipid_thumbnail.png",'source':"recomandation.lipid.html"}]} ;
 //var recomandation_patient ={'section':"patient",'recomandations':[{'title':"Guideline",'thumbnail':"recomandation_patient_thumbnail.png",'source':"recomandation.patient.html"},{'title':"Stages CKD",'thumbnail':"recomandation_ckd_thumbnail.png",'source':"recomandation.ckd.html"},{'title':"A1C Conversion Table",'thumbnail':"recomandation_renal_thumbnail.png",'source':"recomandation.renal.html"}]} ;
-var recomandation_patient ={'section':"patient",'recomandations':[{'title':"Guideline",'thumbnail':"recomandation_patient_thumbnail.png",'source':"recomandation.patient.html"},{'title':"A1C Conversion Table",'thumbnail':"recomandation_renal_thumbnail.png",'source':"recomandation.renal.html"},{'title':"Antihyperglycemic Agents and Renal Functions",'thumbnail':"recomandation_renalfunctions_thumbnail.png",'source':"recomandation.renalfunction.html"}]} ;
-var recomandation_lab = {'section':"lab",'recomandations':[{'title':"Guideline",'thumbnail':"recomandation_lab_thumbnail.png",'source':"recomandation.lab.html"},{'title':"A1C Conversion Table",'thumbnail':"recomandation_renal_thumbnail.png",'source':"recomandation.renal.html"}]} ;;
+var recomandation_patient ={'section':"patient",'recomandations':[{'title':"Guideline",'thumbnail':"recomandation_patient_thumbnail.png",'source':"recomandation.patient.html"},{'title':"A1C Conversion Table",'thumbnail':"recomandation_renal_thumbnail.jpg",'source':"recomandation.renal.html"},{'title':"Antihyperglycemic Agents and Renal Functions",'thumbnail':"recomandation_renalfunctions_thumbnail.jpg?_20230503",'source':"recomandation.renalfunction.html"}]} ;
+var recomandation_lab = {'section':"lab",'recomandations':[{'title':"Targets for glycemic control",'thumbnail':"recomandation_lab_thumbnail.jpg?_20230603",'source':"recomandation.lab.html"},{'title':"A1C Conversion Table",'thumbnail':"recomandation_renal_thumbnail.jpg",'source':"recomandation.renal.html"}]} ;;
 var recomandation_depression={'section':"depression",'recomandations':[{'title':"Happiness scale",'thumbnail':"recomandation_happiness_thumbnail.png",'source':"recomandation.happiness.html"},{'title':"PHQ-2",'thumbnail':"recomandation_phq2_thumbnail.png",'source':"recomandation.phq2.html"},{'title':"PHQ-9",'thumbnail':"recomandation_phq9_thumbnail.png",'source':"recomandation.phq9.html"}]} ;;
-var recomandation_renal = {'section':"renal",'recomandations':[{'title':"CKD Stages",'thumbnail':"recomandation_ckd_thumbnail.png",'source':"recomandation.ckd.html"},{'title':"Antihyperglycemic Agents and Renal Functions",'thumbnail':"recomandation_renalfunctions_thumbnail.png",'source':"recomandation.renalfunction.html"}]} ;
+var recomandation_renal = {'section':"renal",'recomandations':[{'title':"CKD Stages",'thumbnail':"recomandation_ckd_thumbnail.jpg?_20230503",'source':"recomandation.ckd.html"},{'title':"Antihyperglycemic Agents and Renal Functions",'thumbnail':"recomandation_renalfunctions_thumbnail.jpg?_20230503",'source':"recomandation.renalfunction.html"}]} ;
 var recomandation_mdvisits = {'section':"mdvisits",'recomandations':[{'title':"Monofilament Diagram",'thumbnail':"recomandation_monofilament_thumbnail.jpg",'source':"recomandation.monofilament.html"},{'title':"Diabetic foot screen",'thumbnail':"recomandation_foot_thumbnail.png",'source':"recomandation.foot.html"}]} ;
 /*
  * *
@@ -132,7 +141,7 @@ label_rpathscr="Rethinopaty Screening";label_rpathscr_collected_date="Date of ex
 
 /*LAB VALUES*/
 //hba1c
-label_hba1c="HbA1c";label_hba1c_collected_date="Date";type_hba1c='graph';unit_hba1c='Percentage';section_hba1c='lab';
+label_hba1c="HbA1c";label_hba1c_collected_date="Date";type_hba1c='graph';unit_hba1c='Percentage or Absolute value';section_hba1c='lab';
 limits_hba1c={maxvalue:0.085,minvalue:0.055,stages:[{title:"HbA1C > 7%",min:0.07,max:0.085,color:"rgba(255,0,0,0.4)"},{title:"Target HbA1C 7%",min:0.06,max:0.07,color:"rgba(0, 255, 0,0.3)"},{title:"Normal HbA1C < 6%",min:0.055,max:0.06,color:"rgba(0, 255, 0,0.6)"}]};
 //ogtt
 label_ogtt="OGTT";label_ogtt_collected_date="Date";type_ogtt='graph';unit_ogtt='';section_ogtt='lab';

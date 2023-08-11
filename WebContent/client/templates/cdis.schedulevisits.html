@@ -122,10 +122,76 @@
 	//$(".fa-pencil").click(function(){editPatientSchedule($(this))});
 	
 	$(".associate").click(function(){
+		if(isDemo){
+			alert("This function si not available in demo mode");			
+		}else{
+			var parts = $(this).attr("id").split("-");
+			var zone = parts[0];
+			var action = parts[1];
+			if(action == "associate"){
+				$("#visits-"+zone+" .visit-body").empty();
+				$("<select>",{id:"select-"+zone,class:"schedule-select"}).append($("<option>",{value:"0"}).text("Select "+eval("profession_object."+zone))).appendTo($("#visits-"+zone+" .visit-body")).selectmenu();
+				var hcpid = 0;
+				if(zone == "chr"){hcpid = 4;}
+				if(zone == "md"){hcpid = 1;}
+				if(zone == "nur"){hcpid = 2;}
+				if(zone == "nut"){hcpid = 3;}
+				$(usersArray).each(function(index,Object){
+					if(Object.idprofesion == hcpid){
+						$("#select-"+zone).append($("<option>",{value:Object.iduser}).text(capitalizeFirstLetter(Object.firstname)+" "+capitalizeFirstLetter(Object.lastname)));
+					}
+				});
+				$("<input>",{id:"schedule-select-date-"+zone,type:"text",placeholder:"Schedule date",class:"ui-button ui-widget ui-state-default ui-corner-all ui-state-hover schedule-input"}).appendTo($("#visits-"+zone+" .visit-body")).MonthPicker(
+						{
+							MonthFormat: 'M, yy', 
+							Button: false, 
+							AltFormat: "yy-mm-dd",
+							AltField:"#schedule-date-"+zone
+						});
+				
+				$("<input>",{id:"schedule-frequency-"+zone,type:"text",placeholder:"Frequency",class:"ui-button ui-widget ui-state-default ui-corner-all ui-state-hover schedule-input"}).width(100).appendTo($("#visits-"+zone+" .visit-body"));
+				$("<span>",{style:"vertical-align:top;line-height:35px;font-size:110%;font-weight:bold;padding:7px;margin-top:3px;"}).text("(months)").appendTo($("#visits-"+zone+" .visit-body"));
+				$("<div>",{id:"save-schedule-"+zone,class:"cisbutton save-"+zone+"",style:"vertical-align:top;margin-top:10px;"}).text("Save").appendTo($("#visits-"+zone+" .visit-body"));
+				$("<input>",{id:"schedule-idprofesion-"+zone,type:"hidden",value:hcpid}).appendTo($("#visits-"+zone+" .visit-body"));
+				$("<input>",{id:"schedule-date-"+zone,type:"hidden"}).appendTo($("#visits-"+zone+" .visit-body"));
+				$("<input>",{id:"schedule-idpatient-"+zone,type:"hidden",value:patientObjArray[0].idpatient}).appendTo($("#visits-"+zone+" .visit-body"));
+				$(".save-"+zone).click(function(){
+					//var flagHcp =  Validate.now(Validate.Presence, $("#select-"+zone).val());
+					var flagHcp =  Validate.now(Validate.Exclusion, $("#select-"+zone).val(), { within: [ '0', 0 ], allowNull: false, partialMatch: false, caseSensitive: false });
+					var flagDate = Validate.now(Validate.Presence, $("#schedule-date-"+zone).val());
+					var flagFreq = Validate.now(Validate.Presence, $("#schedule-frequency-"+zone).val());
+					$("#select-"+zone+"-button").css("border","none");
+					$("#schedule-select-date-"+zone).css("border","none");
+					$("#schedule-frequency-"+zone).css("border","none");
+					if(flagHcp && flagDate && flagFreq){
+						setScheduleVisit("0", $("#select-"+zone).val(), $("#schedule-idpatient-"+zone).val(), $("#schedule-date-"+zone).val(), $("#schedule-idprofesion-"+zone).val(), $("#schedule-frequency-"+zone).val(),zone);
+						eval("patientObjArray[1]."+zone+"='"+$("#select-"+zone).val()+"'");
+						console.log(patientObjArray[1]);
+						drawPatientSchedule(patientObjArray[0].idpatient,zone);
+					}else{
+						if(!flagHcp){$("#select-"+zone+"-button").css("border","2px solid red");}
+						if(!flagDate){$("#schedule-select-date-"+zone).css("border","2px solid red");}
+						if(!flagFreq){$("#schedule-frequency-"+zone).css("border","2px solid red");}
+					}
+				});	
+			
+			}
+		}
+	});
+	
+	
+function editPatientSchedule(){
+	if(isDemo){
+		alert("This function si not available in demo mode");
+	}else{
+		var hcpObjArr = getObjectArray("hcp", patientObjArray);
 		var parts = $(this).attr("id").split("-");
 		var zone = parts[0];
 		var action = parts[1];
-		if(action == "associate"){
+		var hcpVal = eval("hcpObjArr."+zone);
+		if(action == "edit"){
+			var scheduleVisit = getScheduleVisit(patientObjArray[0].idpatient, hcpVal);
+			var sdate = moment(scheduleVisit.datevisit);
 			$("#visits-"+zone+" .visit-body").empty();
 			$("<select>",{id:"select-"+zone,class:"schedule-select"}).append($("<option>",{value:"0"}).text("Select "+eval("profession_object."+zone))).appendTo($("#visits-"+zone+" .visit-body")).selectmenu();
 			var hcpid = 0;
@@ -135,25 +201,30 @@
 			if(zone == "nut"){hcpid = 3;}
 			$(usersArray).each(function(index,Object){
 				if(Object.idprofesion == hcpid){
-					$("#select-"+zone).append($("<option>",{value:Object.iduser}).text(capitalizeFirstLetter(Object.firstname)+" "+capitalizeFirstLetter(Object.lastname)));
+					if(Object.iduser == hcpVal){
+						$("#select-"+zone).append($("<option>",{value:Object.iduser,selected:true}).text(capitalizeFirstLetter(Object.firstname)+" "+capitalizeFirstLetter(Object.lastname)));
+					}else{
+						$("#select-"+zone).append($("<option>",{value:Object.iduser}).text(capitalizeFirstLetter(Object.firstname)+" "+capitalizeFirstLetter(Object.lastname)));
+					}
 				}
 			});
+			$("#select-"+zone).selectmenu( "refresh" );
 			$("<input>",{id:"schedule-select-date-"+zone,type:"text",placeholder:"Schedule date",class:"ui-button ui-widget ui-state-default ui-corner-all ui-state-hover schedule-input"}).appendTo($("#visits-"+zone+" .visit-body")).MonthPicker(
 					{
+						SelectedMonth: sdate.format("MMM, YYYY"),
 						MonthFormat: 'M, yy', 
 						Button: false, 
 						AltFormat: "yy-mm-dd",
 						AltField:"#schedule-date-"+zone
 					});
 			
-			$("<input>",{id:"schedule-frequency-"+zone,type:"text",placeholder:"Frequency",class:"ui-button ui-widget ui-state-default ui-corner-all ui-state-hover schedule-input"}).width(100).appendTo($("#visits-"+zone+" .visit-body"));
-			$("<span>",{style:"vertical-align:top;line-height:35px;font-size:110%;font-weight:bold;padding:7px;margin-top:3px;"}).text("(months)").appendTo($("#visits-"+zone+" .visit-body"));
+			$("<input>",{id:"schedule-frequency-"+zone,type:"text",placeholder:"Frequency",class:"ui-button ui-widget ui-state-default ui-corner-all ui-state-hover schedule-input"}).val(scheduleVisit.frequency).width(100).appendTo($("#visits-"+zone+" .visit-body"));
+			//$("<span>",{style:"vertical-align:top;line-height:35px;font-size:110%;font-weight:bold;padding:7px;margin-top:3px;"}).text("(months)").appendTo($("#visits-"+zone+" .visit-body"));
 			$("<div>",{id:"save-schedule-"+zone,class:"cisbutton save-"+zone+"",style:"vertical-align:top;margin-top:10px;"}).text("Save").appendTo($("#visits-"+zone+" .visit-body"));
-			$("<input>",{id:"schedule-idprofesion-"+zone,type:"hidden",value:hcpid}).appendTo($("#visits-"+zone+" .visit-body"));
-			$("<input>",{id:"schedule-date-"+zone,type:"hidden"}).appendTo($("#visits-"+zone+" .visit-body"));
+			$("<input>",{id:"schedule-idprofesion-"+zone,type:"hidden",value:scheduleVisit.idprofesion}).appendTo($("#visits-"+zone+" .visit-body"));
+			$("<input>",{id:"schedule-date-"+zone,type:"hidden",value:sdate.format('YYYY-MM-DD')}).appendTo($("#visits-"+zone+" .visit-body"));
 			$("<input>",{id:"schedule-idpatient-"+zone,type:"hidden",value:patientObjArray[0].idpatient}).appendTo($("#visits-"+zone+" .visit-body"));
 			$(".save-"+zone).click(function(){
-				//var flagHcp =  Validate.now(Validate.Presence, $("#select-"+zone).val());
 				var flagHcp =  Validate.now(Validate.Exclusion, $("#select-"+zone).val(), { within: [ '0', 0 ], allowNull: false, partialMatch: false, caseSensitive: false });
 				var flagDate = Validate.now(Validate.Presence, $("#schedule-date-"+zone).val());
 				var flagFreq = Validate.now(Validate.Presence, $("#schedule-frequency-"+zone).val());
@@ -163,7 +234,6 @@
 				if(flagHcp && flagDate && flagFreq){
 					setScheduleVisit("0", $("#select-"+zone).val(), $("#schedule-idpatient-"+zone).val(), $("#schedule-date-"+zone).val(), $("#schedule-idprofesion-"+zone).val(), $("#schedule-frequency-"+zone).val(),zone);
 					eval("patientObjArray[1]."+zone+"='"+$("#select-"+zone).val()+"'");
-					console.log(patientObjArray[1]);
 					drawPatientSchedule(patientObjArray[0].idpatient,zone);
 				}else{
 					if(!flagHcp){$("#select-"+zone+"-button").css("border","2px solid red");}
@@ -171,72 +241,8 @@
 					if(!flagFreq){$("#schedule-frequency-"+zone).css("border","2px solid red");}
 				}
 			});	
-		
 		}
-	});
-	
-	
-function editPatientSchedule(){
-	var hcpObjArr = getObjectArray("hcp", patientObjArray);
-	var parts = $(this).attr("id").split("-");
-	var zone = parts[0];
-	var action = parts[1];
-	var hcpVal = eval("hcpObjArr."+zone);
-	if(action == "edit"){
-		var scheduleVisit = getScheduleVisit(patientObjArray[0].idpatient, hcpVal);
-		var sdate = moment(scheduleVisit.datevisit);
-		$("#visits-"+zone+" .visit-body").empty();
-		$("<select>",{id:"select-"+zone,class:"schedule-select"}).append($("<option>",{value:"0"}).text("Select "+eval("profession_object."+zone))).appendTo($("#visits-"+zone+" .visit-body")).selectmenu();
-		var hcpid = 0;
-		if(zone == "chr"){hcpid = 4;}
-		if(zone == "md"){hcpid = 1;}
-		if(zone == "nur"){hcpid = 2;}
-		if(zone == "nut"){hcpid = 3;}
-		$(usersArray).each(function(index,Object){
-			if(Object.idprofesion == hcpid){
-				if(Object.iduser == hcpVal){
-					$("#select-"+zone).append($("<option>",{value:Object.iduser,selected:true}).text(capitalizeFirstLetter(Object.firstname)+" "+capitalizeFirstLetter(Object.lastname)));
-				}else{
-					$("#select-"+zone).append($("<option>",{value:Object.iduser}).text(capitalizeFirstLetter(Object.firstname)+" "+capitalizeFirstLetter(Object.lastname)));
-				}
-			}
-		});
-		$("#select-"+zone).selectmenu( "refresh" );
-		$("<input>",{id:"schedule-select-date-"+zone,type:"text",placeholder:"Schedule date",class:"ui-button ui-widget ui-state-default ui-corner-all ui-state-hover schedule-input"}).appendTo($("#visits-"+zone+" .visit-body")).MonthPicker(
-				{
-					SelectedMonth: sdate.format("MMM, YYYY"),
-					MonthFormat: 'M, yy', 
-					Button: false, 
-					AltFormat: "yy-mm-dd",
-					AltField:"#schedule-date-"+zone
-				});
-		
-		$("<input>",{id:"schedule-frequency-"+zone,type:"text",placeholder:"Frequency",class:"ui-button ui-widget ui-state-default ui-corner-all ui-state-hover schedule-input"}).val(scheduleVisit.frequency).width(100).appendTo($("#visits-"+zone+" .visit-body"));
-		//$("<span>",{style:"vertical-align:top;line-height:35px;font-size:110%;font-weight:bold;padding:7px;margin-top:3px;"}).text("(months)").appendTo($("#visits-"+zone+" .visit-body"));
-		$("<div>",{id:"save-schedule-"+zone,class:"cisbutton save-"+zone+"",style:"vertical-align:top;margin-top:10px;"}).text("Save").appendTo($("#visits-"+zone+" .visit-body"));
-		$("<input>",{id:"schedule-idprofesion-"+zone,type:"hidden",value:scheduleVisit.idprofesion}).appendTo($("#visits-"+zone+" .visit-body"));
-		$("<input>",{id:"schedule-date-"+zone,type:"hidden",value:sdate.format('YYYY-MM-DD')}).appendTo($("#visits-"+zone+" .visit-body"));
-		$("<input>",{id:"schedule-idpatient-"+zone,type:"hidden",value:patientObjArray[0].idpatient}).appendTo($("#visits-"+zone+" .visit-body"));
-		$(".save-"+zone).click(function(){
-			var flagHcp =  Validate.now(Validate.Exclusion, $("#select-"+zone).val(), { within: [ '0', 0 ], allowNull: false, partialMatch: false, caseSensitive: false });
-			var flagDate = Validate.now(Validate.Presence, $("#schedule-date-"+zone).val());
-			var flagFreq = Validate.now(Validate.Presence, $("#schedule-frequency-"+zone).val());
-			$("#select-"+zone+"-button").css("border","none");
-			$("#schedule-select-date-"+zone).css("border","none");
-			$("#schedule-frequency-"+zone).css("border","none");
-			if(flagHcp && flagDate && flagFreq){
-				setScheduleVisit("0", $("#select-"+zone).val(), $("#schedule-idpatient-"+zone).val(), $("#schedule-date-"+zone).val(), $("#schedule-idprofesion-"+zone).val(), $("#schedule-frequency-"+zone).val(),zone);
-				eval("patientObjArray[1]."+zone+"='"+$("#select-"+zone).val()+"'");
-				drawPatientSchedule(patientObjArray[0].idpatient,zone);
-			}else{
-				if(!flagHcp){$("#select-"+zone+"-button").css("border","2px solid red");}
-				if(!flagDate){$("#schedule-select-date-"+zone).css("border","2px solid red");}
-				if(!flagFreq){$("#schedule-frequency-"+zone).css("border","2px solid red");}
-			}
-		});	
-	
 	}
-
 }	
 	
 	

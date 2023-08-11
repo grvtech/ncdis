@@ -288,7 +288,7 @@ if(patientObj.deceased == 1){
 	$("#deceased-section").hide();
 }
 
-
+$("#chr-value").on("blur",function(){if($(this).val()== ""){$("#chrid").val("");}});
 $("#chr-value").autocomplete({
 	delay: 300,
 	minLength: 2,
@@ -327,17 +327,15 @@ $("#chr-value").autocomplete({
 		
 	}
 }).data("ui-autocomplete")._renderItem = function(ul, item) {
-	var $line = $("<a>");
-	var $container = $("<div>").appendTo($line);
-	$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
 	var $liline = $("<li>");
-	//$liline.height("35px");
-	$liline.append($line).appendTo(ul);
-	$(ul).height(200);
+	$("<div>",{class:'searchname'}).appendTo($liline).append($("<span>").html(item.name));
+	$liline.appendTo(ul);
+	$(ul).height(180);
+	$(ul).width($("#chr-value").outerWidth());
 	return $liline;
 };
 
-
+$("#md-value").on("blur",function(){if($(this).val()== ""){$("#mdid").val("");}});
 $("#md-value").autocomplete({
 	delay: 300,
 	minLength: 2,
@@ -376,16 +374,15 @@ $("#md-value").autocomplete({
 		
 	}
 }).data("ui-autocomplete")._renderItem = function(ul, item) {
-	var $line = $("<a>");
-	var $container = $("<div>").appendTo($line);
-	$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
 	var $liline = $("<li>");
-	//$liline.height("35px");
-	$liline.append($line).appendTo(ul);
-	$(ul).height(200);
+	$("<div>",{class:'searchname'}).appendTo($liline).append($("<span>").html(item.name));
+	$liline.appendTo(ul);
+	$(ul).height(180);
+	$(ul).width($("#md-value").outerWidth());
 	return $liline;
 };
 
+$("#nur-value").on("blur",function(){if($(this).val()== ""){$("#nurid").val("");}});
 $("#nur-value").autocomplete({
 	delay: 300,
 	minLength: 2,
@@ -424,15 +421,15 @@ $("#nur-value").autocomplete({
 		
 	}
 }).data("ui-autocomplete")._renderItem = function(ul, item) {
-	var $line = $("<a>");
-	var $container = $("<div>").appendTo($line);
-	$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
 	var $liline = $("<li>");
-	$liline.append($line).appendTo(ul);
-	$(ul).height(200);
+	$("<div>",{class:'searchname'}).appendTo($liline).append($("<span>").html(item.name));
+	$liline.appendTo(ul);
+	$(ul).height(180);
+	$(ul).width($("#md-value").outerWidth());
 	return $liline;
 };
 
+$("#nut-value").on("blur",function(){if($(this).val()== ""){$("#nutid").val("");}});
 $("#nut-value").autocomplete({
 	delay: 300,
 	minLength: 2,
@@ -471,12 +468,11 @@ $("#nut-value").autocomplete({
 		
 	}
 }).data("ui-autocomplete")._renderItem = function(ul, item) {
-	var $line = $("<a>");
-	var $container = $("<div>").appendTo($line);
-	$("<div>",{class:'searchname'}).appendTo($container).append($("<span>").html(item.name));
 	var $liline = $("<li>");
-	$liline.append($line).appendTo(ul);
-	$(ul).height(200);
+	$("<div>",{class:'searchname'}).appendTo($liline).append($("<span>").html(item.name));
+	$liline.appendTo(ul);
+	$(ul).height(180);
+	$(ul).width($("#md-value").outerWidth());
 	return $liline;
 };
 
@@ -491,7 +487,7 @@ populateForm($("#editpatient-form"), prepareData(diabetObj));
 
 var hcpObject = getObjectArray("hcp",patientObjArray);
 $(usersArray).each(function(k,v){
-	console.log("user id : "+v.iduser + " chr id "+hcpObject.chr);
+	//console.log("user id : "+v.iduser + " chr id "+hcpObject.chr);
 	if(hcpObject.chr != null || hcpObject.chr != ""){
 		if(v.iduser == hcpObject.chr){
 			hcpObject["chr"] = (capitalizeFirstLetter((v.firstname).toLowerCase())+" "+capitalizeFirstLetter((v.lastname).toLowerCase()));

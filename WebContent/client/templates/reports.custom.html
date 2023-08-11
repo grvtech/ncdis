@@ -311,12 +311,17 @@ $("#normal-reports-button").click(function (){
 });
 
 $("#custom-report-execute-button").click(function(){
-	$("body").append($("<div>",{class:"modal"}).append($("<div>",{class:"modal-span"}).text("CDIS Loading..."))).addClass("loading");
-	var reportObject = getReportObjectFromCriterias();
-	console.log(reportObject);
-	//executeReport(reportObject);
-	executeAsyncReport(reportObject);
-	setTimeout(function(){$("body").removeClass("loading");$(".modal").remove();},1500);
+	if(isDemo){
+		alert("This function si not available in demo mode");
+	}else{
+		$("body").append($("<div>",{class:"modal"}).append($("<div>",{class:"modal-span"}).text("CDIS Loading..."))).addClass("loading");
+		var reportObject = getReportObjectFromCriterias();
+		console.log(reportObject);
+		//executeReport(reportObject);
+		executeAsyncReport(reportObject);
+		setTimeout(function(){$("body").removeClass("loading");$(".modal").remove();},1500);	
+	}
+	
 });
 
 

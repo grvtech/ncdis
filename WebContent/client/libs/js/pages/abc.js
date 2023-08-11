@@ -7,7 +7,6 @@ function drawABCGraphs(){
 		
 			abc.done(function( json ) {
 				abcObjArray = json.objs;
-				console.log(abcObjArray);
 				var abcObject = abcObjArray[0];
 				var values = [];
 				var sections =[];

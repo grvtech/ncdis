@@ -23,9 +23,9 @@ function loadTemplate(pageName,callBack){
 	}else{
 		$body.append($("<div>",{class:"cdismodal"}).append($("<div>",{class:"modal-span"}).text("CDIS Loading..."))).addClass("loading");
 		if(callBack == null){
-			$( "#wraper").load( "client/templates/"+pageName+".html");
+			$( "#wraper").load( "client/templates/"+pageName+".html"+"?ts="+moment());
 		}else{
-			$( "#wraper").load("client/templates/"+pageName+".html", callBack);
+			$( "#wraper").load("client/templates/"+pageName+".html"+"?ts="+moment(), callBack);
 		}
 		setTimeout(function(){
 			$body.removeClass("loading");
@@ -85,6 +85,29 @@ function capitalizeFirstLetter(string) {
 }
 
 
+function getEvents(element) {
+    var elemEvents = $._data(element, "events");
+    var allDocEvnts = $._data(document, "events");
+    for(var evntType in allDocEvnts) {
+        if(allDocEvnts.hasOwnProperty(evntType)) {
+            var evts = allDocEvnts[evntType];
+            for(var i = 0; i < evts.length; i++) {
+                if($(element).is(evts[i].selector)) {
+                    if(elemEvents == null) {
+                        elemEvents = {};
+                    }
+                    if(!elemEvents.hasOwnProperty(evntType)) {
+                        elemEvents[evntType] = [];
+                    }
+                    elemEvents[evntType].push(evts[i]);
+                }
+            }
+        }
+    }
+    return elemEvents;
+}
+
+
 function getCacheStatus(){
 	var appCache = window.applicationCache;
 	switch (appCache.status) {
@@ -129,6 +152,56 @@ function randomIntFromInterval(min,max){
     return Math.floor(Math.random()*(max-min+1)+min);
 }
 
+
+function showGRVPopup(title,text,buttons,config){
+	var id = moment();
+	$("body").css("overflow-y","hidden");
+	var modal = $('<div>',{id:"fullscreen_"+id,class:"grvpopup-fullscreen-modal"}).appendTo($("#wraper"));
+	var sett = $('<div>',{class:"grvpopup-window"}).appendTo(modal);
+	if(typeof(config.width) != "undefined")sett.css("width",config.width+"px");
+	if(typeof(config.height) != "undefined")sett.css("height",config.height+"px");
+	var settH = $('<div>',{class:"grvpopup-window-header"}).appendTo(sett);
+	var settB = $('<div>',{class:"grvpopup-window-body"}).appendTo(sett);
+	var settBB = $('<div>',{class:"grvpopup-window-body-body"}).appendTo(settB);
+	var settBF = $('<div>',{class:"grvpopup-window-body-footer"}).appendTo(settB);
+	
+	
+	$.each(buttons, function(i,button){
+		var cb = $('<button>',{class:"cisbutton"}).text(button.text).appendTo(settBF);
+		cb.on("click",{"buttonAction":button.action},function (event){
+			var flag = eval(event.data.buttonAction+"()");
+			if(flag)setTimeout(closeGRVPopup,1000);
+		});
+	});
+	
+	settBB.html(text);
+	$('<div>',{class:"grvpopup-window-header-title"}).text(title).appendTo(settH);
+	var settHC = $('<div>',{class:"grvpopup-window-header-close"}).html("<i class='fa fa-times'></i>").appendTo(settH);
+	settHC.click(function(){
+		closeGRVPopup(); 
+	});
+	
+	function closeGRVPopup(){
+		$(".grvpopup-fullscreen-modal").remove();
+		$("body").css("overflow-y","auto");
+	}
+}
+
+function isDecimal(input){
+    let regex = /^[-+]?[0-9]+\.[0-9]+$/;
+    return (regex.test(input));
+}
+
+
+
+function loadJS(FILE_URL){
+	$.getScript("client/libs/js/common/define.js", function(data, textStatus, jqxhr) {
+		//console.log(data); // data returned
+		//console.log(textStatus); // success
+		//console.log(jqxhr.status); // 200
+		console.log('Load was performed.');
+	});
+}
 
 /* tooltip function*/
 //Use a closure to keep vars out of global scope

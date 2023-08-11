@@ -48,37 +48,46 @@ REPORTS PAGE CSS
 	z-index: 1;
 	*/
 	
-	display: -webkit-box;
-	display: -moz-box;
-	display: -ms-flexbox;
-	display: -webkit-flex;
-	display: flex;  
-	-webkit-flex-flow: column nowrap;
-	flex-flow: column nowrap;
+	display: grid;  
+	grid-template-rows:60px auto;
+
 	text-align: center;
 	margin: 0px;
 	padding:0px;
 	width:100%;
+	height:100vh;
 	
 }
 
 #reportsPage .reportsbody>*{
 	/*flex: 2 50%;*/
-	margin:60px 15px 15px 15px;
-	background-color:#c0c0c0;
+	/*margin:60px 15px 15px 15px;*/
+	/*background-color:#c0c0c0;*/
 	min-width:1180px;
 }
 
 
-#reportsPage #ub_reportsbody_page > *{
-	flex:1 100%;
+#reportsPage #ub_reportsbody_page {
 	padding:10px;
 	
 }
 
+.reportsbody_dashboard{
+	min-width:1160px;
+	height: 100%;
+}
+
 #tabs .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active{
-	background: #4b3b3b url(images/ui-bg_highlight-hard_65_4d90fe_1x100.png) 50% 50% repeat-x;
-	border: 1px solid #4b3b3b;	
+	background: #5c6c9d url(images/ui-bg_highlight-hard_65_4d90fe_1x100.png) 50% 50% repeat-x;
+	border: 1px solid #5c6c9d;	
+}
+
+
+#tabs .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active .ui-tabs-anchor{
+	background: #ffffff ;
+	border: 1px solid #ffffff;
+	color:#4d4d4d;
+	font-weight:bold;	
 }
 
 
@@ -99,7 +108,7 @@ REPORTS PAGE CSS
 .dashboard-item-half{
 	width:48%;
 	min-width:430px;
-	height:300px;
+	height:330px;
 	border:1px solid #cdcdcd;
 	margin:5px;
 }
@@ -142,12 +151,15 @@ REPORTS PAGE CSS
 	display:block;
 	width:100%;
 	height:30px;
-	background: #fafafa;
+	background: #cdcdcd;
+	line-height:30px;
+	font-weight:bold;
+	font-size:15px;
 }
 .dashboard-item-half .form{
 	width:100%;
 	min-width:150px;
-	height:40px;
+	/*height:40px;*/
 	display:block;
 	/*background: blue;*/
 	text-align:left;
@@ -156,9 +168,8 @@ REPORTS PAGE CSS
 .dashboard-item-half .graph{
 	width:100%;
 	min-width:150px;
-	height:230px;
+	height:250px;
 	display:block;
-	
 }
 
 .dashboard-item-half .form-item{
@@ -183,9 +194,6 @@ REPORTS PAGE CSS
 
 
 
-.reportsbody_dashboard{
-	min-width:1160px;
-}
 
 .reportsbody_report{position:absolute;width:80%;top:0px;left:10%;background-color:#ffffff;}
 .reportsbody_personal{
@@ -230,6 +238,7 @@ REPORTS PAGE CSS
 
 .legend-row-highlighted{
 	background:#4d4d4d;
+	color:#ffffff;
 }
 .legend-text-highlighted{
 	color:#ffffff;
@@ -237,6 +246,10 @@ REPORTS PAGE CSS
 .jqplot-table-legend{
 	text-align:left;
 }
+.jqplot-data-label{
+	font-size:12px;
+}
+
 
 
 

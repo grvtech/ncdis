@@ -14,12 +14,10 @@ function loadPatientObject(key,value){
 		patient.done(function( json ) {
 			patientObjArray = json.objs;
 			patientObj = patientObjArray[0];
-			console.log("object patient");
-			console.log(patientObjArray);
 		});
 		patient.fail(function( jqXHR, textStatus ) {
+			
 		  alert( "Request failed: " + textStatus );
-		  console.log(this.url);
 		});	
 }
 
@@ -27,11 +25,8 @@ function getValueSectionArray(section, value, arr){
 	//cdisSection = section;
 	//var objSection = getObjectSection(arr);
 	var objSection = getObjectArray(section,arr);
-	//console.log('object section - '+section+'  -  value:'+value);
-	//console.log(objSection);
 	var objValue = eval("objSection."+value);
 	
-	//console.log(objValue);
 	if(typeof(objValue) != 'undefined'){
 		return objValue.values;
 	}else{
@@ -126,7 +121,6 @@ function getValueLimits(valueName){
 			});
 			limits.done(function( json ) {
 				result = json.objs[0];
-				console.log(result);
 			});
 			limits.fail(function( jqXHR, textStatus ) {
 			  alert( "Request failed: " + textStatus );
@@ -634,9 +628,64 @@ function drawPiramidGraphImprovment(container,ticks,maleArr,femaleArr){
 	
 }
 
+function drawPieGraph(container,dataObject){
+	
+	$(container).empty();
+	var serie = [['Sony',7], ['Samsumg',13.3], ['LG',14.7], ['Vizio',5.2], ['Insignia', 1.2]];
+    
+	var th = $(".pie-label").height();
+	var tw = $(".pie-label").width();
+	var ph = $(container).parent().height();
+    
+	$(container).width(tw);
+	$(container).height(ph-th);
+	
+    var cid = $(container).attr("id");
+   $.jqplot(cid, [dataObject], {
+	   grid: {
+           drawBorder: false, 
+           drawGridlines: false,
+           background: '#ffffff',
+           shadow:false
+       },
+       axesDefaults: {
+            
+       },
+       seriesDefaults:{
+           renderer:$.jqplot.PieRenderer,
+           rendererOptions: {
+               showDataLabels: true
+           }
+       }
+    }); 
+	
+}
 
+function drawPG(object){
+	drawPieGraph(object.container,object.data);
+}
+
+function drawAG(object){
+	var options = {"colors":['#6b03fc', '#b103fc', '#a103fc', '#fc0384', '#17BDB8']};
+	drawLineGraphSimple(object.container,object.data, options);
+}
+
+function drawL(object){
+	var options = {"colors":["#fc6203","#03c6fc","#e05910","#bd10e0"]};
+	drawLineGraphSimple(object.container,object.data, options);
+}
+
+function drawBL(object){
+	drawBarLineGraph(object.container,object.data);
+}
+
+function drawHbA1cValueLL(object){
+	var options = {"colors":["#02a16e","#0227a1","#e05910","#bd10e0"]};
+	drawLineGraphSimple(object.container,object.data, options);
+}
 
 function drawAreaGraph(container, dataObject){
+	$(container).empty();
     var ts = dataObject.ticks;
     var ticks = [];
     $.each(ts, function(i,v){
@@ -645,7 +694,10 @@ function drawAreaGraph(container, dataObject){
     
     var cid = $(container).attr("id");
     var ang = 0;
-    if(ticks.length > 6)ang = -30;
+    if(ticks.length > 10 && $(container).width() < 1000 )ang = -15;
+    
+    
+    
     var showTick = true;
     if(ticks.length > 18)showTick=false;
     plot2 = $.jqplot(cid,dataObject.series,{
@@ -658,18 +710,25 @@ function drawAreaGraph(container, dataObject){
        },
        seriesDefaults: {
            fill: true,
+           fillAndStroke: true,
            rendererOptions: {
                smooth: true,
                animation: {
+            	   speed: 2000,
                    show: true
                }
+               
+           },
+           markerOptions: {
+               style: 'filledCircle',
+               size: 2
            }
        },
-       series: dataObject.labels,
+       series:  dataObject.labels,
        legend: {
     	renderer: $.jqplot.EnhancedLegendRenderer,
         show: true,
-        location:'s',
+        location:'e',
         placement: 'outsideGrid',
         fontSize:'0.6vw',
         rowSpacing:'0.7em',
@@ -688,13 +747,21 @@ function drawAreaGraph(container, dataObject){
            xaxis: {
               ticks: ticks,
               tickRenderer: $.jqplot.CanvasAxisTickRenderer,
-              
               tickOptions: {
             	  show: showTick,
-            	tickInterval:5,
+            	tickInterval:2,
                 angle: ang 
               },
               drawMajorGridlines: false
+          },
+          yaxis: {
+              min: 0,
+              max: 100,
+              tickOptions: {
+                showGridline: false,
+                formatString : "%'d",
+                suffix: '%'
+              }
           }           
         }
     });
@@ -705,12 +772,7 @@ function drawAreaGraph(container, dataObject){
     		//alert(ev.pageX+"   "+ev.pageY);
             // create some content for the tooltip.  Here we want the label of the tick,
             // which is not supplied to the highlighters standard tooltip.
-            var t = 0;
-            $.each(plot.series, function(i,v){
-            	t+=v.data[pointIndex][1];
-            })
-            var pr = Math.round(100*data[1]/t);
-            var content = '<span>HBA1c Trend : <b>'+plot.series[seriesIndex].label + '</b></span><br><span>Date: <b>' + plot.series[seriesIndex]._xaxis.ticks[pointIndex][1] + '</b></span><br><span>No patients: <b>' + data[1]+'</b> - <b>'+pr+'%</b>';
+            var content = '<span>HBA1c Trend : <b>'+plot.series[seriesIndex].label + '</b></span><br><span>Date: <b>' + plot.series[seriesIndex]._xaxis.ticks[pointIndex][1] + '</b></span><br><span>Percentage: <b>' + data[1]+'%</b>';
             // get a handle on our custom tooltip element, which was previously created
             // and styled.  Be sure it is initiallly hidden!
             var elem = $('<div>',{class:"jqplot-highlight","style":"position:absolute;background:"+plot.series[seriesIndex].fillColor}).appendTo($(container));
@@ -739,41 +801,178 @@ function drawAreaGraph(container, dataObject){
 }
 
 
+
+
+
+function drawDoubleLineGraph(container, series, ticks, colors, labels){
+	$(container).empty();
+	var cid = $(container).attr("id");
+    var ang = 0;
+    if(series[0].length > 10 && $(container).width() < 1000)ang = -15;
+    var showTick = true;
+	$.jqplot(cid, series, {
+		showMarker: false,
+	    highlighter: {
+	    	show: true,
+	        showTooltip: false
+	    },
+		seriesDefaults:{
+			rendererOptions: {
+		        highlightMouseOver: true,
+		        highlightMouseDown: false,
+		        highlightColor: null,
+		    }
+		},
+		grid: {
+	        drawBorder: true,
+	        borderWidth: 1,
+	        shadow: false
+	       },
+	       
+	    legend: {
+	       	renderer: $.jqplot.EnhancedLegendRenderer,
+	           show: true,
+	           location:'e',
+	           placement: 'outsideGrid',
+	           fontSize:'0.6vw',
+	           rowSpacing:'0.7em',
+	           border: 'none',
+	           background:'transparent',
+	           marginRight:'5px',
+	           rendererOptions: {
+	               numberRows: 1
+	           }
+	        },
+            series:[
+                    {
+            			renderer:$.jqplot.LineRenderer,
+            			highlightMouseOver: false,
+            			label: labels[0],
+            			color:colors[0],
+            			pointLabels: { 
+            					show: false,
+            					location : 'n'
+            				}
+            		}, 
+            		{
+            			renderer:$.jqplot.LineRenderer,
+            			label:labels[1],
+            			color: colors[1],
+            			pointLabels: { 
+            				show: false,
+        					location : 's' }
+            		}],
+            axes: {
+                  xaxis: {
+                	  ticks: ticks,
+                      renderer: $.jqplot.CategoryAxisRenderer,
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                      tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                      tickOptions: {
+                          angle: ang,
+                          show:showTick
+                      }
+                  },
+                  yaxis: {
+                	  min: 0,
+                      max: 100,
+                      tickOptions: {
+                        showGridline: false,
+                        formatString : "%'d",
+                        suffix: '%'
+                      }
+                  }
+              }
+          });
+	
+	// capture the highlighters highlight event and show a custom tooltip.
+    $(container).bind('jqplotHighlighterHighlight', 
+        function (ev, seriesIndex, pointIndex, data, plot) {
+    		//alert(ev.pageX+"   "+ev.pageY);
+            // create some content for the tooltip.  Here we want the label of the tick,
+            // which is not supplied to the highlighters standard tooltip.
+            var content = '<span><b>'+plot.series[seriesIndex].label + '</b></span><br><span>Date: <b>' + plot.series[seriesIndex]._xaxis.ticks[pointIndex] + '</b></span><br><span>Percentage: <b>' + data[1]+'%</b> ';
+            // get a handle on our custom tooltip element, which was previously created
+            // and styled.  Be sure it is initiallly hidden!
+            var elem = $('<div>',{class:"jqplot-highlight","style":"position:absolute"}).appendTo($(container));
+            elem.html(content);
+            // Figure out where to position the tooltip.
+            var h = elem.outerHeight();
+            var w = elem.outerWidth();
+            var parentOffset = $(elem).parent().offset();
+            var ww = $("#wraper").outerWidth();
+            var left = ev.pageX - parentOffset.left;
+            if(ev.pageX + w > ww){
+            	left = ev.pageX - parentOffset.left - w;
+            }
+            var top = ev.pageY - parentOffset.top;
+            // now stop any currently running animation, position the tooltip, and fade in.
+            elem.stop(true, true).css({left:left, top:top}).fadeIn(300);
+        }
+    );
+     
+    // Hide the tooltip when unhighliting.
+    $(container).bind('jqplotHighlighterUnhighlight', 
+        function (ev) {
+            $('.jqplot-highlight').fadeOut(300);
+        }
+    );
+}
+
+
+
 function drawBarLineGraph(container, dataObject){
+	$(container).empty();
 	var cid = $(container).attr("id");
 	
 	var serie1Init = dataObject.series[0];
 	var serie1 = [];
 	var serie2 = [];
 	$.each(dataObject.series[0], function(i, v){
-		if(i == 0 || i%3==0){
+		//if(i == 0 || i%3==0){
 			var pr = Math.round(100*v/dataObject.series[1][i]);
 			serie1.push(serie1Init[i]);
 			serie2.push(pr);
-		}
+		//}
 	});
 	var ts = dataObject.ticks;
     var ticks = [];
     $.each(ts, function(i,v){
-    	if(i == 0 || i%3==0){
+    	//if(i == 0 || i%3==0){
     		ticks.push(moment(v[1]).format('MMM YYYY'));
-    	}
+    	//}
     });
     
     var ang = 0;
-    if(serie2.length > 6)ang = -30;
+    if(serie2.length > 10 && $(container).width() < 1000)ang = -15;
     var showTick = true;
     if(serie2.length > 18)showTick=false;
 	var plot4 = $.jqplot(cid, [serie1, serie2], {
-	                series:[{
+				seriesDefaults:{
+					rendererOptions: {
+				        highlightMouseOver: false,
+				        highlightMouseDown: false,
+				        highlightColor: null,
+				    }
+				},
+				grid: {
+			        drawBorder: true,
+			        borderWidth: 1,
+			        shadow: false
+			       },
+	                series:[
+	                        
+	                        {
 	                			renderer:$.jqplot.BarRenderer,
 	                			highlightMouseOver: false,
+	                			label: dataObject.labels[0].label,
 	                			pointLabels: { 
 	                					show: true,
 	                					location : 'n'
 	                				}
 	                		}, 
 	                		{
+	                			label:dataObject.labels[1].label,
 	                			xaxis:'xaxis', 
 	                			yaxis:'y2axis',
 	                			pointLabels: { show: true,
@@ -795,11 +994,12 @@ function drawBarLineGraph(container, dataObject){
 	                          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
 	                          tickRenderer: $.jqplot.CanvasAxisTickRenderer,
 	                          tickOptions: {
-	                              angle: 30
+	                              angle: ang
 	                          }
 	                      },
 	                      y2axis: {
-	                          autoscale:true,
+	                    	  min: 0,
+	                          max: 100,
 	                          labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
 	                          rendererOptions : {
 	                        	  forceTickAt0: true, 
@@ -807,7 +1007,7 @@ function drawBarLineGraph(container, dataObject){
 	                          },
 	                          tickRenderer: $.jqplot.CanvasAxisTickRenderer,
 	                          tickOptions: {
-	                              angle: 30,
+	                              angle: ang,
 	                              formatString:"%'d%"
 	                          }
 	                      }
@@ -818,25 +1018,29 @@ function drawBarLineGraph(container, dataObject){
 
 
 function drawLineGraph(container, dataObject){
+	
+	$(container).empty();
 	var cid = $(container).attr("id");
 	
 	var serie1 = dataObject.series[0];
 	var serie2 = [];
 	$.each(dataObject.series[0], function(i, v){
-		if(i == 0 || i%3==0){
+		//if(i == 0 || i%3==0){
 			var pr = Math.round(100*v/dataObject.series[1][i]);
 			serie2.push(pr);
-		}
+		//}
 	});
 	var ts = dataObject.ticks;
     var ticks = [];
     $.each(ts, function(i,v){
-    	if(i == 0 || i%3==0){
+    	//if(i == 0 || i%3==0){
     		ticks.push(moment(v[1]).format('MMM YYYY'));
-    	}
+    	//}
     });
+    
     var ang = 0;
-    if(serie2.length > 6)ang = -30;
+    if(serie2.length > 10 && $(container).width() < 1000)ang = -15;
+    
     var showTick = true;
     if(serie2.length > 18)showTick=false;
 	var plot4 = $.jqplot(cid, [serie2], {
@@ -844,6 +1048,11 @@ function drawLineGraph(container, dataObject){
 		        show: true,
 		        showTooltip: false
 		       },
+		       grid: {
+		           drawBorder: true,
+		           borderWidth: 0.5,
+		           shadow: false
+		          },
 			series:[{
 				color: 'rgba(52,155,235,.6)',
                 negativeColor: 'rgba(31,90,135,.6)',
@@ -873,12 +1082,13 @@ function drawLineGraph(container, dataObject){
                       }
                   },
                   yaxis: {
-                      autoscale:false,
+                      min:0,
+                      max:100,
                       labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
                       tickRenderer: $.jqplot.CanvasAxisTickRenderer,
                       rendererOptions : {forceTickAt0: true, forceTickAt100: true },
                       tickOptions: {
-                          angle: 30,
+                          angle: ang,
                           prefix: '',
                           formatString:"%'d%"
                       }
@@ -920,4 +1130,743 @@ function drawLineGraph(container, dataObject){
         }
     );
 }
+
+
+function drawLineGraphSimple(container, dataObject, options){
+	$(container).empty();
+	var cid = $(container).attr("id");
+	var maxy = 100;
+	var maxserie = 0;
+	var series = [];
+	var seriesPlotConfig = [];
+	
+	var markerStyle = ["filledCircle","filledDiamond","filledSquare","sqaure"];
+	var rendererStyle = ["solid","dashed","doted",[2,5,10,5]];
+	if(dataObject.length > 1){
+		$.each(dataObject, function(i,v){
+			var sconf = {};
+			var vv = v.series[0];
+			series.push(vv);
+			var vm = vv.max();
+			maxserie = Math.max(maxserie, vm);
+			sconf["label"] = v.labels[0].label;
+			sconf["markerOptions"] = {"style":markerStyle[i]};
+			sconf["linePattern"] = rendererStyle[i];
+			seriesPlotConfig.push(sconf);
+		});
+	}else{
+		var sconf = {};
+		var vv = dataObject[0].series[0];
+		series.push(vv);
+		maxserie = vv.max();
+		sconf["label"] = dataObject[0].labels[0].label;
+		sconf["markerOptions"] = {"style":markerStyle[0]};
+		seriesPlotConfig.push(sconf);
+		
+	}
+	var ts = dataObject[0].ticks;
+    var ticks = [];
+    $.each(ts, function(i,v){
+    	//if(i == 0 || i%3==0){
+    		ticks.push(moment(v[1]).format('MMM YYYY'));
+    	//}
+    });
+    
+    var showTick = true;
+    var ang=0;
+    if(ticks.length > 24)ang=-30;
+    if(maxserie < 10)maxy = 10;
+    else if(maxserie > 10 && maxserie < 25)maxy = 25;
+    else if(maxserie > 25 && maxserie < 50)maxy = 50;
+	var plot4 = $.jqplot(cid, series, {
+			highlighter: {
+		        show: true,
+		        showTooltip: false
+		       },
+		       grid: {
+		           drawBorder: true,
+		           borderWidth: 0.5,
+		           shadow: false
+		          },
+		    seriesColors:options.colors,
+		    seriesDefaults:{
+                negativeColor: 'rgba(31,90,135,.6)',
+                showMarker: true,
+                showLine: true,
+                fill: false,
+                fillAndStroke: false,
+                markerOptions: {
+                    style: 'filledCircle',
+                    size: 8
+                },
+                rendererOptions: {
+                    smooth: true,
+                    animation: {
+                  	   speed: 2000,
+                       show: true
+                     }
+                }
+			},
+			series : seriesPlotConfig,
+			legend: {
+		    	renderer: $.jqplot.EnhancedLegendRenderer,
+		        show: true,
+		        location:'s',
+		        border : 'none',
+		        placement: 'outsideGrid',
+		        fontSize:'0.6vw',
+		        rowSpacing:'0.7em',
+		        background:'transparent',
+		        marginRight:'5px',
+		        rendererOptions: {
+		            numberRows: 2,
+		            numberColumns: 2,
+		        }
+		       },
+            axes: {
+                  xaxis: {
+                	  ticks: ticks,
+                	  drawMajorGridlines: false,
+                      renderer: $.jqplot.CategoryAxisRenderer,
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                      tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                      numberTicks: 5,
+                      tickOptions: {
+                    	  show: showTick,
+                          angle: ang
+                      }
+                  },
+                  yaxis: {
+                      min:0,
+                      max:maxy,
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                      tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                      rendererOptions : {forceTickAt0: true, forceTickAt100: true },
+                      tickOptions: {
+                          angle: ang,
+                          prefix: '',
+                          formatString:"%'d%"
+                      }
+                  }
+              }
+          });
+
+	 // capture the highlighters highlight event and show a custom tooltip.
+    $(container).bind('jqplotHighlighterHighlight', 
+        function (ev, seriesIndex, pointIndex, data, plot) {
+    		//alert(ev.pageX+"   "+ev.pageY);
+            // create some content for the tooltip.  Here we want the label of the tick,
+            // which is not supplied to the highlighters standard tooltip.
+            var content = '<span>'+plot.series[seriesIndex].label+'</span><br><span>Date: <b>' + plot.series[seriesIndex]._xaxis.ticks[pointIndex] + '</b></span><br><span>Value: <b>' + data[1]+'%</b>';
+            // get a handle on our custom tooltip element, which was previously created
+            // and styled.  Be sure it is initiallly hidden!
+            var elem = $('<div>',{class:"jqplot-highlight","style":"text-align:left;position:absolute;color:#ffffff;background:"+plot.series[seriesIndex].fillColor}).appendTo($(container));
+            elem.html(content);
+            // Figure out where to position the tooltip.
+            var h = elem.outerHeight();
+            var w = elem.outerWidth();
+            var parentOffset = $(elem).parent().offset();
+            var ww = $("#wraper").outerWidth();
+            var left = ev.pageX - parentOffset.left;
+            if(ev.pageX + w > ww){
+            	left = ev.pageX - parentOffset.left - w;
+            }
+            var top = ev.pageY - parentOffset.top;
+            // now stop any currently running animation, position the tooltip, and fade in.
+            elem.stop(true, true).css({left:left, top:top}).fadeIn(300);
+        }
+    );
+     
+    // Hide the tooltip when unhighliting.
+    $(container).bind('jqplotHighlighterUnhighlight', 
+        function (ev) {
+            $('.jqplot-highlight').fadeOut(300);
+        }
+    );
+}
+
+
+
+function drawAreaStackedGraph(container, dataObject){
+	$(container).empty();
+	var cid = $(container).attr("id");
+	var maxy = 100;
+	var maxserie = 0;
+	var series = [];
+	var seriesPlotConfig = [];
+	
+	var markerStyle = ["filledCircle","filledDiamond","filledSquare","sqaure"];
+	if(dataObject.length > 1){
+		$.each(dataObject, function(i,v){
+			var sconf = {};
+			var vv = v.series[0];
+			series.push(vv);
+			var vm = vv.max();
+			maxserie = Math.max(maxserie, vm);
+			sconf["label"] = v.labels[0].label;
+			sconf["markerOptions"] = {"style":markerStyle[i]};
+			seriesPlotConfig.push(sconf);
+		});
+	}else{
+		var sconf = {};
+		var vv = dataObject[0].series[0];
+		series.push(vv);
+		maxserie = vv.max();
+		sconf["label"] = dataObject[0].labels[0].label;
+		sconf["markerOptions"] = {"style":markerStyle[0]};
+		seriesPlotConfig.push(sconf);
+		
+	}
+	var ts = dataObject[0].ticks;
+    var ticks = [];
+    $.each(ts, function(i,v){
+    	//if(i == 0 || i%3==0){
+    		ticks.push(moment(v[1]).format('MMM YYYY'));
+    	//}
+    });
+    
+    var showTick = true;
+    var ang=0;
+    if(ticks.length > 24)ang=-30;
+    if(maxserie < 10)maxy = 10;
+    else if(maxserie > 10 && maxserie < 25)maxy = 25;
+    else if(maxserie > 25 && maxserie < 50)maxy = 50;
+	var plot4 = $.jqplot(cid, series, {
+		
+			highlighter: {
+		        show: true,
+		        showTooltip: false
+		       },
+		       grid: {
+		           drawBorder: true,
+		           borderWidth: 0.5,
+		           shadow: false
+		          },
+		    seriesColors:['#35fc03', '#03a1fc', '#a103fc', '#fc0384', '#17BDB8'],
+		    seriesDefaults:{
+                negativeColor: 'rgba(31,90,135,.6)',
+                showMarker: true,
+                showLine: true,
+                fill: false,
+                fillAndStroke: false,
+                markerOptions: {
+                    style: 'filledCircle',
+                    size: 8
+                },
+                rendererOptions: {
+                    smooth: true
+                }
+			},
+			series : seriesPlotConfig,
+			legend: {
+		    	renderer: $.jqplot.EnhancedLegendRenderer,
+		        show: true,
+		        location:'s',
+		        border : 'none',
+		        placement: 'outsideGrid',
+		        fontSize:'0.6vw',
+		        rowSpacing:'0.7em',
+		        background:'transparent',
+		        marginRight:'5px',
+		        rendererOptions: {
+		            numberRows: 1,
+		            numberColumns: 0,
+		        }
+		       },
+            axes: {
+                  xaxis: {
+                	  ticks: ticks,
+                	  drawMajorGridlines: false,
+                      renderer: $.jqplot.CategoryAxisRenderer,
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                      tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                      numberTicks: 5,
+                      tickOptions: {
+                    	  show: showTick,
+                          angle: ang
+                      }
+                  },
+                  yaxis: {
+                      min:0,
+                      max:maxy,
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                      tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                      rendererOptions : {forceTickAt0: true, forceTickAt100: true },
+                      tickOptions: {
+                          angle: ang,
+                          prefix: '',
+                          formatString:"%'d%"
+                      }
+                  }
+              }
+          });
+
+	 // capture the highlighters highlight event and show a custom tooltip.
+    $(container).bind('jqplotHighlighterHighlight', 
+        function (ev, seriesIndex, pointIndex, data, plot) {
+    		//alert(ev.pageX+"   "+ev.pageY);
+            // create some content for the tooltip.  Here we want the label of the tick,
+            // which is not supplied to the highlighters standard tooltip.
+            var content = '<span>'+plot.series[seriesIndex].label+'</span><br><span>Date: <b>' + plot.series[seriesIndex]._xaxis.ticks[pointIndex] + '</b></span><br><span>Value: <b>' + data[1]+'%</b>';
+            // get a handle on our custom tooltip element, which was previously created
+            // and styled.  Be sure it is initiallly hidden!
+            var elem = $('<div>',{class:"jqplot-highlight","style":"text-align:left;position:absolute;background:"+plot.series[seriesIndex].fillColor}).appendTo($(container));
+            elem.html(content);
+            // Figure out where to position the tooltip.
+            var h = elem.outerHeight();
+            var w = elem.outerWidth();
+            var parentOffset = $(elem).parent().offset();
+            var ww = $("#wraper").outerWidth();
+            var left = ev.pageX - parentOffset.left;
+            if(ev.pageX + w > ww){
+            	left = ev.pageX - parentOffset.left - w;
+            }
+            var top = ev.pageY - parentOffset.top;
+            // now stop any currently running animation, position the tooltip, and fade in.
+            elem.stop(true, true).css({left:left, top:top}).fadeIn(300);
+        }
+    );
+     
+    // Hide the tooltip when unhighliting.
+    $(container).bind('jqplotHighlighterUnhighlight', 
+        function (ev) {
+            $('.jqplot-highlight').fadeOut(300);
+        }
+    );
+}
+
+
+function drawPrevalenceLL(object){
+	var dataObject = object.data;
+	
+	var serie1 = dataObject.series[0];
+	var serie2 = dataObject.series[1];
+	var serie3 = dataObject.series[2];
+	var serie4 = dataObject.series[3];
+	
+	var ticks = dataObject.ticks[0];
+    
+	var colors = ["#ed312b","#eb9b34","#0691bf","#8304ba"];
+	var filter = object.filter;
+	var hasGenderFilter = false;
+	var hasAgeFilter = false;
+	if(filter.pandisex != "0")hasGenderFilter = true;
+	if(filter.pandiage != "0")hasAgeFilter = true;
+	var labels = dataObject.labels;
+	
+	if(!hasGenderFilter && !hasAgeFilter){
+		drawDoubleLinePrevalenceGraph(object.container,[serie1,serie3],ticks,colors,labels);
+	} else{
+		drawDoubleLinePrevalenceGraph(object.container,[serie1,serie2,serie3,serie4],ticks,colors,labels);
+	}
+}
+
+function drawIncidenceLL(object){
+	var dataObject = object.data;
+	
+	var serie1 = dataObject.series[0];
+	var serie2 = dataObject.series[1];
+	var serie3 = dataObject.series[2];
+	var serie4 = dataObject.series[3];
+	
+	var ticks = dataObject.ticks[0];
+    
+	var colors = ["#ed312b","#eb9b34","#0691bf","#8304ba"];
+	var filter = object.filter;
+	var hasGenderFilter = false;
+	var hasAgeFilter = false;
+	if(filter.pandisex != "0")hasGenderFilter = true;
+	if(filter.pandiage != "0")hasAgeFilter = true;
+	var labels = dataObject.labels;
+	
+	if(!hasGenderFilter && !hasAgeFilter){
+		drawDoubleLineIncidenceGraph(object.container,[serie1,serie3],ticks,colors,labels);
+	} else{
+		drawDoubleLineIncidenceGraph(object.container,[serie1,serie2,serie3,serie4],ticks,colors,labels);
+	}
+}
+
+
+function drawDoubleLinePrevalenceGraph(container, series, ticks, colors, labels){
+	$(container).empty();
+	var cid = $(container).attr("id");
+    
+    var ang = 0;
+    if(series[0].length > 10 && $(container).width() < 1000)ang = -15;
+    
+    var maxvalueY1 = Math.round(series[0].max() + series[0].max()*0.1);
+    var maxvalueY21 = Math.round((( series[1].max() + series[1].max()*0.3) + Number.EPSILON ) * 100 ) / 100; 
+    var maxvalueY22 = 0 ;
+    if(series.length > 2){
+    	maxvalueY1 = Math.round(series[1].max() + series[1].max()*0.1);
+    	maxvalueY21 = Math.round((( series[3].max() + series[3].max()*0.3) + Number.EPSILON ) * 100 ) / 100; 
+    	maxvalueY22 = Math.round((( series[2].max() + series[2].max()*0.3) + Number.EPSILON ) * 100 ) / 100;
+    }
+    var maxvalueY2 = Math.max(maxvalueY21,maxvalueY22);
+    var seriesConfig = [
+                        {
+                			renderer:$.jqplot.LineRenderer,
+                			highlightMouseOver: false,
+                			label: labels[0],
+                			color:colors[0],
+                			pointLabels: { 
+                					show: false,
+                					location : 'n'
+                				}
+                		}, 
+                		{
+                			renderer:$.jqplot.LineRenderer,
+                			linePattern: [5, 2, 1, 2, 1, 3],
+                			xaxis:'xaxis', 
+                			yaxis:'y2axis',
+                			label:labels[2],
+                			color: colors[2],
+                			pointLabels: { 
+                				show: false,
+            					location : 's' }
+                		}];
+    
+    if(series.length == 4){
+    	seriesConfig = [
+                        {
+                			renderer:$.jqplot.LineRenderer,
+                			highlightMouseOver: false,
+                			label: labels[0],
+                			color:colors[0],
+                			pointLabels: { 
+                					show: false,
+                					location : 'n'
+                				}
+                		},
+                		{
+                			renderer:$.jqplot.LineRenderer,
+                			label:labels[1],
+                			color: colors[1],
+                			pointLabels: { 
+                				show: false,
+            					location : 's' }
+                		},
+                		{
+                			renderer:$.jqplot.LineRenderer,
+                			linePattern: 'dashed',
+                	        lineWidth: 2,
+                			xaxis:'xaxis', 
+                			yaxis:'y2axis',
+                			label:labels[2],
+                			color: colors[2],
+                			pointLabels: { 
+                				show: false,
+            					location : 's' }
+                		},
+                		{
+                			renderer:$.jqplot.LineRenderer,
+                			linePattern: [5, 2, 1, 2, 1, 3],
+                			xaxis:'xaxis', 
+                			yaxis:'y2axis',
+                			label:labels[3],
+                			color: colors[3],
+                			pointLabels: { 
+                				show: false,
+            					location : 's' }
+                		}];
+    }
+    
+    var showTick = true;
+	$.jqplot(cid, series, {
+		showMarker: false,
+	    highlighter: {
+	    	show: true,
+	        showTooltip: false
+	    },
+		seriesDefaults:{
+			rendererOptions: {
+		        highlightMouseOver: true,
+		        highlightMouseDown: false,
+		        highlightColor: null,
+		    }
+		},
+		grid: {
+	        drawBorder: true,
+	        borderWidth: 1,
+	        shadow: false
+	       },
+	       
+	    legend: {
+	       	renderer: $.jqplot.EnhancedLegendRenderer,
+	           show: true,
+	           location:'s',
+	           placement: 'outsideGrid',
+	           fontSize:'0.6vw',
+	           rowSpacing:'0.7em',
+	           border: 'none',
+	           background:'transparent',
+	           marginRight:'5px',
+	           rendererOptions: {
+	               numberRows: 1
+	           }
+	        },
+            series:seriesConfig,
+            axes: {
+                  xaxis: {
+                	  ticks: ticks,
+                	  renderer: $.jqplot.CategoryAxisRenderer,
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                      tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                      tickOptions: {
+                          angle: ang,
+                          show:showTick
+                      }
+                  },
+                  yaxis: {
+                	  min:0,
+                	  max: maxvalueY1,
+                	  label:'Existing cases',
+                      tickOptions: {
+                        showGridline: false,
+                        formatString : "%'d",
+                        suffix: ' '
+                      },
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer
+                  },
+                  y2axis: {
+                	  min:0,
+                	  max: maxvalueY2,
+                	  tickRenderer:$.jqplot.CanvasAxisTickRenderer,
+                	  label:'Prevalence',
+                      tickOptions: {
+                        showGridline: false,
+                        formatString:'%.2f%',
+                        suffix: ' '
+                      },
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer
+                  }
+              }
+          });
+	
+	// capture the highlighters highlight event and show a custom tooltip.
+    $(container).bind('jqplotHighlighterHighlight', 
+        function (ev, seriesIndex, pointIndex, data, plot) {
+    		//alert(ev.pageX+"   "+ev.pageY);
+            // create some content for the tooltip.  Here we want the label of the tick,
+            // which is not supplied to the highlighters standard tooltip.
+            var content = '<span><b>'+plot.series[seriesIndex].label + '</b></span><br><span>Date: <b>' + plot.series[seriesIndex]._xaxis.ticks[pointIndex] + '</b></span><br><span>Value: <b>' + data[1]+'</b> ';
+            // get a handle on our custom tooltip element, which was previously created
+            // and styled.  Be sure it is initiallly hidden!
+            var elem = $('<div>',{class:"jqplot-highlight","style":"position:absolute"}).appendTo($(container));
+            elem.html(content);
+            // Figure out where to position the tooltip.
+            var h = elem.outerHeight();
+            var w = elem.outerWidth();
+            var parentOffset = $(elem).parent().offset();
+            var ww = $("#wraper").outerWidth();
+            var left = ev.pageX - parentOffset.left;
+            if(ev.pageX + w > ww){
+            	left = ev.pageX - parentOffset.left - w;
+            }
+            var top = ev.pageY - parentOffset.top;
+            // now stop any currently running animation, position the tooltip, and fade in.
+            elem.stop(true, true).css({left:left, top:top}).fadeIn(300);
+        }
+    );
+     
+    // Hide the tooltip when unhighliting.
+    $(container).bind('jqplotHighlighterUnhighlight', 
+        function (ev) {
+            $('.jqplot-highlight').fadeOut(300);
+        }
+    );
+}
+
+
+function drawDoubleLineIncidenceGraph(container, series, ticks, colors, labels){
+	$(container).empty();
+	var cid = $(container).attr("id");
+    
+    var ang = 0;
+    if(series[0].length > 10 && $(container).width() < 1000)ang = -15;
+    
+    var maxvalueY1 = Math.round(series[0].max() + series[0].max()*0.1);
+    var maxvalueY21 = Math.round((( series[1].max() + series[1].max()*0.3) + Number.EPSILON ) * 1000 ) / 1000;
+    var maxvalueY22 = 0;
+    if(series.length > 2){
+    	maxvalueY1 = Math.round(series[1].max() + series[1].max()*0.1);
+    	maxvalueY21 = Math.round((( series[3].max() + series[3].max()*0.3) + Number.EPSILON ) * 1000 ) / 1000;
+    	maxvalueY22 = Math.round((( series[2].max() + series[2].max()*0.3) + Number.EPSILON ) * 1000 ) / 1000;
+    }
+    var maxvalueY2 = Math.max(maxvalueY21,maxvalueY22);
+    var seriesConfig = [
+                        {
+                			renderer:$.jqplot.LineRenderer,
+                			highlightMouseOver: false,
+                			label: labels[0],
+                			color:colors[0],
+                			pointLabels: { 
+                					show: false,
+                					location : 'n'
+                				}
+                		}, 
+                		{
+                			renderer:$.jqplot.LineRenderer,
+                			linePattern: [5, 2, 1, 2, 1, 3],
+                			xaxis:'xaxis', 
+                			yaxis:'y2axis',
+                			label:labels[2],
+                			color: colors[2],
+                			pointLabels: { 
+                				show: false,
+            					location : 's' }
+                		}];
+    
+    if(series.length == 4){
+    	seriesConfig = [
+                        {
+                			renderer:$.jqplot.LineRenderer,
+                			highlightMouseOver: false,
+                			label: labels[0],
+                			color:colors[0],
+                			pointLabels: { 
+                					show: false,
+                					location : 'n'
+                				}
+                		},
+                		{
+                			renderer:$.jqplot.LineRenderer,
+                			label:labels[1],
+                			color: colors[1],
+                			pointLabels: { 
+                				show: false,
+            					location : 's' }
+                		},
+                		{
+                			renderer:$.jqplot.LineRenderer,
+                			linePattern: 'dashed',
+                	        lineWidth: 2,
+                			xaxis:'xaxis', 
+                			yaxis:'y2axis',
+                			label:labels[2],
+                			color: colors[2],
+                			pointLabels: { 
+                				show: false,
+            					location : 's' }
+                		},
+                		{
+                			renderer:$.jqplot.LineRenderer,
+                			linePattern: [5, 2, 1, 2, 1, 3],
+                			xaxis:'xaxis', 
+                			yaxis:'y2axis',
+                			label:labels[3],
+                			color: colors[3],
+                			pointLabels: { 
+                				show: false,
+            					location : 's' }
+                		}];
+    }
+    
+    var showTick = true;
+	$.jqplot(cid, series, {
+		showMarker: false,
+	    highlighter: {
+	    	show: true,
+	        showTooltip: false
+	    },
+		seriesDefaults:{
+			rendererOptions: {
+		        highlightMouseOver: true,
+		        highlightMouseDown: false,
+		        highlightColor: null,
+		    }
+		},
+		grid: {
+	        drawBorder: true,
+	        borderWidth: 1,
+	        shadow: false
+	       },
+	       
+	    legend: {
+	       	renderer: $.jqplot.EnhancedLegendRenderer,
+	           show: true,
+	           location:'s',
+	           placement: 'outsideGrid',
+	           fontSize:'0.6vw',
+	           rowSpacing:'0.7em',
+	           border: 'none',
+	           background:'transparent',
+	           marginRight:'5px',
+	           rendererOptions: {
+	               numberRows: 1
+	           }
+	        },
+            series:seriesConfig,
+            axes: {
+                  xaxis: {
+                	  ticks: ticks,
+                	  renderer: $.jqplot.CategoryAxisRenderer,
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
+                      tickRenderer: $.jqplot.CanvasAxisTickRenderer,
+                      tickOptions: {
+                          angle: ang,
+                          show:showTick
+                      }
+                  },
+                  
+                  yaxis: {
+                	  min:0,
+                	  max: maxvalueY1,
+                	  label:'New cases',
+                      tickOptions: {
+                        showGridline: false,
+                        formatString : "%'d",
+                        suffix: ' '
+                      },
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer
+                  },
+                  y2axis: {
+                	  min:0,
+                	  max: maxvalueY2,
+                	  tickRenderer:$.jqplot.CanvasAxisTickRenderer,
+                	  label:'Incidence',
+                      tickOptions: {
+                        showGridline: false,
+                        formatString:'%.2f%',
+                        suffix: ' '
+                      },
+                      labelRenderer: $.jqplot.CanvasAxisLabelRenderer
+                  }
+              }
+          });
+	
+	// capture the highlighters highlight event and show a custom tooltip.
+    $(container).bind('jqplotHighlighterHighlight', 
+        function (ev, seriesIndex, pointIndex, data, plot) {
+    		//alert(ev.pageX+"   "+ev.pageY);
+            // create some content for the tooltip.  Here we want the label of the tick,
+            // which is not supplied to the highlighters standard tooltip.
+            var content = '<span><b>'+plot.series[seriesIndex].label + '</b></span><br><span>Date: <b>' + plot.series[seriesIndex]._xaxis.ticks[pointIndex] + '</b></span><br><span>Value: <b>' + data[1]+'</b> ';
+            // get a handle on our custom tooltip element, which was previously created
+            // and styled.  Be sure it is initiallly hidden!
+            var elem = $('<div>',{class:"jqplot-highlight","style":"position:absolute"}).appendTo($(container));
+            elem.html(content);
+            // Figure out where to position the tooltip.
+            var h = elem.outerHeight();
+            var w = elem.outerWidth();
+            var parentOffset = $(elem).parent().offset();
+            var ww = $("#wraper").outerWidth();
+            var left = ev.pageX - parentOffset.left;
+            if(ev.pageX + w > ww){
+            	left = ev.pageX - parentOffset.left - w;
+            }
+            var top = ev.pageY - parentOffset.top;
+            // now stop any currently running animation, position the tooltip, and fade in.
+            elem.stop(true, true).css({left:left, top:top}).fadeIn(300);
+        }
+    );
+     
+    // Hide the tooltip when unhighliting.
+    $(container).bind('jqplotHighlighterUnhighlight', 
+        function (ev) {
+            $('.jqplot-highlight').fadeOut(300);
+        }
+    );
+}
+
 
