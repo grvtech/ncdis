@@ -27,7 +27,6 @@ public class DataServiceServlet extends HttpServlet {
 	    String  actionString= request.getRequestURI();
 	    int endIndex = -1;
 	    String jsonString = ""; //by default print generic error message
-	    //System.out.println("ACTIOn STRING : "+actionString);
 	    if(actionString.indexOf("?") >=0 ){
 	    	endIndex = actionString.indexOf("?");
 	    }
@@ -47,7 +46,8 @@ public class DataServiceServlet extends HttpServlet {
 		if(methodString.indexOf("Session") > 0){
 			postData.put("ipuser", ipStrArr);
 		}
-	    
+		String[] serverNameArr = {getServerName(request)};
+		postData.put("server", serverNameArr);
 		try {
 			Method mtd = cls.getMethod(methodString,postData.getClass());
 			Object clsObj = cls.newInstance();
@@ -75,7 +75,6 @@ public class DataServiceServlet extends HttpServlet {
 		  
 		PrintWriter out = response.getWriter();
 	    String  actionString= request.getRequestURI();
-	    //System.out.println("ACTIOn STRING :"+actionString);
 	    int endIndex = actionString.length();
 	    String jsonString = ""; //by default print generic error message 
 	    if(actionString.indexOf("?") >=0 ){
@@ -95,7 +94,8 @@ public class DataServiceServlet extends HttpServlet {
 		if(methodString.indexOf("Session") > 0){
 			postData.put("ipuser", ipStrArr);
 		}
-	    
+		String[] serverNameArr = {getServerName(request)};
+		postData.put("server", serverNameArr);
 		try {
 			Method mtd = cls.getMethod(methodString,postData.getClass());
 			Object clsObj = cls.newInstance();
@@ -146,5 +146,9 @@ public class DataServiceServlet extends HttpServlet {
 		  
 		} 
 	
+	public String getServerName(HttpServletRequest request) {
+	    String serverName = request.getServerName();     
+	    return serverName;
+	}
 	
 }

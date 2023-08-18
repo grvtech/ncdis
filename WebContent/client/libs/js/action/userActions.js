@@ -6,10 +6,12 @@ function logoutUser(sid){
 		  dataType: "json"
 		});
 		request.done(function( json ) {
+			/*
 			var r = getParameterByName("ramq");
 			if ((r != null) && (r != "")){
 				$.cookie('ramq',r);
 			}
+			*/
 		});
 		request.fail(function( jqXHR, textStatus ) {
 		  alert( "Request failed: " + textStatus );
@@ -202,7 +204,6 @@ function getUsers(){
 		});
 		request.done(function( json ) {
 			result = json.objs;
-						
 		});
 
 		request.fail(function( jqXHR, textStatus ) {
@@ -274,7 +275,7 @@ function refreshUserNotes(sessionid){
 			}else{
 				$(".menu .messages").hide();
 			}
-			setTimeout(refreshUserNotes,5000,sessionid);
+			setTimeout(refreshUserNotes,30000,sessionid);
 		});
 		request.fail(function( jqXHR, textStatus ) {
 		  alert( "Request failed: " + textStatus );
@@ -369,7 +370,6 @@ function resetForm($form){
 }
 
 function populateForm($form, data){
-	
     $.each(data, function(key, value) {
     	if(typeof value == "object" && value != null){
     		populateForm($form, value.values[0]);
@@ -388,6 +388,7 @@ function populateForm($form, data){
                 switch($ctrl.attr("type")) {
                     case "text":
                     case "hidden":
+                    	//alert(key+"   "+value)
                     	$ctrl.val(value);
                     	$ctrlHidden.val(value);
                         break;
@@ -665,9 +666,7 @@ function initPage(){
 	}
 	$("#search").focus();
 	initNavigation();
-	$(document).ready(function(){
-		$('[data-toggle="tooltip"]').tooltip(); 
-	});
+	$(document).ready(function(){$('[data-toggle="tooltip"]').tooltip();});
 
 }
 
@@ -823,7 +822,7 @@ function populatePageside(){
 	if(typeof(window["recomandation_"+cdisSection]) != "undefined"){
 		loadRecomandation(window["recomandation_"+cdisSection]);
 	}
-	if(cdisSection != "patient" && cdisSection != "schedulevisits" && cdisSection != "editpatient" && cdisSection != "addpatient"){
+	if(cdisSection != "patient" &&  cdisSection != "editpatient" && cdisSection != "addpatient"){
 		getPatientNextVisits(patientObjArray);
 	}
 	/*BMI out*/
@@ -1028,6 +1027,11 @@ function demoData(dataObject, context){
 			ob.giu = "1111";
 		});
 		dataObject["objs"] = obArr;
+	}else if(context == "userdashboard"){
+		$.each(dataObject.history, function(i,ob){
+			ob[2] = ob[1];
+			ob[1] = "XXXX12345678";
+		});
 	} else if(context == "userpatients"){
 		$.each(dataObject, function(i,ob){
 			ob.fullname = "Full name" + " Patient "+i ;
@@ -1142,5 +1146,223 @@ function getUserPatients(userId,hcpcat){
 }
 
 
+function resetPassword(){
+	var username = $("#usernameRes").val();
+	var password = $("#passwordrRes").val();
+	var passwordc = $("#cpasswordrRes").val();
+	var iduser = $("#iduserRes").val();
+	var validUser = Validate.now(Validate.Presence, username);
+	var validPass = Validate.now(Validate.Presence, password);
+	var validPassC = Validate.now(Validate.Presence, passwordc);
+	if(validUser && validPass && validPassC){
+		var data = "username="+username+"&passwordr="+btoa(password)+"&iduser="+iduser+"&language=en";
+		var request = $.ajax({
+		  url: "/ncdis/service/action/resetUserPassword",
+		  type: "POST",
+		  data: data,
+		  async : false,
+		  dataType: "json"
+		});
+		request.done(function( json ) {
+			
+		  if(json.status == "0"){
+			  $(".validateTipsReset").html(json.message);
+		  }else{
+			  $(".validateTipsReset").html(json.message);
+			  $("#dialog-reset").find("fieldset").hide();
+			  //$("#resetButtonDialog").text("Go to login page");
+			
+			  $("#dialog-reset").dialog( "option", "buttons", 
+			    [
+			      {
+			        text: "Go to login page",
+			        click: function() {
+			          gti();
+			        }
+			      }
+			    ]
+			  );
+		  }
+		});
+		request.fail(function( jqXHR, textStatus ) {
+			$("#errortext").text("Wrong Username or Password");
+		});
+		
+	}else{
+		$("#errortext").text("Wrong Username or Password");
+		
+	}	
+}
 
 
+function loadPatientObject(key,value){
+	var patient = $.ajax({
+		  url: "/ncdis/service/data/getPatientRecord?sid="+sid+"&language=en&"+key+"="+value,
+		  type: "GET",
+		  async : false,
+		  cache : false,
+		  dataType: "json"
+		});
+		patient.done(function( json ) {
+			patientObjArray = json.objs;
+			if(isDemo){patientObjArray = demoData(patientObjArray,"patient");}
+			patientObj = patientObjArray[0];
+		});
+		patient.fail(function( jqXHR, textStatus ) {
+		  alert( "Request failed: " + textStatus );
+		});	
+}
+
+function getValueSectionArray(section, value, arr){
+	//cdisSection = section;
+	//var objSection = getObjectSection(arr);
+	var objSection = getObjectArray(section,arr);
+	var objValue = eval("objSection."+value);
+	if(typeof(objValue) != 'undefined'){
+		return objValue.values;
+	}else{
+		return [];
+	}
+}
+
+function getValueObject(section, value, arr){
+	//cdisSection = section;
+	var objSection = getObjectArray(section,arr);
+	var objValue = eval("objSection."+value);
+	if(typeof(objValue) != 'undefined'){
+		objValue['name'] = value;
+		return objValue;
+	}else{
+		return {};
+	}
+}
+
+
+function getObjectArray(objectName, objectArray){
+	if(objectName == "mdvisits"){
+		return objectArray[3];
+	}else if(objectName == "lab"){
+		return objectArray[6];
+	}else if(objectName == "lipid"){
+		return objectArray[5];
+	}else if(objectName == "renal"){
+		return objectArray[4];
+	}else if(objectName == "complications"){
+		return objectArray[7];
+	}else if(objectName == "meds"){
+		return objectArray[9];
+	}else if(objectName == "miscellaneous"){
+		return objectArray[8];
+	}else if(objectName == "depression"){
+		return objectArray[10];
+	}else if(objectName == "diabet"){
+		var oa = objectArray[2];
+		 $.each(oa, function(key, value) {
+			var oarr = value.values;
+			$.each(oarr, function(k, v) {
+				var newvalues = {dtype:v.value, ddate:v.date , diabetcode:v.code, diabetidvalue:v.idvalue};
+				$.extend(true,v,newvalues);
+			});
+		 });
+		return oa;
+	}else if(objectName == "hcp"){
+		var oa = objectArray[1];
+		return oa;
+	}
+}
+
+
+function getObjectSection(arr){
+	
+	if(cdisSection == "mdvisits"){
+		return arr[3];
+	}else if(cdisSection == "lab"){
+		return arr[6];
+	}else if(cdisSection == "lipid"){
+		return arr[5];
+	}else if(cdisSection == "renal"){
+		return arr[4];
+	}else if(cdisSection == "complications"){
+		return arr[7];
+	}else if(cdisSection == "meds"){
+		return arr[9];
+	}else if(cdisSection == "miscellaneous"){
+		return arr[8];
+	}else if(cdisSection == "depression"){
+		return arr[10];
+	}
+}
+
+function getValueLimits(valueName){
+	var result = null;
+	
+	if(typeof(window['limits_'+valueName]) != 'undefined'){
+		result = window['limits_'+valueName];
+	}else{
+		var limits = $.ajax({
+			  url: "/ncdis/service/data/getValueLimits?sid="+sid+"&language=en&name="+valueName,
+			  type: "GET",
+			  async : false,
+			  cache : false,
+			  dataType: "json"
+			});
+			limits.done(function( json ) {
+				result = json.objs[0];
+			});
+			limits.fail(function( jqXHR, textStatus ) {
+			  alert( "Request failed: " + textStatus );
+			});
+	} 
+	return result;
+}
+
+
+
+
+function showProgress(container){
+	if(!progressOn){
+		var p = $('<div>',{id:"progress",class:"fullscreen-progress"}).appendTo(container);
+		var c = $('<div>',{class:"fullscreen-progress-container"}).appendTo(p);
+		var l = $('<div>',{class:"fullscreen-progress-container-logo"}).appendTo(c);
+		var t = $('<div>',{class:"fullscreen-progress-container-text"}).appendTo(c);
+		progressOn=true;
+	}
+}
+
+function hideProgress(container){
+	$(container).find($("#progress")).fadeOut(500, function(){
+		$(container).find($("#progress")).remove();
+		progressOn=false;
+	}).delay(500, function(){
+		$(container).find($("#progress")).remove();
+		progressOn=false;
+	});
+}
+
+
+
+function showPopupMessage(title,text){
+	var id = moment();
+	$("body").css("overflow-y","hidden");
+	var modal = $('<div>',{id:"fullscreen_"+id,class:"popupmessage-fullscreen-modal"}).appendTo($("#wraper"));
+	var sett = $('<div>',{class:"popupmessage-window"}).appendTo(modal);
+	var settH = $('<div>',{class:"popupmessage-window-header"}).appendTo(sett);
+	var settB = $('<div>',{class:"popupmessage-window-body"}).appendTo(sett);
+	var settBB = $('<div>',{class:"popupmessage-window-body-body"}).appendTo(settB);
+	var settBF = $('<div>',{class:"popupmessage-window-body-footer"}).appendTo(settB);
+	
+	$('<div>',{class:"gap"}).appendTo(settBF);
+	var cb = $('<button>',{class:"cisbutton"}).text("Close").appendTo(settBF);
+	cb.click(function(){
+		$(".popupmessage-fullscreen-modal").remove();
+		$("body").css("overflow-y","auto");
+	});
+	settBB.html(text);
+	$('<div>',{class:"popupmessage-window-header-title"}).text(title).appendTo(settH);
+	var settHC = $('<div>',{class:"popupmessage-window-header-close"}).html("<i class='fa fa-times'></i>").appendTo(settH);
+	settHC.click(function(){
+		$(".popupmessage-fullscreen-modal").remove();
+		$("body").css("overflow-y","auto");
+	});
+	
+}

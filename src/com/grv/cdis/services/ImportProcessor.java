@@ -85,7 +85,7 @@ public class ImportProcessor {
 		String chibougamouStr = importData("chibougamou");
 		//MailTool.sendMailText("CDIS Import Interface", chisasibiStr+"\n\n"+chibougamouStr, "radu@grvtech.ca");
 		
-		MailTool.sendMailInHtml("CDIS Import Interface", chisasibiStr+"<br><br>"+chibougamouStr, "radu@grvtech.ca");
+		MailTool.sendMailInHtml("CDIS Import Interface", chisasibiStr+"<br><br>"+chibougamouStr, "support@grvtech.ca");
 		
 		result = json.toJson(chisasibiStr+"\n"+chibougamouStr);	
 		return result;
@@ -122,10 +122,9 @@ public class ImportProcessor {
 			
 			String value = dataLine.get(var.toLowerCase());
 			 
-			//System.out.println("RAMQ: "+ramq + "     date :"+date +"     value:"+value+"     var:"+vars[x]+"      idpatient:"+pat.getIdpatient());
 			
 			if(value == null || value.equals("")){
-				//System.out.println("THERE IS NO VALUE FOR "+vars[x]);
+
 			}else{
 				double fileDoubleValue = 0;
 				try{
@@ -150,10 +149,8 @@ public class ImportProcessor {
 					}else{
 						fileDoubleValue = Double.parseDouble(value);
 					}
-					//System.out.println("Value :"+ value );
 				}catch(NumberFormatException ex){
-					//ex.printStackTrace();
-					System.out.println("parsing error:"+value);
+					ex.printStackTrace();
 				}
 				Class<?> cls =  obj.getClass();
 				Values vals = new Values();
@@ -190,7 +187,6 @@ public class ImportProcessor {
 								e.printStackTrace();
 							}
 							if(valuevalue.equals("null")){
-								//System.out.println("String null in value: ");
 								db.deleteValue(Integer.toString(v.getIdvalue()));
 							}else{
 								double dbValueDouble = 0;
@@ -203,7 +199,6 @@ public class ImportProcessor {
 								
 								if(fileDate.equals(dbDate)){
 									if(dbValueDouble != fileDoubleValue){
-										//System.out.println("DB VLAUE : "+dbValueDouble +"    FILE Value:"+fileDoubleValue);
 										if(fileDoubleValue > 0){
 											ups ++;
 											
@@ -219,7 +214,6 @@ public class ImportProcessor {
 											}
 										}
 									}else{
-										//System.out.println("SAME VALUE ");
 										/*treatement special for hba1c*/
 										if(v.getCode().equals("hba1c")){
 											if(dbValueDouble > 1){
@@ -312,7 +306,6 @@ public class ImportProcessor {
 					strLine = strLine.replaceAll(" ", "");
 					strLine = strLine.toLowerCase();
 					
-					//System.out.println(strLine);
 					
 					Hashtable<String, String> dataLine	= new Hashtable<>();
 					List<String> lineList = new ArrayList<>();
@@ -360,7 +353,6 @@ public class ImportProcessor {
 					for(int jj=0;jj<dls.size();jj++){
 						Hashtable<String, String> dl = dls.get(jj);
 						if(!ramqStr.equals(lastramq)){
-							//System.out.println("TREATING RAMQ: "+ramqStr);
 							pat = db.getPatientByRamq(ramqStr);
 							ren = (Renal)db.getAllValues("Renal","REN", pat.getIdpatient(), "");
 							lab = (Lab)db.getAllValues("Lab","LAB", pat.getIdpatient(), "");

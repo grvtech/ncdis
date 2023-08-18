@@ -40,6 +40,8 @@ public class User {
 	private String active;
 	private String idprofesion;
 	private transient boolean isValid;
+	private String reset;
+	private String confirmmail;
 	
 	
 	public User() {
@@ -55,11 +57,13 @@ public class User {
 		idcommunity = "";
 		active="1";
 		idprofesion="";
+		reset="0";
+		confirmmail="0";
 	}
 	
 	
 	
-	public User(String username, String password, String firstname,String lastname, String email,String iduser, boolean isValid, String phone, String idcommunity, String active, String idprofesion) {
+	public User(String username, String password, String firstname,String lastname, String email,String iduser, boolean isValid, String phone, String idcommunity, String active, String idprofesion, String reset, String confirmmail) {
 		this.username = username;
 		this.password = password;
 		this.firstname = firstname;
@@ -71,6 +75,8 @@ public class User {
 		this.idcommunity = idcommunity;
 		this.active = active;
 		this.idprofesion = idprofesion;
+		this.reset = reset;
+		this.confirmmail = confirmmail;
 	}
 
 	public User(String username, String password) {
@@ -107,7 +113,6 @@ public class User {
 		ArrayList<Object> result = new ArrayList<>();
 		ChbDBridge db = new ChbDBridge();
 		result = db.getUsers();
-		
 		return result;
 	}
 
@@ -124,6 +129,8 @@ public class User {
 			this.active = mp.get("active");
 			this.isValid = true;
 			this.idprofesion = mp.get("idprofesion");
+			this.reset = mp.get("reset");
+			this.confirmmail = mp.get("confirmmail");
 		}
 	}
 	
@@ -210,11 +217,32 @@ public class User {
 		}
 		return result;
 	}
+	
+	
+	
+	
 	*/
+	
+	
+	public String getConfirmmail() {
+		return confirmmail;
+	}
+	public void setConfirmmail(String confirmmail) {
+		this.confirmmail = confirmmail;
+	}
+	
+	public String getReset() {
+		return reset;
+	}
+	public void setReset(String reset) {
+		this.reset = reset;
+	}
+
 	//username
 	public String getUsername(){
 		return this.username;
 	}
+
 	public void setUsername(String username){
 		this.username=username;
 	}

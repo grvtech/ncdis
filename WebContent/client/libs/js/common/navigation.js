@@ -98,16 +98,6 @@ function initNavigation() {
 	}/*go to admin*/
 	
 
-	/*cache validation*/
-	//get The application cache object
-/*
-	var appCache = window.applicationCache;
-	appCache.addEventListener('updateready', function(e) {
-		this.swapCache();
-		location.reload();
-	});
-*/
-	
 	
 window.addEventListener("beforeunload", function (e) {
 	logout(sid);

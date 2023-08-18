@@ -32,7 +32,6 @@ public class MigratorProcessor {
 		
 		String spInit = "exec sp_Migrate_All";
 		//String spPatientHcp = "exec sp_Migrate_PatientHcp";
-		System.out.println("START MIGRATE ALL");
 		try {
 			initContext = new InitialContext();
 			//Context envContext  = (Context)initContext.lookup("java:comp/env");
@@ -87,7 +86,6 @@ public class MigratorProcessor {
 		PreparedStatement cs=null;
 		Connection conn = null;
 		String spPatientHcp = "exec sp_Migrate_PatientHcp";
-		System.out.println("START MIGRATE PATIENT HTC");
 		try {
 			initContext = new InitialContext();
 			//Context envContext  = (Context)initContext.lookup("java:comp/env");
@@ -129,7 +127,6 @@ public class MigratorProcessor {
 		Connection connCDIS = null;
 		Connection connNCDIS = null;
 		String sqlCDIS = "select * from dbo.cdis_patient";
-		System.out.println("START MIGRATE PATIENT");
 		try {
 			initContext = new InitialContext();
 			//Context envContext  = (Context)initContext.lookup("java:comp/env");
@@ -227,7 +224,6 @@ public class MigratorProcessor {
 		Connection connCDIS = null;
 		Connection connNCDIS = null;
 		String sqlCDIS = "select cd.* from dbo.cdis_diabet cd left join dbo.cdis_patient cp on cd.idpatient = cp.idpatient where cp.idpatient > 0";
-		System.out.println("START MIGRATE DIABET");
 		try {
 			initContext = new InitialContext();
 			dsNCDIS = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -248,7 +244,6 @@ public class MigratorProcessor {
 		    		psNCDIS.execute();
 		    	}catch(SQLException se){
 		    		se.printStackTrace();
-		    		System.out.println("Data :  "+a1);
 		    		//System.exit(0);
 		    	}
 		    	psNCDIS.clearBatch();
@@ -291,7 +286,6 @@ public class MigratorProcessor {
 		Connection connCDIS = null;
 		Connection connNCDIS = null;
 		String sqlCDIS = "select cl.* from dbo.cdis_lab cl left join dbo.cdis_patient cp on cl.idpatient = cp.idpatient  where cp.idpatient > 0";
-		System.out.println("START MIGRATE LAB");
 		try {
 			initContext = new InitialContext();
 			dsNCDIS = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -319,7 +313,6 @@ public class MigratorProcessor {
 			    		psNCDIS_lab1.execute();
 			    	}catch(SQLException se){
 			    		se.printStackTrace();
-			    		System.out.println("LAB DATA : "+a1);
 			    		System.exit(0);
 			    	}
 		    		psNCDIS_lab1.clearBatch();
@@ -336,7 +329,6 @@ public class MigratorProcessor {
 			    		psNCDIS_lab2.execute();
 			    	}catch(SQLException se){
 			    		se.printStackTrace();
-			    		System.out.println("LAB DATA : "+a1);
 			    		System.exit(0);
 			    	}
 		    		psNCDIS_lab2.clearBatch();
@@ -353,7 +345,6 @@ public class MigratorProcessor {
 		    	   		psNCDIS_lab3.execute();
 		    	   	}catch(SQLException se){
 		    	   		se.printStackTrace();
-		    	   		System.out.println("LAB DATA : "+a1);
 		    	   		System.exit(0);
 		    	   	}
 		    	   	psNCDIS_lab3.clearBatch();
@@ -396,7 +387,6 @@ public class MigratorProcessor {
 		Connection connCDIS = null;
 		Connection connNCDIS = null;
 		String sqlCDIS = "select cl.* from dbo.cdis_renal cl left join dbo.cdis_patient cp on cl.idpatient = cp.idpatient where cp.idpatient > 0";
-		System.out.println("START MIGRATE RENAL");
 		try {
 			initContext = new InitialContext();
 			dsNCDIS = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -527,7 +517,6 @@ public class MigratorProcessor {
 		Connection connCDIS = null;
 		Connection connNCDIS = null;
 		String sqlCDIS = "select cl.* from dbo.cdis_lipid cl left join dbo.cdis_patient cp on cl.idpatient = cp.idpatient where cp.idpatient > 0";
-		System.out.println("START MIGRATE LIPID");
 		try {
 			initContext = new InitialContext();
 			dsNCDIS = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -658,7 +647,6 @@ public class MigratorProcessor {
 		Connection connCDIS = null;
 		Connection connNCDIS = null;
 		String sqlCDIS = "select md.*,cp.height from dbo.cdis_mdvisits md left join dbo.cdis_patient cp on md.idpatient = cp.idpatient where cp.idpatient > 0";
-		System.out.println("START MIGRATE VISITS");
 		try {
 			initContext = new InitialContext();
 			dsNCDIS = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -931,7 +919,6 @@ public class MigratorProcessor {
 		Connection connCDIS = null;
 		Connection connNCDIS = null;
 		String sqlCDIS = "select cl.* from dbo.cdis_complications cl left join dbo.cdis_patient cp on cl.idpatient = cp.idpatient where cp.idpatient > 0";
-		System.out.println("START MIGRATE COMPLICATIONS");
 		try {
 			initContext = new InitialContext();
 			dsNCDIS = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -1217,7 +1204,6 @@ public class MigratorProcessor {
 		Connection connCDIS = null;
 		Connection connNCDIS = null;
 		String sqlCDIS = "select cl.* from dbo.cdis_miscellaneous cl left join dbo.cdis_patient cp on cl.idpatient = cp.idpatient where cp.idpatient > 0";
-		System.out.println("START MIGRATE MISC");
 		try {
 			initContext = new InitialContext();
 			dsNCDIS = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -1371,7 +1357,6 @@ public class MigratorProcessor {
 		Connection connCDIS = null;
 		Connection connNCDIS = null;
 		String sqlCDIS = "select cl.* from dbo.cdis_meds cl left join dbo.cdis_patient cp on cl.idpatient = cp.idpatient where cp.idpatient > 0";
-		System.out.println("START MIGRATE MEDS");
 		try {
 			initContext = new InitialContext();
 			dsNCDIS = (DataSource)initContext.lookup("jdbc/ncdis");

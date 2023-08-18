@@ -61,7 +61,8 @@ public class ActionServiceServlet extends HttpServlet {
 			if(methodString.indexOf("Session") > 0){
 				postData.put("ipuser", ipStrArr);
 			}
-			
+			String[] serverNameArr = {getServerName(request)};
+			postData.put("server", serverNameArr);
 			Method mtd = cls.getMethod(methodString,postData.getClass());
 			Object clsObj = cls.newInstance();
 			jsonString = (String) mtd.invoke(clsObj, postData);
@@ -106,6 +107,8 @@ public class ActionServiceServlet extends HttpServlet {
 			if(methodString.indexOf("Session") > 0){
 				postData.put("ipuser", ipStrArr);
 			}
+			String[] serverNameArr = {getServerName(request)};
+			postData.put("server", serverNameArr);
 			
 			Method mtd = cls.getMethod(methodString,postData.getClass());
 			Object clsObj = cls.newInstance();
@@ -155,6 +158,9 @@ public class ActionServiceServlet extends HttpServlet {
 		   return ip;      
 		  
 		} 
-	
+	public String getServerName(HttpServletRequest request) {
+	    String serverName = request.getServerName();     
+	    return serverName;
+	}
 	
 }

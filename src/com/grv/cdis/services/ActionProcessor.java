@@ -7,7 +7,10 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -23,6 +27,7 @@ import java.util.Set;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.google.gson.Gson;
@@ -50,6 +55,7 @@ import com.grv.cdis.model.User;
 import com.grv.cdis.util.FileTool;
 import com.grv.cdis.util.ImportNames;
 import com.grv.cdis.util.MailTool;
+import com.grv.cdis.util.SecurityTool;
 
 
 public class ActionProcessor {
@@ -65,7 +71,19 @@ public class ActionProcessor {
 		String language = ((String[])args.get("language"))[0];
 		String reswidth = ((String[])args.get("reswidth"))[0];
 		String resheight = ((String[])args.get("resheight"))[0];
-		User user = new User(username, password);
+		
+		
+		
+		String encPassword = "";
+		String clearPassword = "";
+		try {
+			clearPassword = new String(Base64.decodeBase64(password), "UTF-8");
+			encPassword = SecurityTool.encryptPassword(clearPassword);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		
+		User user = new User(username, encPassword);
 		Action act = new Action("LOGIN");
 		Session userSession = null;
 		
@@ -275,9 +293,6 @@ public class ActionProcessor {
 	    JsonParser parser = new JsonParser();
 	    JsonObject jObject = parser.parse(raw).getAsJsonObject();
 	    
-	    //System.out.println(raw);
-	    
-	    
 	    JsonArray jArrayC = jObject.get("criteria").getAsJsonArray();
 	    JsonArray jArraySC = jObject.get("subcriteria").getAsJsonArray();
 
@@ -307,7 +322,6 @@ public class ActionProcessor {
 	    for(JsonElement obj : jArraySC ){
 	        ReportSubcriteria scse = gson.fromJson( obj , ReportSubcriteria.class);
 	        scse.loadIddata();
-	        //System.out.println("SUBCRITERIA : "+scse.getSuboperator()+"   VALUE : "+ scse.getSubvalue());
         	slcs.add(scse);
 	    }
 	    ArrayList<String> header = new ArrayList<>();
@@ -316,8 +330,6 @@ public class ActionProcessor {
 	    
 	    if(type.equals("list")){
 	    	ArrayList<String> allIdpatients = new ArrayList<>();
-	    	
-	    	//System.out.println("Filter : "+filter+"    hcp:"+hcp+"    hcpid:"+hcpid);
 	    	
 	    	if(filter.equals("all")){
 	    		allIdpatients = db.getIdPatients();
@@ -598,46 +610,32 @@ public class ActionProcessor {
 		return result;
 	}
 	
-	public String sendUserMessage(Hashtable<String, String[]> args){
-		Gson json = new Gson();
-		ChbDBridge chbdb = new ChbDBridge();
-		String result = "";
-		String nameUser = ((String[])args.get("nameUser"))[0];
-		String messageUser = ((String[])args.get("messageUser"))[0];
-		String emailUser = ((String[])args.get("emailUser"))[0];
-		String adminUser = ((String[])args.get("adminUser"))[0];
-		String language = ((String[])args.get("language"))[0];
-		
-		//MailTool.sendMailText("CDIS User Message", emailUser+"\nSent the message:\n\n"+messageUser, FileTool.getEmailProperty("admin."+adminUser));
-		
-		String messagEmail = "<b><p>Hello CDIS user</p></b><p>New message from : "+emailUser+"<br><br><b>Message:</b><br><pre>"+messageUser+"</pre></p>";
-		MailTool.sendMailInHtml("CDIS User Message", messagEmail, FileTool.getEmailProperty("admin."+adminUser));
-		
-		ArrayList<Object> obs = new ArrayList<Object>();
-		result = json.toJson(new MessageResponse(true,language,obs));
-		return result;
-	}
+	
 
 	public String forgotPassword(Hashtable<String, String[]> args){
+		String result = "";
+		
 		Gson json = new Gson();
 		ChbDBridge chbdb = new ChbDBridge();
-		String result = "";
-		String firstnameUser = ((String[])args.get("firstnameUser"))[0];
-		String lastnameUser = ((String[])args.get("lastnameUser"))[0];
+		
 		String usernameUser = ((String[])args.get("usernameUser"))[0];
-		String profesionUser = ((String[])args.get("profesionUser"))[0];
 		String emailUser = ((String[])args.get("emailUser"))[0];
 		String language = ((String[])args.get("language"))[0];
+		String server = ((String[])args.get("server"))[0];
 		User u = chbdb.isValidUser(emailUser, usernameUser);
 		if(u.isValid()){
-			//String message = "Recovery Password \n Your password has been recovered.\nYour password is: "+u.getPassword()+" \nYou can now login to CDIS by clicking here : <a href='http://cdis.reg18.rtss.qc.ca/ncdis/'>CDIS</a> ";
-			//MailTool.sendMailText("CDIS Recover Password", message, emailUser);
-			
-			String messagEmail = "<h2>Recovery Password</h2> <p>Hello "+u.getFirstname()+" "+u.getLastname()+"<br><br>Your password has been recovered.<br><br><b>Your username is :</b>"+u.getUsername()+"<br><b>Your password is :</b>"+u.getPassword()+"<br><br>You can now login to CDIS by clicking here : <a href='http://cdis.reg18.rtss.qc.ca/ncdis/'>go to CDIS</a></p>";
-			MailTool.sendMailInHtml("CDIS Recover Password", messagEmail, emailUser);
+		
+			chbdb.setResetPassword(u.getIduser(),"1");
+			String params = "rst=1&iduser="+u.getIduser(); 
+			String url = "https://"+server+"/ncdis/index.html?"+Base64.encodeBase64String(params.getBytes());
+			String messagEmail = "<b><p>CDIS Password reset</p></b><p>Hello "+u.getFirstname()+" "+u.getLastname()+"<br> Click on the button below to reset your password<br><br><a href='"+url+"'>Reset Password</a></p>";
+			MailTool.sendMailInHtml("CDIS Password Reset", messagEmail, u.getEmail());
 			
 			ArrayList<Object> obs = new ArrayList<Object>();
-			result = json.toJson(new MessageResponse("FORGOT-TRUE",false,language,obs));
+			String msg = "You initiated password reset. Click on Reset Password button in the email you received to reset your password.";
+			MessageResponse mr = new MessageResponse(true,language,obs);
+			mr.setMessage(msg);
+			result = json.toJson(mr);
 		}else{
 			ArrayList<Object> obs = new ArrayList<Object>();
 			result = json.toJson(new MessageResponse("FORGOT-FALSE",false,language,obs));
@@ -645,6 +643,11 @@ public class ActionProcessor {
 		
 		return result;
 	}
+	
+	
+	
+	
+    
 	
 	public String subscribe(Hashtable<String, String[]> args){
 		Gson json = new Gson();
@@ -657,34 +660,58 @@ public class ActionProcessor {
 		String emailUser = ((String[])args.get("emailSub"))[0];
 		String language = ((String[])args.get("language"))[0];
 		String usernameUser = lastnameUser.toLowerCase().trim()+firstnameUser.toLowerCase().substring(0,1);
+		String pass = ((String[])args.get("passwordSub"))[0];
+		
+		String server = ((String[])args.get("server"))[0];
+		String encPassword = "";
+		try {
+			String clearPassword = new String(Base64.decodeBase64(pass), "UTF-8");
+			encPassword = SecurityTool.encryptPassword(clearPassword);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		
 		User u = chbdb.isValidUser(emailUser, usernameUser);
 		if(u.isValid()){
-			String message = "Subscribe to CDIS \nYour information is already in CDIS database.\nIf you forgot your password you should click on forgot password link to recover your password.";
-			//MailTool.sendMailText("CDIS Recover Password", message, emailUser);
+			String message = "Subscribe to CDIS \nYour information is already in CDIS database.\n";
+			if(u.getReset().equals("1")){
+				message+="A reset password was initiated and you should click on Reset Password button in the email that you received.\n If you did not received an email to reset your password click on Forgot Password link to reset your password again.";
+			}else if(u.getConfirmmail().equals("1")){
+				message+="You must confirm your password in order to log in.\nYou should click on Confirm Email button in the email that you received.\n If you did not received an email to confirm your subscription contact CDIS Admisitrator or send en email to support@grvtech.ca.";
+			}else{
+				message = "\nIf you forgot your password you should click on forgot password link to reset your password.";
+			}
 			ArrayList<Object> obs = new ArrayList<Object>();
 			MessageResponse mr = new MessageResponse(false,language,obs);
 			mr.setMessage(message);
 			result = json.toJson(mr);
 		}else{
-			u.setActive("0");
+			u.setActive("1");
 			u.setEmail(emailUser);
 			u.setFirstname(firstnameUser);
 			u.setLastname(lastnameUser);
 			u.setUsername(usernameUser);
-			u.setPassword("cdis2017");
+			u.setPassword(encPassword);
 			u.setIdcommunity(idcommunityUser);
 			u.setIdprofesion(idprofesionUser);
-			u.setPhone("GRV");
+			u.setPhone(u.getPhone());
+			u.setReset("0");
+			u.setConfirmmail("1");
 			int idPendingUser = chbdb.addUser(u);
 			
 			
 			if(chbdb.saveUserProfile(idPendingUser, 1, 2)){
 				//MailTool.sendMailText("CDIS New User Subscribe", , "support@grvtech.ca");
 				
-				String messagEmail = "<b><p>Hello Administrator</p></b><p>New user is subscribed to CDIS.<br>Login to CDIS and go to Users section.<br>Click on the button pending users to see the users that subscribed to CDIS but are not active yet.Click on the user to select it and click on the button Activate to allow the user to log in to CDIS.<br><br><b>An email will be sent to the user to annouce the activation.</b></p>";
-				MailTool.sendMailInHtml("CDIS New User Subscribe", messagEmail, "support@grvtech.ca");
+				String messagEmail = "<b><p>Hello CDIS Administrator</p></b><p>New user is subscribed to CDIS.<br>The user should confirm the email in order to finish subscription.<br>Login to CDIS and go to Users section to view users pending. <br>The administrator can confirm users email in order to activate subscription.<br><b>User Info:</b><br><b>Name :</b> "+u.getFirstname()+" "+u.getLastname()+"<br><b>Username :</b> "+u.getUsername()+"<br><b>User Email :</b> "+u.getEmail()+"<br><br><b>An email will be sent to the user to confirm email and activate subscription.</b></p>";
+				MailTool.sendMailInHtml("CDIS New User Subscribe", messagEmail, "admins@grvtech.ca");
 				
-				String message = "Subscribe to CDIS \nYour account is sent to CDIS Administrators to be activated.\nYou will receive an email with the authentification information when your account will be activated";
+				String params = "confirm=1&iduser="+idPendingUser; 
+				String url = "https://"+server+"/ncdis/index.html?"+Base64.encodeBase64String(params.getBytes());
+				String messagEmailUser = "<b><p>Welcome to CDIS</p></b><p>In order to activate your CDIS subscription you should confirm the email.<br><br><b>Click on the button below to confirm your email and activate the subscription</b><br><br><a href='"+url+"'>Confirm Email</a></p>";
+				MailTool.sendMailInHtml("CDIS Subscribe", messagEmailUser, u.getEmail());
+				
+				String message = "Subscribe to CDIS.\nYou will receive an email with a button to confirm email and activate the subscription. ";
 				ArrayList<Object> obs = new ArrayList<Object>();
 				MessageResponse mr = new MessageResponse(true,language,obs);
 				mr.setMessage(message);
@@ -700,6 +727,108 @@ public class ActionProcessor {
 		return result;
 	}
 	
+	public String confirmUserEmail(Hashtable<String, String[]> args){
+		Gson json = new Gson();
+		ChbDBridge chbdb = new ChbDBridge();
+		String result = "";
+		String language = ((String[])args.get("language"))[0];
+		String iduser = ((String[])args.get("iduser"))[0];
+		String server = ((String[])args.get("server"))[0];
+		
+		User u = new User(Integer.parseInt(iduser));
+		if(u.isValid()){
+			chbdb.setEmailConfirm(iduser, "0");
+			
+			String messagEmail = "<b><p>Hello "+u.getFirstname()+" "+u.getLastname()+"</p></b><p>You email was confirmed with success!<br><br>Use you new credentials to login into CDIS<br><br><a href='https://"+server+"/ncdis'>Login to CDIS</a></p>";
+			MailTool.sendMailInHtml("CDIS Email Confirmed Successfully", messagEmail, u.getEmail());
+			
+			ArrayList<Object> obs = new ArrayList<Object>();
+			MessageResponse mr = new MessageResponse(true,language,obs);
+			result = json.toJson(mr);
+		}else{
+			ArrayList<Object> obs = new ArrayList<Object>();
+			MessageResponse mr = new MessageResponse(false,language,obs);
+			result = json.toJson(mr);
+		}
+		return result;
+	}
+	
+	public String resetUserPassword(Hashtable<String, String[]> args){
+		Gson json = new Gson();
+		ChbDBridge chbdb = new ChbDBridge();
+		String result = "";
+		
+		String language = ((String[])args.get("language"))[0];
+		String usernameUser = ((String[])args.get("username"))[0];
+		String pass = ((String[])args.get("passwordr"))[0];
+		String iduser = ((String[])args.get("iduser"))[0];
+		String server = ((String[])args.get("server"))[0];
+		
+		String encPassword = "";
+		String clearPassword = "";
+		try {
+			clearPassword = new String(Base64.decodeBase64(pass), "UTF-8");
+			encPassword = SecurityTool.encryptPassword(clearPassword);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+		User u = new User(Integer.parseInt(iduser));
+		if(u.isValid()){
+			u.setPassword(encPassword);
+			chbdb.resetUserPassword(u);
+			
+			String messagEmail = "<b><p>Hello "+u.getFirstname()+" "+u.getLastname()+"</p></b><p>You reset you password with success!<br><br>Use you new credentials to login into CDIS<br><br><a href='https://"+server+"/ncdis'>Login to CDIS</a></p>";
+			MailTool.sendMailInHtml("CDIS Password Reset Successfully", messagEmail, u.getEmail());
+			
+			String message = "You successfully reset your password\n.";
+			ArrayList<Object> obs = new ArrayList<Object>();
+			MessageResponse mr = new MessageResponse(true,language,obs);
+			mr.setMessage(message);
+			result = json.toJson(mr);
+		}else{
+			ArrayList<Object> obs = new ArrayList<Object>();
+			MessageResponse mr = new MessageResponse(false,language,obs);
+			mr.setMessage("User is invalid");
+			result = json.toJson(mr);
+		}		
+		return result;
+	}
+	
+	/*
+	 * one time deal
+	 * https://localhost/ncdis/service/action/encodeUsersPasswords
+	 * 
+	 * */
+	public String encodeUsersPasswords(Hashtable<String, String[]> args){
+		Gson json = new Gson();
+		ChbDBridge chbdb = new ChbDBridge();
+		String result = "";
+		
+		String server = ((String[])args.get("server"))[0];
+		
+		ArrayList<Object> obs = User.getUsers();
+		
+		for(int i=0;i<obs.size();i++){
+			String encPassword = "";
+			User u = (User)obs.get(i);
+			String cpass = u.getPassword();
+			//change passwords for all different than 40 characters
+			if(cpass.length() != 40){
+				if(u.isValid()){
+					encPassword = SecurityTool.encryptPassword(cpass);
+					u.setPassword(encPassword);
+					chbdb.resetUserPassword(u);
+					
+					ArrayList<Object> objs = new ArrayList<Object>();
+					MessageResponse mr = new MessageResponse(true,"en",objs);
+					mr.setMessage("Password reset successfully");
+					result = json.toJson(mr);
+				}
+			}
+		}
+		return result;
+	}
 	
 	
 	public String getFrontPageMessage(Hashtable<String, String[]> args){
@@ -993,7 +1122,6 @@ public class ActionProcessor {
 		String result = "";
 		JsonParser jp = new JsonParser();
 		
-		//System.out.println("METHOD LAUNCH ");
 		String reportCode = ((String[])args.get("rep"))[0];
 		
 		InitialContext ic;
@@ -1013,8 +1141,6 @@ public class ActionProcessor {
 		    JsonArray jArraySC = jObject.get("subcriteria").getAsJsonArray();
 		    JsonArray jArrayI = jObject.get("input").getAsJsonArray();
 		    
-		    //System.out.println(reportFile.getAbsolutePath());
-		    //System.out.println(jObject.toString());
 		    String reportType = jObject.get("type").getAsString();
 		    String reportId = jObject.get("id").getAsString();
 		    
@@ -1043,7 +1169,6 @@ public class ActionProcessor {
 			    //build subcriteria from input if exists 
 			    ArrayList<ArrayList<ReportSubcriteria>> matrix = new ArrayList<>();
 			    
-			    //System.out.println("INput array size : "+jArrayI.size());
 			    for(int iobj=0;iobj<jArrayI.size();iobj++){
 			        JsonObject input = jArrayI.get(iobj).getAsJsonObject();
 			        String iname = input.get("name").getAsString();
@@ -1051,8 +1176,6 @@ public class ActionProcessor {
 			        if(matrix.size() > 0){
 			        	JsonArray varr = input.get("values").getAsJsonArray();
 			        	int ml = matrix.size();
-			        	//System.out.println("freeze matrix size : "+ml);
-			        	//System.out.println("start loop for subscriteria :   "+iname);
 			        	
 			        	for(int jj=0;jj<varr.size();jj++){
 			        		ReportSubcriteria scs1 = new ReportSubcriteria();
@@ -1065,21 +1188,16 @@ public class ActionProcessor {
 			        		for(int ii=0;ii<ml;ii++){
 			        			ArrayList<ReportSubcriteria> ars1 = new ArrayList<>();
 				        		ArrayList<ReportSubcriteria> ars = matrix.get(ii);
-				        		//System.out.println("subcriteria array size in loop: "+ars.size());
 				        		for(ReportSubcriteria xx : ars){
 				        			ars1.add(xx);
 				        		}
-				        		//System.out.println("subcriteria array1 size in loop before add: "+ars1.size());
-			        			//ars1 = ars;
 				        		ars1.add(scs1);
-				        		//System.out.println("subcriteria array1 size in loop after add: "+ars1.size());
 					        	matrix.add(ars1);
 				        	}
 			        	}
 			        	
 			        	for(int iii=0;iii<ml;iii++){
 			        		ArrayList<ReportSubcriteria> d1 = matrix.get(0);
-			        		//System.out.println("delete array from index :"+iii+"   with size : "+d1.size());
 			        		matrix.remove(0);
 			        	}
 			        	
@@ -1099,22 +1217,8 @@ public class ActionProcessor {
 			        	}
 			        }
 			    }
-			    /* 
-			    System.out.println("Matrix size: "+matrix.size());
-			    for(ArrayList<ReportSubcriteria> aa : matrix){
-			    	System.out.println("Subscriteria arrai size: "+aa.size());
-			    	for(ReportSubcriteria bb : aa){
-			    		System.out.println("Subscriteria name: "+bb.getSubname());
-			    		System.out.println("Subscriteria value: "+bb.getSubvalue());
-			    		System.out.println("Subscriteria operator: "+bb.getSuboperator());
-			    	}
-			    }
-			    */
 			    //now i have a matrix of all combinations of report subcriterias
 			    
-			    
-
-	    		//System.out.println("-------------------------------------------------matrix size "+matrix.size());
 			    for(int x=0;x<matrix.size();x++){
 			    	
 			    	
@@ -1124,15 +1228,11 @@ public class ActionProcessor {
 			    	
 				    Hashtable<ReportCriteria, ArrayList<ArrayList<String>>> map = new Hashtable<>();
 				    
-				    //System.out.println("-------------------------------------------------report criteria size "+lcs.size());
-				    
 			    	for(int i=0;i<lcs.size();i++){
 			    		ReportCriteria rc = lcs.get(i);
 			    		if(!header.contains(rc.getDisplay())){
 			    			header.add(rc.getDisplay());
 			    		}
-			    		//System.out.println("-------------------------------------------------criteria "+rc.getName() + "     value : "+rc.getValue()+ " report type = "+reportType);
-			    		
 			    		ArrayList<ArrayList<String>> criteriaSet = db.executeReport(rc, reportType, sc);
 			    		map.put(rc, criteriaSet);
 			    	}
@@ -1187,16 +1287,11 @@ public class ActionProcessor {
 		    	 
 		    }
 		    
-		    System.out.println("-------------------------------------------------");
 		    dataObject.put("header",header);
 		    dataObject.put("datasets",datasets);
 			
 			jObject.add("data", json.toJsonTree(dataObject));
 			writeReportFile(reportCode, jObject.toString());
-			System.out.println("-------------------------------------------------");
-			
-			System.out.println("REPORT "+ reportCode+" GENERATED");
-			System.out.println("-------------------------------------------------");
 			
 		} catch (NamingException e) {
 			e.printStackTrace();
@@ -1213,16 +1308,6 @@ public class ActionProcessor {
 		String result = "";
 		JsonParser jp = new JsonParser();
 		
-		//System.out.println("METHOD LAUNCH ");
-		/*
-		String idcommunity = ((String[])args.get("idcommunity"))[0];
-		String sex = ((String[])args.get("sex"))[0];
-		String dataperiod = ((String[])args.get("dataperiod"))[0];
-		String dtype = ((String[])args.get("dtype"))[0];
-		String age = ((String[])args.get("age"))[0];
-		String hba1c = ((String[])args.get("hba1c"))[0];
-		
-		*/
 		String dataset = ((String[])args.get("dataset"))[0];
 		InitialContext ic;
 		try {
@@ -1249,11 +1334,6 @@ public class ActionProcessor {
 		    }
 		    
 		    
-		    System.out.println("-------------------------------------------------");
-		   
-			
-			System.out.println("-------------------------------------------------");
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1270,8 +1350,6 @@ public class ActionProcessor {
 		for(JsonElement obj : subcriterias ){
 		        ReportSubcriteria scse = json.fromJson( obj , ReportSubcriteria.class);
 		        datasetObject.put(scse.getSubname(), scse.getSubvalue());
-		        System.out.println("SUBCRITERIA : "+scse.getSubname());
-		        System.out.println("SUBCRITERIA VALUE : "+scse.getSubvalue());
 		}
 		
 		ArrayList<Hashtable<String, String>> dataset = db.executeReportFlist(dataName, criterias);
@@ -1294,7 +1372,10 @@ public class ActionProcessor {
 		return result;
 	}
 
-	
+	/*
+	 * 
+	 * https://localhost/ncdis/service/action/generateDataOutcomes
+	 * */
 	public String generateDataOutcomes(Hashtable<String, String[]> args){
 		
 		CdisDBridge db = new CdisDBridge();
@@ -1387,7 +1468,6 @@ public class ActionProcessor {
 		    String ppdmtout  = "tp.3";
 		    String ppdmtcontent = gson.toJson(ppdmtotals);
 		    writeOutcomeFile(ppdmtout, ppdmtcontent);
-
 		    
 		    Hashtable<String,ArrayList<Hashtable<String,String>>> v12 = db.getHbA1cValue("1_2");
 		    Iterator<String> v12keys = v12.keySet().iterator();
@@ -1430,11 +1510,6 @@ public class ActionProcessor {
 		    String vpdmtcontent = gson.toJson(vpdmtotals);
 		    writeOutcomeFile(vpdmtout, vpdmtcontent);
 		    
-		    
-		    System.out.println("-------------------------------------------------");
-		    System.out.println("outcome files generated");
-			System.out.println("-------------------------------------------------");
-			
 		} catch (NamingException e) {
 			e.printStackTrace();
 		}
@@ -1471,14 +1546,10 @@ public class ActionProcessor {
 		            }
 		         }
 		      };
-		     System.out.println(rf+System.getProperty("file.separator")+"import");
-		     System.out.println(importFolder.listFiles(fileFilter)); 
 		     File[] list = importFolder.listFiles(fileFilter);
 		     ArrayList<String> files = new ArrayList<>();
 		     for(int i=0;i<list.length;i++){
 		    	 String fn = list[i].getName();
-		    	 System.out.println(fn);
-		    	 
 		    	 Date curentDate = new Date();
 		    	 
 		    	 DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy");

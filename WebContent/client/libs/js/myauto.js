@@ -9,7 +9,6 @@ var searchObj = $("#search").autocomplete({
 		          success: function(data) {
 		        	  //$('#search').removeClass('ui-autocomplete-loading');  // hide loading image
 			          //alert(data.objects.length);
-			          //console.log( data ); 
 		        	  var array = data.error ? [] : $.map(data.objects, function(m) {
 							return {
 								fname: m.fname,
@@ -45,7 +44,6 @@ var searchObj = $("#search").autocomplete({
 		    	$(".cdisuser").hide();
 		    	optionSelected = true;
 		    	//alert(this.value +"   "+ ui.item.fname);
-		    	//console.log(ui);
 		    },
 		    search: function( event, ui ) {
 		    	//detect if not alpha numeric and return error

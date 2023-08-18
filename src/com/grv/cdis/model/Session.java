@@ -139,7 +139,6 @@ public class Session {
 	
 	public boolean setSession(){
 		boolean result = false;
-		//System.out.println("SESSION ID IN SET SESSION : "+ this.getIdsession());		
 		ChbDBridge chb = new ChbDBridge();
 		result = chb.setUserSession(this);
 		return result;

@@ -23,7 +23,6 @@ public class Renderer {
 	
 	public static String renderOperator(String opStr){
 		
-		//System.out.println("OPERATOR : "+opStr);
 		String result = "=";
 		int index = Arrays.asList(operatorsStr).indexOf(opStr);
 		if(index >= 0){

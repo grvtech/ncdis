@@ -21,6 +21,7 @@ function loadTemplate(pageName,callBack){
 		    close: function() { }
 		  });
 	}else{
+		
 		$body.append($("<div>",{class:"cdismodal"}).append($("<div>",{class:"modal-span"}).text("CDIS Loading..."))).addClass("loading");
 		if(callBack == null){
 			$( "#wraper").load( "client/templates/"+pageName+".html"+"?ts="+moment());
@@ -215,12 +216,11 @@ function isDecimal(input){
 
 function loadJS(FILE_URL){
 	$.getScript("client/libs/js/common/define.js", function(data, textStatus, jqxhr) {
-		//console.log(data); // data returned
-		//console.log(textStatus); // success
-		//console.log(jqxhr.status); // 200
-		console.log('Load was performed.');
 	});
 }
+
+
+
 
 /* tooltip function*/
 //Use a closure to keep vars out of global scope

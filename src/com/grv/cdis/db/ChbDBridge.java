@@ -45,6 +45,18 @@ import com.grv.cdis.model.User;
  * 
  * */
 
+/*
+ * 2023-08-11
+ * Users table change add columns : reset [0:1] ,
+ * 
+ * to reset password email and username
+ * 
+ * processus link users CDIS username CDIS First name CDIS Last name CDIS email WIN username WIN password (not saved)
+ * 
+ * link to table made for windows table :  idlinkuser wusername iduser  
+ * 
+ * */
+
 public class ChbDBridge {
 	
 	
@@ -107,7 +119,9 @@ public class ChbDBridge {
 			//Context envContext  = (Context)initContext.lookup("java:comp/env");
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
-		    cs=conn.prepareStatement("exec sp_getUserByUsernameAndPassword ?,?");
+		    //cs=conn.prepareStatement("exec sp_getUserByUsernameAndPassword ?,?");
+			cs=conn.prepareStatement("select * from ncdis.ncdis.users where username = ? and password = ? and confirmmail='0' and reset='0'");
+			
 		    cs.setEscapeProcessing(true);
 		    cs.setQueryTimeout(90);
 		    cs.setString(1, username);
@@ -145,13 +159,14 @@ public class ChbDBridge {
 		PreparedStatement cs=null;
 		Connection conn = null;
 
+		
 		try {
 			initContext = new InitialContext();
 			//Context envContext  = (Context)initContext.lookup("java:comp/env");
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
 			String sql = "select * from ncdis.ncdis.users where iduser > ? ";
-		    cs=conn.prepareStatement("select * from ncdis.ncdis.users where iduser > ? and active = ? or (active=0 and phone='GRV') order by fname,lname asc");
+		    cs=conn.prepareStatement("select * from ncdis.ncdis.users where iduser > ? and active = ? order by fname,lname asc");
 		    
 		    cs.setEscapeProcessing(true);
 		    cs.setQueryTimeout(90);
@@ -185,8 +200,6 @@ public class ChbDBridge {
 		return result;
 	}
 	
-
-	
 	
 	public HashMap<String, String> getUser(int iduser){
 		HashMap<String, String> result = new HashMap<String, String>();
@@ -201,7 +214,7 @@ public class ChbDBridge {
 			//Context envContext  = (Context)initContext.lookup("java:comp/env");
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
-		    cs=conn.prepareStatement("select * from ncdis.ncdis.users where iduser=? and active=1 or (active=0 and phone='GRV')");
+		    cs=conn.prepareStatement("select * from ncdis.ncdis.users where iduser=? and active=1");
 		    cs.setEscapeProcessing(true);
 		    cs.setQueryTimeout(90);
 		    cs.setInt(1, iduser);
@@ -269,6 +282,40 @@ public class ChbDBridge {
 		
 	}
 
+	
+	public void resetUserPassword(User user){
+		HashMap<String, String> result = new HashMap<String, String>();
+		Context initContext;
+		DataSource ds;
+		ResultSet rs = null;
+		PreparedStatement cs=null;
+		Connection conn = null;
+		Statement st = null;
+		try {
+			initContext = new InitialContext();
+			ds = (DataSource)initContext.lookup("jdbc/ncdis");
+			conn = ds.getConnection();
+			
+			String sql = "update ncdis.ncdis.users set password='"+user.getPassword()+"', "
+					+ "reset='0' "
+					+ "where iduser = "+Integer.parseInt(user.getIduser())+" ";
+		    
+			st = conn.createStatement();
+		    st.executeUpdate(sql);
+		}catch (SQLException se) {
+		        se.printStackTrace();
+	    } catch (NamingException e) {
+			e.printStackTrace();
+		} finally {
+	        try {
+	            st.close();
+	            conn.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	   }
+	}
+	
 	public int addUser(User user){
 		int result = 0;
 		Context initContext;
@@ -282,26 +329,13 @@ public class ChbDBridge {
 			initContext = new InitialContext();
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
-			String sql = "insert into ncdis.ncdis.users (fname,lname,username,password,email,phone,idcommunity,idprofesion,active) "
+			String sql = "insert into ncdis.ncdis.users (fname,lname,username,password,email,phone,idcommunity,idprofesion,active,reset,confirmmail) "
 		    		+ "values ('"+user.getFirstname()+"','"+user.getLastname()+"','"+user.getUsername()+"','"+user.getPassword()+"','"+user.getEmail()+"',"
-    				+ "'"+user.getPhone()+"','"+user.getIdcommunity()+"','"+user.getIdprofesion()+"','"+user.getActive()+"')";
+    				+ "'"+user.getPhone()+"','"+user.getIdcommunity()+"','"+user.getIdprofesion()+"','"+user.getActive()+"','"+user.getReset()+"','"+user.getConfirmmail()+"')";
 		    cs=conn.prepareStatement(sql);
 		    cs.setEscapeProcessing(true);
 		    cs.setQueryTimeout(90);
-		    /*
-		    cs.setString(1, user.getFirstname());
-		    cs.setString(2, user.getLastname());
-		    cs.setString(3, user.getUsername());
-		    cs.setString(4, user.getPassword());
-		    cs.setString(5, user.getEmail());
-		    cs.setString(6, user.getPhone());
-		    cs.setString(7, user.getIdcommunity());
-		    cs.setString(8, user.getIdprofesion());
-		    cs.setString(9, user.getActive());
-		    */
-		    //System.out.println(sql);
 		    cs.executeUpdate();
-		    
 		    
 		    cs.clearBatch();
 		    st = conn.createStatement();
@@ -822,7 +856,9 @@ public class ChbDBridge {
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
 			//   idsystem system_name system_code idrole
-		    cs=conn.prepareStatement("exec sp_getSessionByIDSESSION ?");
+			
+			cs=conn.prepareStatement("select * from ncdis.ncdis.session where idsession = ? and active=1 group by idsession,iduser,ipuser,modified,created,reswidth,resheight,active having datediff(minute, max(modified), GETDATE()) < (Select convert(int,value) from ncdis.ncdis.configuration where keia='session')");
+			
 		    cs.setEscapeProcessing(true);
 		    cs.setString(1,idsession);
 		    rs = cs.executeQuery();
@@ -868,7 +904,7 @@ public class ChbDBridge {
 		    rs = cs.executeQuery();
 		    if(rs.isBeforeFirst()){
 		    	rs.next();
-		    	result = new User(rs.getString("username"), rs.getString("password"), rs.getString("fname"), rs.getString("lname"),rs.getString("email"), rs.getString("iduser"), true, rs.getString("phone"),rs.getString("idcommunity"), rs.getString("active"),rs.getString("idprofesion"));
+		    	result = new User(rs.getString("username"), rs.getString("password"), rs.getString("fname"), rs.getString("lname"),rs.getString("email"), rs.getString("iduser"), true, rs.getString("phone"),rs.getString("idcommunity"), rs.getString("active"),rs.getString("idprofesion"), rs.getString("reset"), rs.getString("confirmmail"));
 		    }
 		    
 		}catch (SQLException se) {
@@ -887,6 +923,69 @@ public class ChbDBridge {
 		return result;
 	}
 	
+	public boolean setResetPassword(String iduser, String rbit){
+		boolean result = false;
+		Context initContext;
+		DataSource ds;
+		PreparedStatement cs=null;
+		Connection conn = null;
+
+		try {
+			initContext = new InitialContext();
+			ds = (DataSource)initContext.lookup("jdbc/ncdis");
+			conn = ds.getConnection();
+		    cs=conn.prepareStatement("update ncdis.ncdis.users set reset = "+rbit+" where iduser = ?");
+		    cs.setEscapeProcessing(true);
+		    cs.setString(1,iduser);
+		    cs.executeUpdate();
+		    result = true;
+		}catch (SQLException se) {
+		    se.printStackTrace();
+	    } catch (NamingException e) {
+			e.printStackTrace();
+		} finally {
+	        try {
+	            //rs.close();
+	            cs.close();
+	            conn.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	   }
+		return result;
+	}
+	
+	public boolean setEmailConfirm(String iduser, String confirm){
+		boolean result = false;
+		Context initContext;
+		DataSource ds;
+		PreparedStatement cs=null;
+		Connection conn = null;
+
+		try {
+			initContext = new InitialContext();
+			ds = (DataSource)initContext.lookup("jdbc/ncdis");
+			conn = ds.getConnection();
+		    cs=conn.prepareStatement("update ncdis.ncdis.users set confirmmail = "+confirm+" where iduser = ?");
+		    cs.setEscapeProcessing(true);
+		    cs.setString(1,iduser);
+		    cs.executeUpdate();
+		    result = true;
+		}catch (SQLException se) {
+		    se.printStackTrace();
+	    } catch (NamingException e) {
+			e.printStackTrace();
+		} finally {
+	        try {
+	            //rs.close();
+	            cs.close();
+	            conn.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	   }
+		return result;
+	}
 	
 	public boolean logoutSession(String idsession){
 		boolean result = false;
@@ -900,7 +999,7 @@ public class ChbDBridge {
 			initContext = new InitialContext();
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
-		    cs=conn.prepareStatement("exec sp_logoutSession ?");
+		    cs=conn.prepareStatement("update ncdis.ncdis.session set active = 0 where idsession = ?");
 		    cs.setEscapeProcessing(true);
 		    cs.setString(1,idsession);
 		    cs.executeUpdate();
@@ -1002,7 +1101,6 @@ public class ChbDBridge {
 		    rs = cs.executeQuery(url);
 		    while(rs.next()){
 		    	SearchPatient sp = new SearchPatient(rs.getString("fname"), rs.getString("lname"), rs.getString("ramq"), rs.getString("name_en"), rs.getInt("chart"), rs.getInt("idpatient"), rs.getString("giu"));
-		    	//System.out.println(rs.getString("fname")+"-----"+ rs.getString("lname")+"-----"+ rs.getString("ramq")+"-----"+ rs.getString("name_en")+"-----"+ rs.getInt("chart")+"-----"+ rs.getInt("idpatient")+"-----"+ rs.getString("giu"));
 		    	result.add(sp);
 		    }
 		    
@@ -1649,6 +1747,96 @@ public ArrayList<Note> getUserNotes(String iduserto){
 		return result;
 	}
 	
+	public Hashtable<String,ArrayList<ArrayList<String>>> getUserDashboard(String iduser){
+		Hashtable<String,ArrayList<ArrayList<String>>> result = new Hashtable();
+		Context initContext;
+		DataSource ds;
+		ResultSet rs = null;
+		PreparedStatement cs=null;
+		Connection conn = null;
+
+		try {
+			initContext = new InitialContext();
+			//Context envContext  = (Context)initContext.lookup("java:comp/env");
+			ds = (DataSource)initContext.lookup("jdbc/ncdis");
+			conn = ds.getConnection();
+			String sql1 = "select top 5 count(*) actions, x.action_name from ("
+					+ "select  ee.iduser, ee.idaction, u.fname,u.lname, aa.action_code,aa.action_name "
+					+ "from ncdis.ncdis.events ee "
+					+ "left join ncdis.ncdis.users u on ee.iduser=u.iduser "
+					+ "	left join ncdis.ncdis.action aa on ee.idaction = aa.idaction "
+					+ "where ee.iduser="+iduser+" "
+					+ "and  ee.created between DATEDIFF(day,30,getdate())  and getdate() ) x "
+					+ "group by x.iduser,x.fname,x.lname,x.action_code,x.action_name "
+					+ "order by actions desc";
+		    cs=conn.prepareStatement(sql1);
+		    
+		    cs.setEscapeProcessing(true);
+		    cs.setQueryTimeout(90);
+		    rs = cs.executeQuery();
+		    ArrayList<ArrayList<String>> actions = new ArrayList();
+		    while (rs.next()) {
+		    	ArrayList<String> l = new ArrayList();
+		    	l.add(rs.getString("actions"));
+		    	l.add(rs.getString("action_name"));
+		    	actions.add(l);
+		    }
+		    result.put("actions",actions);
+		    cs.clearBatch();
+		    
+		    String sql2 = "select top 10 data, cast(max(created) as date) as date from ncdis.ncdis.events "
+		    		+ "where iduser="+iduser+" and data is not null and created between DATEDIFF(day,30,getdate())  and getdate() "
+		    		+ "group by data order by date desc";
+		    
+		    cs=conn.prepareStatement(sql2);
+		    
+		    cs.setEscapeProcessing(true);
+		    cs.setQueryTimeout(90);
+		    rs = cs.executeQuery();
+		    ArrayList<ArrayList<String>> history = new ArrayList();
+		    while (rs.next()) {
+		    	ArrayList<String> l = new ArrayList();
+		    	l.add(rs.getString("date"));
+		    	l.add(rs.getString("data"));
+		    	history.add(l);
+		    }
+		    result.put("history",history);
+		    cs.clearBatch();
+		    
+		    String sql3 = "select count(*) actions, cast(created as date) date from ncdis.ncdis.events "
+		    		+ "where iduser="+iduser+" and created between DATEDIFF(day,30,getdate())  and getdate() "
+		    		+ "group by cast(created as date) order by date desc";
+		    
+		    cs=conn.prepareStatement(sql3);
+		    
+		    cs.setEscapeProcessing(true);
+		    cs.setQueryTimeout(90);
+		    rs = cs.executeQuery();
+		    ArrayList<ArrayList<String>> activity = new ArrayList();
+		    while (rs.next()) {
+		    	ArrayList<String> l = new ArrayList();
+		    	l.add(rs.getString("date"));
+		    	l.add(rs.getString("actions"));
+		    	activity.add(l);
+		    }
+		    result.put("activity",activity);
+		    
+		    
+		}catch (SQLException se) {
+		        se.printStackTrace();
+	    } catch (NamingException e) {
+			e.printStackTrace();
+		} finally {
+	        try {
+	            rs.close();
+	            cs.close();
+	            conn.close();
+	        } catch (SQLException ex) {
+	            ex.printStackTrace();
+	        }
+	   }
+		return result;
+	}
 	
 	public boolean readPatientNote(String noteid){
 		boolean result = false;
@@ -1735,7 +1923,6 @@ public ArrayList<Note> getUserNotes(String iduserto){
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
 			String sql = "select top 1 case when datediff(month, DATEADD(month, DATEDIFF(month, 0, datevisit), 0), getdate()) > 0 then dateadd(month,frequency * ceiling( datediff(month, DATEADD(month, DATEDIFF(month, 0, datevisit), 0), getdate() ) / cast(frequency as float)) ,datevisit) else	datevisit end as nextdate , idpatient,iduser, idprofesion, frequency from ncdis.ncdis.schedulevisits  where idpatient="+idpatient+" and iduser="+iduser+" order by datevisit desc";
-			//System.out.println(sql);
 		    cs=conn.prepareStatement(sql);
 		    cs.setEscapeProcessing(true);
 		    cs.setQueryTimeout(90);
@@ -1832,7 +2019,6 @@ public ArrayList<Note> getUserNotes(String iduserto){
 		    + " left join ncdis.ncdis.community cc on pp.idcommunity = cc.idcommunity"
 		    + " left join ncdis.ncdis.patient_hcp ph on pp.idpatient = ph.idpatient "
 		    + " where pp.active=1 and (pp.dod is null or pp.dod='1900-01-01') and ph."+hcpcat+" = '"+iduser+"'";
-		    //System.out.println(sql);
 		    cs = conn.prepareStatement(sql);
 		    cs.setEscapeProcessing(true);
 		    cs.setQueryTimeout(90);

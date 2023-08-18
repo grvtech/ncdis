@@ -458,6 +458,7 @@ public class CdisDBridge {
 		return result;
 	}
 	
+	
 	public boolean setOneHcpOfPatient(String idpatient,  String iduser, String hcpcode){
 		Context initContext;
 		DataSource ds;
@@ -904,7 +905,6 @@ public class CdisDBridge {
 		Connection conn = null;
 		boolean result = false;
 		String sql = "update ncdis.ncdis.cdis_value set datevalue = '"+valueDate+"', value = '"+valueValue+"' where idpatient = '"+idpatient+"' and iddata = (select iddata from ncdis.ncdis.cdis_data where data_code = '"+valueName+"') and idvalue = '"+idvalue+"';";
-		//System.out.println(sql);
 		try {
 			initContext = new InitialContext();
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -1149,8 +1149,6 @@ public class CdisDBridge {
 	
 	public ArrayList<ArrayList<String>> executeReport(ReportCriteria criteria, String reportType, ArrayList<ReportSubcriteria> subcriterias){
 		
-		//System.out.println("REPORT TYPE"+reportType   +"criteria = "+criteria.getName() +"  subcriteria size "+subcriterias.size());
-		
 		ArrayList<ArrayList<String>> result = new ArrayList<>();
 		Context initContext;
 		DataSource ds;
@@ -1159,10 +1157,8 @@ public class CdisDBridge {
 		Connection conn = null;
 		
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-		//System.out.println("AAAAAA");
 		if(reportType.equals("list")){
 			
-			//System.out.println("REPORT TYPE LIST");
 			String val = criteria.getValue();
 			String nom = criteria.getName();
 			String op = Renderer.renderOperator(criteria.getOperator());
@@ -1193,8 +1189,6 @@ public class CdisDBridge {
 						+ " where nn.idpatient > 0 and nn.active=1 and (nn.dod is null or nn.dod = '1900-01-01') "
 						+ " "+ criteriaStr+ " "
 						+ "order by nn.idpatient asc";
-				//sql = "select * from ncdis.ncdis.patient";
-				//System.out.println(sql);
 				try {
 					initContext = new InitialContext();
 					ds = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -1321,9 +1315,6 @@ public class CdisDBridge {
 											+ "order by nn.idpatient asc";
 				}
 					
-				//System.out.println(sql);
-				
-				
 				
 				try {
 					initContext = new InitialContext();
@@ -1398,7 +1389,6 @@ public class CdisDBridge {
 									+ " bb.active  = '1' "
 									+ " and "+nom+" "+op+" "+"'"+val+"'"
 									+ " and (bb.dod is null or bb.dod = '1900-01-01')";
-							System.out.println(sql);
 						}
 					
 						//sql = "select count(pp.idpatient) as cnt from ncdis.ncdis.patient pp "+subStrFrom+" where pp."+nom+" "+op+" '"+val+"' "+subStrWhere +"  ";
@@ -1408,8 +1398,6 @@ public class CdisDBridge {
 							conn = ds.getConnection();
 						    cs=conn.createStatement();		    
 						    cs.setEscapeProcessing(true);
-						    
-						    //System.out.println(sql);
 						    
 						    rs = cs.executeQuery(sql);
 						    int index = 0;
@@ -1447,8 +1435,6 @@ public class CdisDBridge {
 						conn = ds.getConnection();
 					    cs=conn.createStatement();		    
 					    cs.setEscapeProcessing(true);
-					    
-					    //System.out.println(sql);
 					    
 					    rs = cs.executeQuery(sql);
 					    int index = 0;
@@ -1512,10 +1498,7 @@ public class CdisDBridge {
 							subcriteriaStr += " inner join (select distinct idpatient from ncdis.ncdis.cdis_value where iddata = '"+rsc.getSubiddata()+"' and value "+Renderer.renderOperator(rsc.getSuboperator())+" "+rsc.getSubvalue()+") cc"+x+" on bb.idpatient = cc"+x+".idpatient";
 						}
 					}
-					
-					//sql = criteriaStr +" "+subcriteriaStr + " "+criteriaWhere;
 					sql = criteriaStr + " "+criteriaWhere +" "+subcriteriaStr ;
-					//System.out.println(sql);
 					try {
 						initContext = new InitialContext();
 						ds = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -1523,11 +1506,9 @@ public class CdisDBridge {
 					    cs=conn.createStatement();		    
 					    cs.setEscapeProcessing(true);
 					    long ts1 = (new Date()).getTime();
-					    //System.out.println("SQL-"+sec+"-"+criteria.getName()+":"+sql);
 					    rs = cs.executeQuery(sql);
 					    int index = 0;
 					    //long ts11 = (new Date()).getTime();
-					   // System.out.println("Exec Time SQL before parsing-"+sec+"-"+criteria.getName()+": "+ (ts11-ts1));
 					    while (rs.next()) {
 					    	ArrayList<String> line = new ArrayList<>();
 					    	line.add(Integer.toString(index));
@@ -1537,7 +1518,6 @@ public class CdisDBridge {
 				    		index++;
 					    }
 					    long ts2 = (new Date()).getTime();
-					    //System.out.println("Exec Time SQL after parsing-"+sec+"-"+criteria.getName()+": "+ (ts2-ts1));
 					    
 					}catch (SQLException se) {
 				        se.printStackTrace();
@@ -1601,7 +1581,6 @@ public class CdisDBridge {
 					for(int x=0;x<subcriterias.size();x++){
 						ReportSubcriteria rsc = subcriterias.get(x);
 						
-						//System.out.println("SUBin SQL :"+rsc.getSubvalue());
 						
 						if(rsc.getSubsection().equals("1")){
 							sql = "select count(*) cnt"
@@ -1634,7 +1613,6 @@ public class CdisDBridge {
 									+ " and cc.maxdate is not null"
 									+ " and bb.datevalue = (select max(xx.datevalue) from ncdis.ncdis.cdis_value xx where xx.iddata='"+rsc.getSubiddata()+"' and xx.idpatient = bb.idpatient group by xx.idpatient)";
 						
-							System.out.println(sql); 
 						}
 						
 						try {
@@ -1685,8 +1663,6 @@ public class CdisDBridge {
 						conn = ds.getConnection();
 					    cs=conn.createStatement();		    
 					    cs.setEscapeProcessing(true);
-					    
-					    //System.out.println(sql);
 					    
 					    rs = cs.executeQuery(sql);
 					    int index = 0;
@@ -1754,7 +1730,6 @@ public class CdisDBridge {
 		    	Hashtable<String, String> row = new Hashtable<>();
 		    	for(ReportCriteria rc : rcList){
 		    		for(int i=1;i<=columns;i++){
-		    			//System.out.println(" rc: "+rc.getName()+"  column : "+rsm.getColumnName(i));
 		    			if(rc.getName().equals(rsm.getColumnName(i))){
 		    				String colVal = rs.getString(rsm.getColumnName(i)); 
 		    				if(colVal == null) colVal = "";
@@ -1769,11 +1744,7 @@ public class CdisDBridge {
 		    		}
 		    	}
 		    	result.add(row);
-		    	/*
-		    	for(Hashtable<String, String> r : result){
-		    		System.out.println(" ramq: "+r.get("ramq")+"  chart : "+r.get("chart"));
-		    	}
-		    	*/
+		    	
 		    }
 		}catch (SQLException se) {
 	        se.printStackTrace();
@@ -2054,7 +2025,6 @@ public class CdisDBridge {
 		Statement cs=null;
 		Connection conn = null;
 		String sql = "select distinct nn.idpatient from ncdis.ncdis.patient nn left join ncdis.ncdis.patient_hcp ph on nn.idpatient = ph.idpatient where (nn.dod is null or nn.dod = '1900-01-01') and ph."+hcp+"='"+hcpid+"'";
-		//System.out.println(sql);
 		try {
 			initContext = new InitialContext();
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
@@ -2339,7 +2309,6 @@ public class CdisDBridge {
 											+ " and p.idcommunity != 10 "
 									+ " ) as a ";
 
-							System.out.println(sql);
 							rs = cs.executeQuery(sql);
 						    while (rs.next()) {
 						    	
@@ -2517,7 +2486,6 @@ public class CdisDBridge {
 											+ " and p.idcommunity != 10 "
 									+ " ) as a ";
 
-							//System.out.println(sql);
 							rs = cs.executeQuery(sql);
 						    while (rs.next()) {
 						    	
@@ -2693,7 +2661,6 @@ public class CdisDBridge {
 									+ " ) as a ";
 
 									
-							//System.out.println(sql);
 							rs = cs.executeQuery(sql);
 						    while (rs.next()) {
 						    	DecimalFormat df = new DecimalFormat("###.##");
@@ -2799,7 +2766,6 @@ public class CdisDBridge {
 						+ "(select idpatient, max(datevalue) as lastdate from ncdis.ncdis.cdis_value group by idpatient) as nn on mm.idpatient = nn.idpatient  "
 						+ " where "
 						+ " nn.lastdate < dateadd(year, -5, getdate())";
-				//System.out.println(sql);
 			}else if(idlist.equals("2")){
 				HashMap<String, String> hc1 = new HashMap<>();
 		    	hc1.put("column", "fullname");
@@ -3064,7 +3030,7 @@ public class CdisDBridge {
 							+ " ) as t ";
 
 								
-			//System.out.println(sql);
+
 			rs = cs.executeQuery(sql);
 			while (rs.next()) {
 				String n = rs.getString("cnt");
@@ -3187,7 +3153,6 @@ public class CdisDBridge {
 							+ " ) as t ";
 
 								
-			//System.out.println(sql);
 			rs = cs.executeQuery(sql);
 			while (rs.next()) {
 				String n = rs.getString("cnt");
@@ -3308,7 +3273,6 @@ public class CdisDBridge {
 							+ " ) as t ";
 
 									
-			//System.out.println(sql);
 			rs = cs.executeQuery(sql);
 			while (rs.next()) {
 				String n = rs.getString("cnt");
@@ -3436,7 +3400,6 @@ public class CdisDBridge {
 									+ " ) as t ";
 
 									
-					//System.out.println(sql);
 					rs = cs.executeQuery(sql);
 					while (rs.next()) {
 						String n = rs.getString("cnt");
@@ -3563,7 +3526,6 @@ public class CdisDBridge {
 									+ cStr + gStr + dtStr + aStr 
 							+ " ) as t ";
 
-				//System.out.println(sql);
 				rs = cs.executeQuery(sql);
 				while (rs.next()) {
 					String n = rs.getString("cnt");
@@ -3699,7 +3661,6 @@ public class CdisDBridge {
 									+ cStr + gStr + dtStr + aStr 
 							+ " ) as t ";
 
-				//System.out.println(sql);
 				rs = cs.executeQuery(sql);
 				while (rs.next()) {
 					String n = rs.getString("cnt");
@@ -3816,7 +3777,6 @@ public class CdisDBridge {
 							+ " ) as cv"
 							+ " on p.idpatient = cv.idpatient";
 
-				//System.out.println(sql);
 				rs = cs.executeQuery(sql);
 				while (rs.next()) {
 					result = rs.getInt("cnt");
@@ -3944,7 +3904,6 @@ public class CdisDBridge {
 									+ " ) as a "
 									+ " group by a.age,a.sex,a.idcommunity";
 
-							//System.out.println(sql);
 							rs = cs.executeQuery(sql);
 							
 							ArrayList<Hashtable<String,String>> month = new ArrayList<>();
@@ -4064,7 +4023,6 @@ public  Hashtable<String,ArrayList<Hashtable<String,String>>> getHbA1cPeriod(Str
 									+ " ) as a "
 									+ " group by a.sex,a.age,a.idcommunity";
 
-					//System.out.println(sql);
 					rs = cs.executeQuery(sql);
 					ArrayList<Hashtable<String,String>> month = new ArrayList<>();
 					while (rs.next()) {
@@ -4200,7 +4158,6 @@ public  Hashtable<String,ArrayList<Hashtable<String,String>>> getHbA1cValue(Stri
 								+ " group by a.sex, a.age, a.idcommunity, a.value1";
 
 								
-				//System.out.println(sql);
 				rs = cs.executeQuery(sql);
 				ArrayList<Hashtable<String,String>> month = new ArrayList<>();
 				while (rs.next()) {

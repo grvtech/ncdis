@@ -946,28 +946,6 @@ function drawValue(section, valueName, valueObj, valueLimitsObj, subsection){
 }
 
 
-function getValueLimits(valueName){
-	var result = null;
-	
-	if(typeof(window['limits_'+valueName]) != 'undefined'){
-		result = window['limits_'+valueName];
-	}else{
-		var limits = $.ajax({
-			  url: "/ncdis/service/data/getValueLimits?sid="+sid+"&language=en&name="+valueName,
-			  type: "GET",
-			  async : false,
-			  cache : false,
-			  dataType: "json"
-			});
-			limits.done(function( json ) {
-				result = json.objs[0];
-			});
-			limits.fail(function( jqXHR, textStatus ) {
-			  alert( "Request failed: " + textStatus );
-			});
-	} 
-	return result;
-}
 
 
 function createHistory(section, valueName, valueLimitsObj){

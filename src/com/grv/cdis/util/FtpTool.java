@@ -51,15 +51,12 @@ public class FtpTool {
  
             InputStream inputStream = new FileInputStream(firstLocalFile);
  
-            System.out.println("Start uploading first file");
             result = ftpClient.storeFile(firstRemoteFile, inputStream);
             inputStream.close();
             if (result) {
-                System.out.println("The first file is uploaded successfully.");
             }
  
         } catch (IOException ex) {
-            System.out.println("Error: " + ex.getMessage());
             ex.printStackTrace();
         } finally {
             try {
@@ -131,20 +128,17 @@ public class FtpTool {
             	}
             }
             
-            System.out.println("The file to download : "+remoteFile);
             if(!remoteFile.equals("")){
-            	System.out.println("Start downloading first file");
             	result = ftpClient.retrieveFile(remoteFile, output);
             }
             //close output stream
             output.close();
             
             if (result) {
-                System.out.println("The first file is downloaded successfully.");
+
             }
  
         } catch (IOException ex) {
-            System.out.println("Error: " + ex.getMessage());
             ex.printStackTrace();
         } finally {
             try {

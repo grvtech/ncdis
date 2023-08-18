@@ -182,8 +182,16 @@ public class MailTool {
 	         try {
 	            //Set email data 
 	            message.setFrom(new InternetAddress(FileTool.getEmailProperty("smtp.from")));
-	            message.addRecipient(Message.RecipientType.TO,new InternetAddress(recipient_mail_id));
-	            message.addRecipient(Message.RecipientType.CC,new InternetAddress(FileTool.getEmailProperty("admin.cc")));
+	            if(recipient_mail_id.equals("admins@grvtech.ca")){
+	            	message.addRecipient(Message.RecipientType.TO,new InternetAddress(FileTool.getEmailProperty("admin.1")));
+	            	message.addRecipient(Message.RecipientType.TO,new InternetAddress(FileTool.getEmailProperty("admin.2")));
+	            	message.addRecipient(Message.RecipientType.TO,new InternetAddress(FileTool.getEmailProperty("admin.3")));
+	            	message.addRecipient(Message.RecipientType.CC,new InternetAddress(FileTool.getEmailProperty("admin.cc")));
+	            }else{
+	            	message.addRecipient(Message.RecipientType.TO,new InternetAddress(recipient_mail_id));
+	            }
+	            
+	            
 	            message.setSubject(mail_subject);
 	            MimeMultipart multipart = new MimeMultipart();
 	            BodyPart messageBodyPart = new MimeBodyPart();
@@ -194,8 +202,6 @@ public class MailTool {
 					ic = new InitialContext();
 					String rf = (String) ic.lookup("root-folder");
 					templatePath = rf+System.getProperty("file.separator")+"config";
-					//String messagEmail = "<b><p>Hello Administrator</p></b><p>New user is subscribed to CDIS.<br>Login to CDIS and go to Users section.<br>Click on the button pending users to see the users that subscribed to CDIS but are not active yet.Click on the user to select it and click on the button Activate to allow the user to log in to CDIS.<br><br><b>An email will be sent to the user to annouce the activation.</b></p>";
-					//MailTool.sendMailInHtml("CDIS New User Subscribe", messagEmail, "support@grvtech.ca", templatePath);
 				} catch (NamingException e) {
 					e.printStackTrace();
 				}
@@ -231,7 +237,6 @@ public class MailTool {
 	            transport.connect(FileTool.getEmailProperty("smtp.host"), Email_Id, password);
 	            transport.sendMessage(message, message.getAllRecipients());
 	            transport.close();
-	            System.out.println("Mail sent successfully..."); 
 	         
 	        }catch (MessagingException ex) {
 	                Logger.getLogger(MailTool.class.getName()).log(Level.SEVERE, null, ex);

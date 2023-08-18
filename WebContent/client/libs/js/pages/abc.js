@@ -129,11 +129,3 @@ function printABCGraphs(){
 	$("#abcgraphs-container").printJQPlot("Summary Lab Graphs");
 }
 
-
-
-/*
- * PAGE ACTIONS
- * 
- * */
-
-

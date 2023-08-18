@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
 
+import org.apache.commons.net.util.Base64;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.grv.cdis.controler.Reports;
@@ -40,6 +42,7 @@ import com.grv.cdis.model.ValueLimit;
 import com.grv.cdis.model.Values;
 import com.grv.cdis.util.FileTool;
 import com.grv.cdis.util.MailTool;
+import com.grv.cdis.util.SecurityTool;
 
 public class DataProcessor {
 	
@@ -61,6 +64,26 @@ public class DataProcessor {
 		}
 		return result;
 	}
+	
+	public String getUserDashboard(Hashtable<String, String[]> args){
+		Gson json = new Gson();
+		String result = "";
+		ChbDBridge db = new ChbDBridge();
+		String iduser = ((String[])args.get("iduser"))[0];
+		String language = ((String[])args.get("language"))[0];
+		User user = new User(Integer.parseInt(iduser));
+		if(user.isValid()){
+			Hashtable<String,ArrayList<ArrayList<String>>>  dashboard = db.getUserDashboard(iduser); 
+			ArrayList<Object> obs = new ArrayList<>();
+			obs.add(dashboard);
+			result = json.toJson(new MessageResponse(true,language,obs));
+		}else{
+			result = json.toJson(new MessageResponse(false,language,null));
+		}
+		return result;
+	}
+	
+	
 	
 	public String getUsers(Hashtable<String, String[]> args){
 		Gson json = new Gson();
@@ -128,12 +151,12 @@ public class DataProcessor {
 		String usertoEmail = userto.getEmail();
 		if((usertoEmail != null) && (!usertoEmail.equals(""))){
 			if(usertoEmail.indexOf("/") >= 0 ){
-				MailTool.sendMailInHtml("CDIS Patient Message", "<h2>Hello Admin</h2> <p>The user "+userto.getFirstname()+" "+userto.getLastname()+" with the username  <b>"+userto.getUsername()+"</b> does not have a valid email defined. Please contact user and set the email.</p>", "support@grvtech.ca");
+				MailTool.sendMailInHtml("CDIS Patient Message", "<h2>Hello Admin</h2> <p>The user "+userto.getFirstname()+" "+userto.getLastname()+" with the username  <b>"+userto.getUsername()+"</b> does not have a valid email defined. Please contact user and set the email.</p>", "admins@grvtech.ca");
 			}else{
 				MailTool.sendMailInHtml("CDIS Patient Message", "<h2>Hello "+userto.getFirstname()+" "+userto.getLastname()+"</h2> <p>There is a new patient message addressed to you in CDIS.<br><br>Please login to CDIS to see the message!.<br><br><b>Thank you.</b></p>", usertoEmail);
 			}
 		}else{
-			MailTool.sendMailInHtml("CDIS Patient Message", "<h2>Hello Admin</h2> <p>The user "+userto.getFirstname()+" "+userto.getLastname()+" with the username  <b>"+userto.getUsername()+"</b> does not have a valid email defined. Please contact user and set the email.</p>", "support@grvtech.ca");
+			MailTool.sendMailInHtml("CDIS Patient Message", "<h2>Hello Admin</h2> <p>The user "+userto.getFirstname()+" "+userto.getLastname()+" with the username  <b>"+userto.getUsername()+"</b> does not have a valid email defined. Please contact user and set the email.</p>", "admins@grvtech.ca");
 		}
 		
 		ArrayList<Object> obs = new ArrayList<Object>();
@@ -164,25 +187,7 @@ public class DataProcessor {
 		return result;
 	}
 	
-	public String activateUser(Hashtable<String, String[]> args){
-		Gson json = new Gson();
-		ChbDBridge db = new ChbDBridge();
-		String result = "";
-		String language = ((String[])args.get("language"))[0];
-		String iduser = ((String[])args.get("iduser"))[0].trim();
-		
-		User u = new User(Integer.parseInt(iduser));
-		u.setActive("1");
-		u.setPhone("");
-		db.setUser(u);
-		
-		String messagEmail = "<b><p>Hello "+u.getFirstname()+" "+u.getLastname()+"</p></b><p>Your CDIS account was activated.<br>You can login to CDIS by clicking <a href='http://cdis.reg18.rtss.qc.ca/ncdis/'>HERE</a><br> Your login information:<br><b>Username:</b>"+u.getUsername()+"<br><b>Password:</b>"+u.getPassword()+"<br><b>For any problems you can contact <a href='mailto:support@grvtech.ca'>CDIS Support</a></p>";
-		MailTool.sendMailInHtml("CDIS User Activation", messagEmail, u.getEmail());
-		
-		ArrayList<Object> obs = User.getUsers();
-		result = json.toJson(new MessageResponse(true,language,obs));
-		return result;
-	}
+	
 	
 	public String saveUser(Hashtable<String, String[]> args){
 		Gson json = new Gson();
@@ -198,7 +203,7 @@ public class DataProcessor {
 		u.setLastname(((String[])args.get("lastname"))[0]);
 		u.setEmail(((String[])args.get("email"))[0]);
 		u.setUsername(((String[])args.get("username"))[0]);
-		u.setPassword(((String[])args.get("password"))[0]);
+		
 		u.setPhone(((String[])args.get("phone"))[0]);
 		u.setIdcommunity(((String[])args.get("idcommunity"))[0]);
 		String profesion = ((String[])args.get("profession"))[0];
@@ -216,9 +221,18 @@ public class DataProcessor {
 			db.setUser(u);
 			db.setUserProfile(Integer.parseInt(u.getIduser()), 1, Integer.parseInt(((String[])args.get("role"))[0]));
 		}else{
+			u.setPassword(SecurityTool.encryptPassword("GRV"));
+			u.setReset("1");
 			int iu = db.addUser(u);
 			db.saveUserProfile(iu, 1, Integer.parseInt(((String[])args.get("role"))[0]));
+			//this method saves paassword GRV so we need to send to user email to reset password
+			// only if is new user - for existing keep password - new user has iduser=0 so we need to update iduser
+			String[] iua = {Integer.toString(iu)};
+			args.put("iduser", iua);
+			sendResetUserPassword(args);
 		}
+		
+		
 		
 		ArrayList<Object> obs = User.getUsers();
 		result = json.toJson(new MessageResponse(true,language,obs));
@@ -241,6 +255,35 @@ public class DataProcessor {
 			db.setUser(user);
 			ArrayList<Object> obs = new ArrayList<>();
 			obs.add(user);
+			result = json.toJson(new MessageResponse(true,language,obs));
+		}else{
+			result = json.toJson(new MessageResponse(false,language,null));
+		}
+		return result;
+	}
+	
+	
+	public String sendResetUserPassword(Hashtable<String, String[]> args){
+		Gson json = new Gson();
+		ChbDBridge db = new ChbDBridge();
+		String result = "";
+		
+		String language = ((String[])args.get("language"))[0];
+		int iduser = Integer.parseInt(((String[])args.get("iduser"))[0]);
+		String server = ((String[])args.get("server"))[0];
+		
+		User user = new User(iduser);
+		
+		if(user.isValid()){
+			//db.setUser(user);
+			db.setResetPassword(user.getIduser(),"1");
+			String params = "rst=1&iduser="+user.getIduser(); 
+			String url = "https://"+server+"/ncdis/index.html?"+Base64.encodeBase64String(params.getBytes());
+			String messagEmail = "<b><p>CDIS Password reset</p></b><p>Hello "+user.getFirstname()+"<br> Click on the button below to reset your password<br><br><a href='"+url+"'>Reset Password</a></p>";
+			MailTool.sendMailInHtml("CDIS Password Reset", messagEmail, user.getEmail());
+			
+			ArrayList<Object> obs = new ArrayList<>();
+			//obs.add(user);
 			result = json.toJson(new MessageResponse(true,language,obs));
 		}else{
 			result = json.toJson(new MessageResponse(false,language,null));
@@ -648,9 +691,13 @@ public class DataProcessor {
 		String casem = ((String[])args.get("casem"))[0];
 		
 		String chr = ((String[])args.get("chrid"))[0];
+		String chrName = ((String[])args.get("chr"))[0];
 		String md = ((String[])args.get("mdid"))[0];
+		String mdName = ((String[])args.get("md"))[0];
 		String nut = ((String[])args.get("nutid"))[0];
+		String nutName = ((String[])args.get("nut"))[0];
 		String nur = ((String[])args.get("nurid"))[0];
+		String nurName = ((String[])args.get("nur"))[0];
 		Patient pat = null;
 		String chart = null, ramq = null, id = null;
 		if(args.get("ramq") != null){
@@ -710,7 +757,11 @@ public class DataProcessor {
 					patient.setStatus(1);
 				}
 			}
-			//if(!db.editValue(valueName, valueValue, valueDate, String.valueOf(pat.getIdpatient()), idvalue)){
+			
+			md = validateHcp(md,mdName);
+			chr = validateHcp(chr,chrName);
+			nut = validateHcp(nut,nutName);
+			nur = validateHcp(nur,nurName);
 			db.setHcpOfPatient(pat.getIdpatient(), casem, md, nut, nur, chr);
 			
 		}
@@ -721,6 +772,19 @@ public class DataProcessor {
 		Event.registerEvent(u.getIduser(), act.getIdaction(), 1, sid, pat.getRamq());
 		return result;
 	}
+	
+	public String validateHcp(String hcpid, String hcpName){
+		String result = "";
+		if(hcpid!=null && !hcpid.equals("")){
+			ChbDBridge chbdb = new ChbDBridge();
+			HashMap u = chbdb.getUser(Integer.parseInt(hcpid));
+			String name = (u.get("fname").toString().toLowerCase()+ u.get("lname").toString().toLowerCase()).replace(" ", "");
+			String hname = hcpName.toLowerCase().replace(" ", "");
+			if(name.equals(hname)){result = hcpid;}else{result="";}
+		}
+		return result;
+	}
+	
 	
 	public String addPatientRecord(Hashtable<String, String[]> args){
 		Gson json = new GsonBuilder().serializeNulls().create();

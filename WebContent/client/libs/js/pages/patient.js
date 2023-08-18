@@ -3,136 +3,6 @@
  * 
  */
 
-function loadPatientObject(key,value){
-	var patient = $.ajax({
-		  url: "/ncdis/service/data/getPatientRecord?sid="+sid+"&language=en&"+key+"="+value,
-		  type: "GET",
-		  async : false,
-		  cache : false,
-		  dataType: "json"
-		});
-		patient.done(function( json ) {
-			patientObjArray = json.objs;
-			patientObj = patientObjArray[0];
-		});
-		patient.fail(function( jqXHR, textStatus ) {
-			
-		  alert( "Request failed: " + textStatus );
-		});	
-}
-
-function getValueSectionArray(section, value, arr){
-	//cdisSection = section;
-	//var objSection = getObjectSection(arr);
-	var objSection = getObjectArray(section,arr);
-	var objValue = eval("objSection."+value);
-	
-	if(typeof(objValue) != 'undefined'){
-		return objValue.values;
-	}else{
-		return [];
-	}
-}
-
-function getValueObject(section, value, arr){
-	//cdisSection = section;
-	var objSection = getObjectArray(section,arr);
-	var objValue = eval("objSection."+value);
-	if(typeof(objValue) != 'undefined'){
-		objValue['name'] = value;
-		return objValue;
-	}else{
-		return {};
-	}
-}
-
-
-function getObjectArray(objectName, objectArray){
-	if(objectName == "mdvisits"){
-		return objectArray[3];
-	}else if(objectName == "lab"){
-		return objectArray[6];
-	}else if(objectName == "lipid"){
-		return objectArray[5];
-	}else if(objectName == "renal"){
-		return objectArray[4];
-	}else if(objectName == "complications"){
-		return objectArray[7];
-	}else if(objectName == "meds"){
-		return objectArray[9];
-	}else if(objectName == "miscellaneous"){
-		return objectArray[8];
-	}else if(objectName == "depression"){
-		return objectArray[10];
-	}else if(objectName == "diabet"){
-		var oa = objectArray[2];
-		 $.each(oa, function(key, value) {
-			var oarr = value.values;
-			$.each(oarr, function(k, v) {
-				var newvalues = {dtype:v.value, ddate:v.date , diabetcode:v.code, diabetidvalue:v.idvalue};
-				$.extend(true,v,newvalues);
-			});
-		 });
-		return oa;
-	}else if(objectName == "hcp"){
-		var oa = objectArray[1];
-		return oa;
-	}
-}
-
-
-
-function getObjectSection(arr){
-	
-	if(cdisSection == "mdvisits"){
-		return arr[3];
-	}else if(cdisSection == "lab"){
-		return arr[6];
-	}else if(cdisSection == "lipid"){
-		return arr[5];
-	}else if(cdisSection == "renal"){
-		return arr[4];
-	}else if(cdisSection == "complications"){
-		return arr[7];
-	}else if(cdisSection == "meds"){
-		return arr[9];
-	}else if(cdisSection == "miscellaneous"){
-		return arr[8];
-	}else if(cdisSection == "depression"){
-		return arr[10];
-	}
-}
-
-
-
-
-function getValueLimits(valueName){
-	var result = null;
-	
-	if(typeof(window['limits_'+valueName]) != 'undefined'){
-		result = window['limits_'+valueName];
-	}else{
-		var limits = $.ajax({
-			  url: "/ncdis/service/data/getValueLimits?sid="+sid+"&language=en&name="+valueName,
-			  type: "GET",
-			  async : false,
-			  cache : false,
-			  dataType: "json"
-			});
-			limits.done(function( json ) {
-				result = json.objs[0];
-			});
-			limits.fail(function( jqXHR, textStatus ) {
-			  alert( "Request failed: " + textStatus );
-			});
-	} 
-	return result;
-}
-
-
-
-
-
 /* function to draw graph of value like in abc graphs - for normal values : without _and_ or _or_ in name */
 function drawGraphValue(section, valueName){
 	// section get data for graph
@@ -175,9 +45,6 @@ function drawGraphBP(){
 function drawGraphOrValues(valueName, condition){
 	
 }
-
-
-
 
 function loadGraphValue(graphContainer, values, labels, title, limits, valueName){
 	graphContainer.empty();
@@ -315,7 +182,6 @@ function loadGraphValue(graphContainer, values, labels, title, limits, valueName
 		
 }
 
-
 function drawPiramidGraph(container,ticksArr,maleArr,femaleArr,valueName){
 	    var ticks = ticksArr;
 	    var male = maleArr;
@@ -423,7 +289,6 @@ function drawPiramidGraph(container,ticksArr,maleArr,femaleArr,valueName){
 	        $('.tp-table-'+v+'-'+v+' .value').stop(true, true).fadeOut(200).html('');
 	    });
 }
-
 
 
 function drawPiramidGraphImprovment(container,ticks,maleArr,femaleArr){
@@ -628,6 +493,7 @@ function drawPiramidGraphImprovment(container,ticks,maleArr,femaleArr){
 	
 }
 
+
 function drawPieGraph(container,dataObject){
 	
 	$(container).empty();
@@ -800,10 +666,6 @@ function drawAreaGraph(container, dataObject){
     );
 }
 
-
-
-
-
 function drawDoubleLineGraph(container, series, ticks, colors, labels){
 	$(container).empty();
 	var cid = $(container).attr("id");
@@ -919,8 +781,6 @@ function drawDoubleLineGraph(container, series, ticks, colors, labels){
     );
 }
 
-
-
 function drawBarLineGraph(container, dataObject){
 	$(container).empty();
 	var cid = $(container).attr("id");
@@ -1015,9 +875,7 @@ function drawBarLineGraph(container, dataObject){
 	              });
 }
 
-
-
-function drawLineGraph(container, dataObject){
+function drawLineGraphReport(container, dataObject){
 	
 	$(container).empty();
 	var cid = $(container).attr("id");
@@ -1130,7 +988,6 @@ function drawLineGraph(container, dataObject){
         }
     );
 }
-
 
 function drawLineGraphSimple(container, dataObject, options){
 	$(container).empty();
@@ -1285,8 +1142,6 @@ function drawLineGraphSimple(container, dataObject, options){
     );
 }
 
-
-
 function drawAreaStackedGraph(container, dataObject){
 	$(container).empty();
 	var cid = $(container).attr("id");
@@ -1435,7 +1290,6 @@ function drawAreaStackedGraph(container, dataObject){
     );
 }
 
-
 function drawPrevalenceLL(object){
 	var dataObject = object.data;
 	
@@ -1485,7 +1339,6 @@ function drawIncidenceLL(object){
 		drawDoubleLineIncidenceGraph(object.container,[serie1,serie2,serie3,serie4],ticks,colors,labels);
 	}
 }
-
 
 function drawDoubleLinePrevalenceGraph(container, series, ticks, colors, labels){
 	$(container).empty();
@@ -1583,7 +1436,12 @@ function drawDoubleLinePrevalenceGraph(container, series, ticks, colors, labels)
 		        highlightMouseOver: true,
 		        highlightMouseDown: false,
 		        highlightColor: null,
-		    }
+		    },
+		    smooth: true,
+            animation: {
+         	   speed: 2000,
+                show: true
+            }
 		},
 		grid: {
 	        drawBorder: true,
@@ -1676,7 +1534,6 @@ function drawDoubleLinePrevalenceGraph(container, series, ticks, colors, labels)
         }
     );
 }
-
 
 function drawDoubleLineIncidenceGraph(container, series, ticks, colors, labels){
 	$(container).empty();
@@ -1774,7 +1631,12 @@ function drawDoubleLineIncidenceGraph(container, series, ticks, colors, labels){
 		        highlightMouseOver: true,
 		        highlightMouseDown: false,
 		        highlightColor: null,
-		    }
+		    },
+		    smooth: true,
+            animation: {
+         	   speed: 2000,
+                show: true
+            }
 		},
 		grid: {
 	        drawBorder: true,

@@ -8,7 +8,7 @@ var currentInput = null;
 var currentDataName = null;
 var datasetReady = false;
 
-//console.log(userProfileObj);
+
 
 $.each(reportsObject.lists, function(i, v){
 	var raport = prepareDefinedReport(v.code);
@@ -60,9 +60,6 @@ function getSerie(valueName){
 	if(valueName == 'dateperiod') valueName = currentDataName+"_collecteddate";
 	if(valueName.indexOf('_collecteddate') >= 0){
 		dataset = originalDataset;
-		console.log('dataset');
-		console.log(dataset);
-		console.log(currentHeader);
 	}
 	
 	$.each(dataset, function(index, row){
@@ -161,7 +158,6 @@ function drawStatsForm(dataset, header){
 				    }
 				  );	
 		}else if(graph.type == "bar"){
-			//console.log(serie);
 			 $("#chart-"+i).jqplot([serie], {
 			        title:graph.title,
 			        // Provide a custom seriesColors array to override the default colors.

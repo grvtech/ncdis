@@ -1,10 +1,4 @@
-/*
- * link event to button to open the list
- * */
-$('#locallist-button').click(function(){
-	setTimeout(setEvent,100,"LLIST");
-	openList();
-});
+
 
 /*
  * global variable for list
@@ -90,6 +84,7 @@ function buildFrameList(container){
  * function to show the progress in words
  * use parameter to place progress
  * */
+/*
 var progressOn=false;
 function showProgress(container){
 	if(!progressOn){
@@ -109,7 +104,7 @@ function hideProgress(container){
 		progressOn=false;
 	});
 }
-
+*/
 function getAllPatients(report, community){
 	var result =0 ;
 	$.each(report.data.datasets,function(i,v){
@@ -1273,7 +1268,7 @@ function getPeriodSeries(){
 		}).done(function( json ) {
 			periodStatsData = json.objs[0];
 			$("#period-graph").css("background","#cdcdcd");
-			drawLineGraph($("#period-graph"), periodStatsData);
+			drawLineGraphReport($("#period-graph"), periodStatsData);
 		}).fail(function( jqXHR, textStatus ) {
 			
 		  alert( "Request failed: " + textStatus );
