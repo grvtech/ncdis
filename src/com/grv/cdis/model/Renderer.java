@@ -17,8 +17,8 @@ public class Renderer {
 	private static String[] operatorsStr = new String[] {"equal", "more than", "less than", "between", "starting", "until", "multi"};
 	private static String[] operatorsOp = new String[] {"=",">=","<=","between",">=","<=", "in"};
 	
-	private static String[] valueStr = new String[] {"90.0", "90.1"};
-	private static String[] valueValue = new String[] {"('1','2','3','4','10','11')", "('1','2')"};
+	private static String[] valueStr = new String[] {"90.0", "90.1", "90.2", "90.3"};
+	private static String[] valueValue = new String[] {"('1','2','3','4','10','11')", "('1','2')", "('3')", "('4')"};
 	
 	
 	public static String renderOperator(String opStr){

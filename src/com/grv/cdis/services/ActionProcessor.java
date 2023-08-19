@@ -800,6 +800,7 @@ public class ActionProcessor {
 	 * https://localhost/ncdis/service/action/encodeUsersPasswords
 	 * 
 	 * */
+	/*
 	public String encodeUsersPasswords(Hashtable<String, String[]> args){
 		Gson json = new Gson();
 		ChbDBridge chbdb = new ChbDBridge();
@@ -829,7 +830,7 @@ public class ActionProcessor {
 		}
 		return result;
 	}
-	
+	*/
 	
 	public String getFrontPageMessage(Hashtable<String, String[]> args){
 		
