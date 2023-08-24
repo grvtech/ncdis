@@ -141,7 +141,6 @@ public class MailTool {
 	    }
 	    return msg;
 	}
-	 
 	
 	
 	public static void sendMailInHtml(String subject, String htmlMessage, String to){
@@ -154,15 +153,29 @@ public class MailTool {
            String mail_subject = subject;
             
             
-           //Set mail properties
+           //Set mail properties 
             Properties props = System.getProperties();
             props.put("mail.transport.protocol", "smtp");
-            
             if(FileTool.getEmailProperty("smtp.tls").equals("true")){
             	props.put("mail.smtp.starttls.enable", "true");
-            	props.put("mail.smtp.ssl.trust", FileTool.getEmailProperty("smtp.host"));
             	props.put("mail.smtp.auth", "true");
-	            props.put("mail.debug", "false");
+            	//props.put("mail.smtp.socketFactory.port", FileTool.getEmailProperty("smtp.port"));
+            	props.put("mail.smtp.ssl.trust", FileTool.getEmailProperty("smtp.host"));
+            	//props.put("mail.smtp.ssl.protocols", "TLSv1,TLSv1.1,TLSv1.2");
+	            props.put("mail.debug", "true");
+            }else{
+            	props.remove("mail.smtp.starttls.enable");
+            	props.remove("mail.smtp.auth");
+            	props.remove("mail.smtp.ssl.trust");
+            	props.remove("mail.smtp.ssl.protocols");
+            }
+            
+            if(FileTool.getEmailProperty("smtp.ssl").equals("true")){
+            	props.put("mail.smtp.socketFactory.port", FileTool.getEmailProperty("smtp.port"));
+            	props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+            }else{
+            	props.remove("mail.smtp.socketFactory.port");
+            	props.remove("mail.smtp.socketFactory.class");
             }
             
             props.put("mail.smtp.host", FileTool.getEmailProperty("smtp.host"));
@@ -189,6 +202,7 @@ public class MailTool {
 	            	message.addRecipient(Message.RecipientType.CC,new InternetAddress(FileTool.getEmailProperty("admin.cc")));
 	            }else{
 	            	message.addRecipient(Message.RecipientType.TO,new InternetAddress(recipient_mail_id));
+	            	message.addRecipient(Message.RecipientType.CC,new InternetAddress(FileTool.getEmailProperty("admin.cc")));
 	            }
 	            
 	            
@@ -235,7 +249,8 @@ public class MailTool {
 	            //Conect to smtp server and send Email
 	            Transport transport = session.getTransport("smtp");            
 	            transport.connect(FileTool.getEmailProperty("smtp.host"), Email_Id, password);
-	            transport.sendMessage(message, message.getAllRecipients());
+	            //transport.sendMessage(message, message.getAllRecipients());
+	            transport.send(message);
 	            transport.close();
 	         
 	        }catch (MessagingException ex) {

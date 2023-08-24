@@ -640,7 +640,19 @@ function initAddPatientSection(){
 	/*
 	 * EVENTS
 	 * */
-	$("#radio-deceased input[type=radio]").on("change",function() {if($("input[name='deceased']:checked").val() == 1){$("#deceased-section").show();}else{$("#deceased-section").hide();}});
+	$("#radio-deceased input[type=radio]").on("change",function() {
+		if($("input[name='deceased']:checked").attr("id") == "deceased-yes-value"){
+			$("input[name='deceased']:checked").val("1");
+			$("#deceased-section").show();
+			$("#deceased-yes-value").prop("checked",true);
+			$("#deceased-no-value").prop("checked",false);
+		}else{
+			$("input[name='deceased']:checked").val("0");
+			$("#deceased-section").hide();
+			$("#deceased-yes-value").prop("checked",false);
+			$("#deceased-no-value").prop("checked",true);
+		}
+	});
 	$("#radio-sex label").on("change",function() {$("input[name='sex']").val($(this).find("input[type='radio']").val());});
 	$("#cancel-addpatient").on("click",function() {gts(sid,"en");});
 	$("#add-patient").on("click",addPatient);
@@ -688,6 +700,8 @@ function populateAddPatientConfirm(event) {
 		        	  $(v).text(report_dtype[$("#"+idv+"-value").val()]);
 		          }else if(idv == 'idcommunity'){
 		        	  $(v).text(report_idcommunity[$("#"+idv+"-value").val()]);
+		          }else if(idv == 'deceased'){
+		        	  if($("input[name='"+idv+"']:checked").val() == 0 ){$(v).text("No")}else{$(v).text("Yes")};
 		          }else{
 		        	  $(v).text($("#"+idv+"-value").val());
 		          }
@@ -713,13 +727,12 @@ function showAddPatientConfirm() {
   	  	var validDdate = validateDdate($("#ddate-value").val());
   	  	var validPhone = validatePhone($("#phone-value").val());
   	  	var validCommunity = validateCommunity($("#idcommunity-value").val());
-  		if(validRamq && validChart && validCommunity && validDtype && validDdate && validPhone){
+  		if(validRamq && validChart && validCommunity && validDtype && validDdate && validPhone && validDeceased){
   	  	  	$('#myModal').modal({
   	  		  keyboard: false
   	  		});
   	  	}
   	}	
-  	
 }
 
 /*
@@ -772,7 +785,19 @@ function initEditPatientSection(){
 	/*
 	 * EVENTS
 	 * */
-	$("#radio-deceased input[type=radio]").on("change",function() {if($("input[name='deceased']:checked").val() == 1){$("#deceased-section").show();}else{$("#deceased-section").hide();}});
+	$("#radio-deceased input[type=radio]").on("change",function() {
+		if($("input[name='deceased']:checked").attr("id") == "deceased-yes-value"){
+			$("input[name='deceased']:checked").val("1");
+			$("#deceased-section").show();
+			$("#deceased-yes-value").prop("checked",true);
+			$("#deceased-no-value").prop("checked",false);
+		}else{
+			$("input[name='deceased']:checked").val("0");
+			$("#deceased-section").hide();
+			$("#deceased-yes-value").prop("checked",false);
+			$("#deceased-no-value").prop("checked",true);
+		}
+	});
 	$("#radio-sex label").on("change",function() {$("input[name='sex']").val($(this).find("input[type='radio']").val());});
 	$("#chr-value").on("blur",function(){if($(this).val()== ""){$("#chrid").val("");}});
 	$("#md-value").on("blur",function(){if($(this).val()== ""){$("#mdid").val("");}});
@@ -911,7 +936,7 @@ function showEditPatientConfirm() {
   	var validCommunity = validateCommunity($("#idcommunity-value").val());
 
   		
-  	if(validRamq && validChart && validCommunity && validDtype && validDdate && validPhone){
+  	if(validRamq && validChart && validCommunity && validDtype && validDdate && validPhone && validDeceased){
   	  	$('#myModalEdit').modal({
   		  keyboard: false
   		});

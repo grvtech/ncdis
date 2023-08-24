@@ -1,0 +1,12 @@
+admin.1=margaret.odell.med@ssss.gouv.qc.ca
+admin.2=HPorada@ssss.gouv.qc.ca
+admin.3=Natasha.Courtenay@ssss.gouv.qc.ca
+admin.cc=support@grvtech.ca
+smtp.host=smtp.reg18.rtss.qc.ca
+smtp.port=25
+smtp.tls=true
+smtp.ssl=true
+smtp.user=gabrad01
+smtp.pass=canada01
+smtp.from=18TCR.No.Reply@ssss.gouv.qc.ca
+
