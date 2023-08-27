@@ -1,0 +1,16 @@
+ https://cdis.reg18.rtss.qc.ca/ncdis/service/action/encodeUsersPasswords
+ 
+ http://localhost/ncdis/service/import/importOmnilab
+ http://localhost/ncdis/service/import/exportRamq
+ 
+ https://localhost/ncdis/service/action/generateDataOutcomes
+  
+ http://localhost/ncdis/service/action/generateDataReport?rep=REP1
+ 
+ https://localhost/ncdis/service/action/generateDataReport?rep=LIST.ACGLU
+ 
+ 
+ https://localhost/ncdis/service/action/generateDataReport?rep=localist
+ 
+  
+  

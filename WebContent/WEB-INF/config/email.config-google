@@ -1,0 +1,12 @@
+admin.1=radu@grvtech.ca
+admin.2=radu@grvtech.com
+admin.3=raduvictorgabor@gmail.com
+admin.cc=support@grvtech.ca
+smtp.host=smtp.gmail.com
+smtp.port=587
+smtp.tls=true
+smtp.ssl=false
+smtp.user=raduvictorgabor@gmail.com
+smtp.pass=xkedbexnqcjvvfez
+smtp.from=18TCR.No.Reply@ssss.gouv.qc.ca
+
