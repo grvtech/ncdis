@@ -738,12 +738,18 @@ public class DataProcessor {
 				Value vdtype = dtypeArray.get(i);
 				String dtypeDateStr = vdtype.getDate();
 				String dtypeValueStr = vdtype.getValue();
-				if(dtypeDateStr.equals(valueDate)){
-					isUpdateDate = true;
+				// sometimes for unknown reason there is no diagnosis for existing patients
+				if(dtypeDateStr != null){
+					if(dtypeDateStr.equals(valueDate)){
+						isUpdateDate = true;
+					}
 				}
-				if(dtypeValueStr.equals(valueValue)){
-					isUpdateValue = true;
+				if(dtypeValueStr != null){
+					if(dtypeValueStr.equals(valueValue)){
+						isUpdateValue = true;
+					}
 				}
+				
 			}
 			
 			if(isUpdateDate && isUpdateValue){

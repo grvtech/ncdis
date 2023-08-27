@@ -701,7 +701,13 @@ function populateAddPatientConfirm(event) {
 		          }else if(idv == 'idcommunity'){
 		        	  $(v).text(report_idcommunity[$("#"+idv+"-value").val()]);
 		          }else if(idv == 'deceased'){
-		        	  if($("input[name='"+idv+"']:checked").val() == 0 ){$(v).text("No")}else{$(v).text("Yes")};
+		        	  if($("input[name='"+idv+"']:checked").val() == 0 ){
+		        		  $(v).text("No");
+		        		  $("#dod-value").val("");
+		        		  $("#dcause-value").val("");
+		        	  }else{
+		        		  $(v).text("Yes");
+		        	  }
 		          }else{
 		        	  $(v).text($("#"+idv+"-value").val());
 		          }
@@ -750,11 +756,6 @@ function initEditPatientSection(){
 
 	$(community).each(function(index, value) {$("#idcommunity-value").append($("<option />").val(index).text(value));});
 	$(dtype).each(function(index, value) {$("#dtype-value").append($("<option />").val(index).text(value));});
-
-	$("input[name='iscree']").filter("[value='0']").prop('checked', true);
-	$("input[name='iscree']").val(0);
-	$("input[name='deceased']").filter("[value='0']").prop('checked', true);
-	$("input[name='deceased']").val(0);
 	
 	diabetObj = getObjectArray("diabet",patientObjArray);
 	
@@ -762,6 +763,8 @@ function initEditPatientSection(){
 	/*
 	 * MAIN
 	 * */
+	
+	
 	$(".cdismenu").hide();
 	$(".side").hide();
 	$(".cdisbody_editpatient").fadeIn(350);
@@ -796,6 +799,8 @@ function initEditPatientSection(){
 			$("#deceased-section").hide();
 			$("#deceased-yes-value").prop("checked",false);
 			$("#deceased-no-value").prop("checked",true);
+			//make dod null and dcause null ????
+			
 		}
 	});
 	$("#radio-sex label").on("change",function() {$("input[name='sex']").val($(this).find("input[type='radio']").val());});
@@ -848,7 +853,7 @@ function getHcpObject(){
 function editPatient() {
 	$("#errortext-patient").html("");
 	var data = $('#editpatient-form').serialize();
-	data+="&sid="+sid+"&language=en&casem=&idpatient="+patientObjArray[0].idpatient
+	data+="&sid="+sid+"&language=en&casem=&idpatient="+patientObjArray[0].idpatient;
 	var save = $.ajax({
 		  url: "/ncdis/service/data/savePatientRecord",
 		  type: "POST",

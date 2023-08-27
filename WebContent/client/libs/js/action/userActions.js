@@ -1321,6 +1321,7 @@ function getValueLimits(valueName){
 
 function showProgress(container){
 	if(!progressOn){
+		$(container).css("position","relative");
 		var p = $('<div>',{id:"progress",class:"fullscreen-progress"}).appendTo(container);
 		var c = $('<div>',{class:"fullscreen-progress-container"}).appendTo(p);
 		var l = $('<div>',{class:"fullscreen-progress-container-logo"}).appendTo(c);

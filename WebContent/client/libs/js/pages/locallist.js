@@ -73,38 +73,14 @@ function buildFrameList(container){
 	$('<div>',{class:"gap"}).appendTo(body);
 	var c = $('<div>',{"id":"locallist-list",class:"fullscreen-modal-list"}).appendTo(body);
 	$('<div>',{class:"gap"}).appendTo(body);
-	showProgress(c);
+	
+	setTimeout(showProgress , 10, c);
+	
 	//$('<div>',{"id":"locallist-stats",class:"fullscreen-modal-stats"}).appendTo(body);
 	$('<div>',{class:"fullscreen-modal-footer"}).appendTo(container);
 }
 
 
-
-/*
- * function to show the progress in words
- * use parameter to place progress
- * */
-/*
-var progressOn=false;
-function showProgress(container){
-	if(!progressOn){
-		var p = $('<div>',{id:"progress",class:"fullscreen-progress"}).appendTo(container);
-		var c = $('<div>',{class:"fullscreen-progress-container"}).appendTo(p);
-		var l = $('<div>',{class:"fullscreen-progress-container-logo"}).appendTo(c);
-		var t = $('<div>',{class:"fullscreen-progress-container-text"}).appendTo(c);
-		progressOn=true;
-	}
-}
-function hideProgress(container){
-	$(container).find($("#progress")).fadeOut(500, function(){
-		$(container).find($("#progress")).remove();
-		progressOn=false;
-	}).delay(500, function(){
-		$(container).find($("#progress")).remove();
-		progressOn=false;
-	});
-}
-*/
 function getAllPatients(report, community){
 	var result =0 ;
 	$.each(report.data.datasets,function(i,v){
@@ -346,7 +322,7 @@ function drawToolbarButtons(container){
 	var genBtn = $("<button>",{class:"cisbutton"}).text("Generate List").appendTo($(".gr-2col2"));
 	//genBtn.prop("disabled","true");
 	genBtn.click(function(){
-		showProgress($("#locallist-list"));
+		setTimeout(showProgress,10,$("#locallist-list"));
 		if($("#age-filter-2").hasClass("selected")){
 			var min = isNaN($("#age-custom-min").val())?"0":($("#age-custom-min").val() === '')?"0":$("#age-custom-min").val();
 			var max = isNaN($("#age-custom-max").val())?"0":($("#age-custom-max").val() === '')?"0":$("#age-custom-max").val();
@@ -420,7 +396,7 @@ function drawToolbarLists(container){
 			$(".list-tab").removeClass("selected");
 			$(this).addClass("selected");
 			appFilter["list"] = $(this).attr("id").replace("list-",""); 
-			showProgress($("#locallist-list"));
+			setTimeout(showProgress,10,$("#locallist-list"));
 			setTimeout(drawList,1000,appFilter.list, listConfig, globalReport);
 		});
 	});
@@ -1296,7 +1272,8 @@ function getValueSeries(){
 	$("#s3")
 	.append($("<div>",{class:"title"}).text(tit))
 	.append($("<div>",{class:"tp-graph","id":"value-graph"}));
-	showProgress($("#value-graph"));
+	
+	setTimeout(showProgress,10,$("#value-graph"));
 	var trendStats = $.ajax({
 		  url: "/ncdis/service/data/getStatsData?sid="+sid+"&language=en",
 		  data : data,

@@ -35,6 +35,7 @@ initPandi();
 
 function initPandi(){
 	//$("#pandi").css("display","grid");
+	setTimeout(showProgress,10,$(".pandi-wraper"));
 	initPandiFilters();
 	getPandiNow();
 	getPandiHistory();
@@ -87,6 +88,7 @@ function initPandiFilters(){
 	
 	
 	var genBtn = $("#pandiApplyFilter").click(function(){
+		setTimeout(showProgress,10,$(".pandi-wraper"));
 		getPandiNow();
 		getPandiHistory();
 	});
@@ -194,7 +196,6 @@ function getPandiHistory(){
 		data["idcommunity"] = pandiFilter.pandiidcommunity;
 		data["sex"] = pandiFilter.pandisex;
 		
-		
 		$.ajax({
 			  url: "/ncdis/service/data/getPandiHistory?sid="+sid+"&language=en",
 			  data : data,
@@ -204,6 +205,8 @@ function getPandiHistory(){
 				ispandiLoaded = true;
 				drawExistingHistory(pandiObjects);
 				drawNewHistory(pandiObjects);
+				hideProgress($(".pandi-wraper"));
+				
 			}).fail(function( jqXHR, textStatus ) {
 				
 			  alert( "Request failed: " + textStatus );

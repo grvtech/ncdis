@@ -1537,7 +1537,7 @@ public class ActionProcessor {
 		            if (dir.isFile()) {
 		            	String dName = dir.getName();
 		            	String extension = dName.substring(dName.lastIndexOf(".")+1);
-		            	if(extension.equals("html")){
+		            	if(extension.equals("json")){
 		            		return true;
 		            	}else{
 		            		return false;

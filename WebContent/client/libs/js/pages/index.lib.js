@@ -321,7 +321,7 @@ function forgotPassword() {
   			  $("#dialog-forgot").dialog( "close" );
     		});	
 
-    }
+    } 
     return valid;
 }
 

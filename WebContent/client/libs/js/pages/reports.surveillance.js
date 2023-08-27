@@ -394,32 +394,16 @@ function buildStatsFrame(){
 	.append($("<div>",{class:"tp-graph","id":"period-graph"}));
 	
 	var tit = "HbA1C target";
-	/*
-	if(appFilter.hba1c == "1"){
-		tit+= "over 0.08"
-	}else if(appFilter.hba1c.indexOf("_") >= 0){
-		var ps = appFilter.hba1c.split("_");
-		tit += "between "+ps[0]+" and "+ps[1]+"."
-	}else{
-		
-	}
-	*/
 	$("#s3").empty();
 	$("#s3")
 	.append($("<div>",{class:"title"}).text(tit))
 	.append($("<div>",{class:"tp-graph","id":"value-graph"}));
-	
-	
-	showProgress($(".surveillance-stats"));
-	//var p = $("#surveillance");
-	//$(p).height($(".reportsbody_dashboard").height() - $("#tabs ul").outerHeight() - 200);
-	//alert($(".reportsbody_dashboard").height()+"   "+$("#tabs ul").outerHeight()+"  "+$(p).height()+"   "+$(".reportsbody_dashboard").width());
+	setTimeout(showProgress,10,$(".surveillance-stats"));
 }
 
 function drawToolbarFilters(container){
 	container.empty();
 	//container
-	
 	var grbut = $("<div>",{class:"gr-buttons"}).appendTo(container);
 	var genBtn = $("<button>",{class:"cisbutton"}).text("Apply filter").appendTo(grbut); 
 	genBtn.click(function(){
@@ -440,8 +424,6 @@ function drawToolbarFilters(container){
 			$("#age-custom-max").val(max);
 			appFilter["age"] = min+"_"+max;
 		}
-		
-		//showProgress($(".surveillance-stats"));
 		getNumberOfPatients();
 		buildStatsFrame();
 		refreshStatsOutcomes(1);
@@ -607,9 +589,9 @@ function drawToolbarFilters(container){
 
 function refreshStatsOutcomes(p){
 	setToolbar(appFilter);
-	setTimeout(getNewTrendSeries, 100,p);
-	setTimeout(getNewPeriodSeries, 200,p);
-	setTimeout(getNewValueSeries, 300,p);
+	setTimeout(getNewTrendSeries, 10,p);
+	setTimeout(getNewPeriodSeries, 20,p);
+	setTimeout(getNewValueSeries, 30,p);
 	if(p!=null){
 		removeStatsProgress();
 	}
@@ -617,7 +599,7 @@ function refreshStatsOutcomes(p){
 
 function removeStatsProgress(){
 	if(trendStatsDataFlag && periodStatsDataFlag && valueStatsDataFlag){
-		hideProgress($(".surveillance-stats"));
+		setTimeout(hideProgress, 500, $(".surveillance-stats"));
 		trendStatsDataFlag = false;
 		periodStatsDataFlag = false;
 		valueStatsDataFlag = false;

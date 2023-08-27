@@ -9,7 +9,8 @@ const pvalidationConfig = {
 		         {"id":"1","name":"No data in last 5 years (unless GDM) "},
 		         {"id":"2","name":"Age > 95"},
 		         {"id":"3","name":"Duplicate name"},
-		         {"id":"4","name":"Predm and last 2 HbA1c values > 0.065 "}
+		         {"id":"4","name":"Predm and last 2 HbA1c values > 0.065 "},
+		         {"id":"5","name":"Patients with no diabetes diagnostic in CDIS "}
 		         ]
 };
 
@@ -18,6 +19,7 @@ var list1Object = null;
 var list2Object = null;
 var list3Object = null;
 var list4Object = null;
+var list5Object = null;
 var listLoadedFlag = false;
 
 
@@ -57,7 +59,7 @@ function buildPListFrame(){
 	$("<div>",{class:"pvalidation-list-header"}).appendTo(container);
 	$("<div>",{class:"pvalidation-list-body"}).appendTo(container);
 	
-	showProgress($(".pvalidation-list"));
+	setTimeout(showProgress,10,$(".pvalidation-list"));
 }
 
 function drawPToolbarFilters(container){
@@ -70,7 +72,7 @@ function drawPToolbarFilters(container){
 	
 	var genBtn = $("<button>",{class:"cisbutton"}).text("Apply filter").appendTo(grbut);
 	genBtn.click(function(){
-		showProgress($(".pvalidation-list"));
+		setTimeout(showProgress,10,$(".pvalidation-list"));
 		buildPListFrame();
 		refreshPStats();
 	});
@@ -128,6 +130,7 @@ function getListSeries(){
 	if(pappFilter.idlist == "2") lo = list2Object;
 	if(pappFilter.idlist == "3") lo = list3Object;
 	if(pappFilter.idlist == "4") lo = list4Object;
+	if(pappFilter.idlist == "5") lo = list5Object;
 	var flag = false;
 	if(lo != null){
 		flag = true;
@@ -147,6 +150,7 @@ function getListSeries(){
 				if(pappFilter.idlist == "2") list2Object = sd;
 				if(pappFilter.idlist == "3") list3Object = sd;
 				if(pappFilter.idlist == "4") list4Object = sd;
+				if(pappFilter.idlist == "5") list5Object = sd;
 				listLoadedFlag = true;
 				drawPValidationList(applyPFilter(sd));
 			}).fail(function( jqXHR, textStatus ) {

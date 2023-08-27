@@ -144,7 +144,14 @@ public class CdisDBridge {
 			//Context envContext  = (Context)initContext.lookup("java:comp/env");
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
-		    cs=conn.prepareStatement("exec sp_getPatientByRamq ?");
+			String sql = "SELECT p.*, p.death_cause as dcause, pp.province_en as province, cc.name_en as community"
+					+ "		from ncdis.patient p"
+					+ "			left join ncdis.province pp on p.idprovince = pp.idprovince"
+					+ "			left join ncdis.community cc on p.idcommunity = cc.idcommunity"
+					+ "		where p.ramq = ? and p.active=1"; 
+			
+		    //cs=conn.prepareStatement("exec sp_getPatientByRamq ?");
+		    cs=conn.prepareStatement(sql);
 		    cs.setEscapeProcessing(true);
 		    cs.setQueryTimeout(90);
 		    cs.setString(1, ramq);
@@ -232,10 +239,6 @@ public class CdisDBridge {
 			//Context envContext  = (Context)initContext.lookup("java:comp/env");
 			ds = (DataSource)initContext.lookup("jdbc/ncdis");
 			conn = ds.getConnection();
-			String query = "update ncdis.ncdis.patient set ";
-			
-		    //cs=conn.prepareStatement("update ncdis.ncdis.patient set ramq=?, chart=?, band=?, giu=?, jbnqa=?, fname=?, lname=?, sex=?,dob=?, mfname=?, mlname=?, pfname=?, plname=?, address=?, postalcode=?, dod=?, death_cause=?, idcommunity=? where idpatient=?");
-			
 		    cs=conn.prepareStatement("update ncdis.ncdis.patient set chart=?, band=?, giu=?, jbnqa=?, fname=?, lname=?, sex=?,"
 		    		+ "dob=?, mfname=?, mlname=?, pfname=?, plname=?, address=?, postalcode=?, dod=?, death_cause=?, idcommunity=?, iscree=?, phone=? where idpatient=?");
 		    cs.setEscapeProcessing(true);
@@ -835,7 +838,7 @@ public class CdisDBridge {
 		Statement cs=null;
 		Connection conn = null;
 		boolean result = false;
-		String sql = "insert into ncdis.ncdis.cdis_value (idpatient, datevalue, value, iddata) values ("+idpatient+", '"+valueDate+"', '"+valueValue+"', (select iddata from ncdis.ncdis.cdis_data where data_code = '"+valueName+"'));";
+		String sql = "insert into ncdis.ncdis.cdis_value (idpatient, datevalue, value, iddata, entrydate) values ("+idpatient+", '"+valueDate+"', '"+valueValue+"', (select iddata from ncdis.ncdis.cdis_data where data_code = '"+valueName+"'), GETDATE());";
 		
 		try {
 			initContext = new InitialContext();
@@ -2898,6 +2901,43 @@ public class CdisDBridge {
 		    		+ "     on v1.idpatient = v2.idpatient) as vv "
 		    		+ " on mm.idpatient = vv.idpatient "
 		    		+ " where vv.value1 is not null and vv.value2 is not null ";
+		    	
+			}else if(idlist.equals("5")){
+				HashMap<String, String> hc1 = new HashMap<>();
+		    	hc1.put("column", "fullname");
+		    	hc1.put("name", "Full name");
+		    	header.add(hc1);
+		    	
+		    	HashMap<String, String> hc11 = new HashMap<>();
+		    	hc11.put("column", "ramq");
+		    	hc11.put("name", "RAMQ Number");
+		    	header.add(hc11);
+
+		    	HashMap<String, String> hc2 = new HashMap<>();
+		    	hc2.put("column", "chart");
+		    	hc2.put("name", "Chart");
+		    	header.add(hc2);
+
+		    	HashMap<String, String> hc3 = new HashMap<>();
+		    	hc3.put("column", "idcommunity");
+		    	hc3.put("name", "Community");
+		    	header.add(hc3);
+
+		    	HashMap<String, String> hc4 = new HashMap<>();
+		    	hc4.put("column", "dob");
+		    	hc4.put("name", "Date of birth");
+		    	header.add(hc4);
+
+		    	HashMap<String, String> hc5 = new HashMap<>();
+		    	hc5.put("column", "band");
+		    	hc5.put("name", "Band");
+		    	header.add(hc5);
+		    	
+		    	sql = "select pat.idpatient,pat.fullname, pat.ramq, pat.chart, pat.dob, pat.idcommunity, pat.band from "
+						+ " (select p.idpatient, concat(p.fname,' ',p.lname) as fullname, p.ramq, p.chart, p.dob, p.idcommunity, p.band from ncdis.ncdis.patient p "
+						+ " where p.active=1 and (p.dod='1900-01-01' or p.dod is null) ) as pat "
+						+ " where pat.idpatient not in (select cd.idpatient from ncdis.ncdis.cdis_value cd where cd.iddata=1)"
+						+ " ";
 		    	
 			}
 		    

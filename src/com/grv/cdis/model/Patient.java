@@ -173,9 +173,15 @@ public class Patient {
 		if(map.get("plname") != null){this.plname = ((String[])map.get("plname"))[0];}
 		if(map.get("address") != null){this.address = ((String[])map.get("address"))[0];}
 		if(map.get("postalcode") != null){this.postalcode = ((String[])map.get("postalcode"))[0];}
-
+		
 		if(map.get("dod") != null){this.dod = ((String[])map.get("dod"))[0];}
 		if(map.get("dcause") != null){this.dcause = ((String[])map.get("dcause"))[0];}
+		String deceased = ((String[])map.get("deceased"))[0];
+		if(deceased.equals("0")){
+			this.dod = "1900-01-01";
+			this.dcause = "";
+		}
+		
 		if(map.get("idcommunity") != null){this.idcommunity = ((String[])map.get("idcommunity"))[0];}
 		if(map.get("idprovince") != null){this.idprovince = ((String[])map.get("idprovince"))[0];}
 		if(map.get("phone") != null){this.phone = ((String[])map.get("phone"))[0];}
@@ -186,6 +192,7 @@ public class Patient {
 			//if()
 			result.setStatus(1);
 		}
+		
 		return result;
 	}
 	

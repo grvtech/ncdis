@@ -144,43 +144,6 @@ function drawg(){
 
 function initLocalPage(){
 	
-	/*
-	//load surveillance tabs as well
-	$("#surveillance").load("/ncdis/client/templates/reports.sur.html",function(){
-		setTimeout(setEvent,100,"SUR");
-		initSurveillance(1);
-		
-	});
-	*/
-	
-	/*
-	if(isDemo){
-		alert("This function is not available in demo mode");
-	}else{
-		//load patient validation tool
-		$("#pvalidation").load("/ncdis/client/templates/reports.patv.html",function(){
-			//setTimeout(setEvent,100,"PATV");
-			initPvalidation();
-		});
-	}
-	
-	//load patient validation tool
-	$("#pandi").load("/ncdis/client/templates/reports.pandi.html",function(){
-		//setTimeout(setEvent,100,"PANDI");
-		reportsSection = "pandi";
-		initPandi();
-	});
-	
-	if(isDemo){
-		//alert("This function si not available in demo mode");
-	}else{
-		//load import omnilab
-		$("#importomnilab").load("/ncdis/client/templates/reports.importomnilab.html",function(){
-			reportsSection = "importomnilab";
-			initImportOmnilab();
-		});
-	}
-	*/
 	if(isSurveillance){
 		reportsSection = "surveillance";
 		isSurveilance = false;

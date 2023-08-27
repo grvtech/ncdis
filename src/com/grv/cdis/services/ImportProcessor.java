@@ -12,6 +12,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -81,18 +82,156 @@ public class ImportProcessor {
 	public String importOmnilab(Hashtable<String, String[]> args){
 		Gson json = new Gson();
 		String result = "";
-		String chisasibiStr = importData("chisasibi");
-		String chibougamouStr = importData("chibougamou");
+		InitialContext ic;
+		SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+		Date now = new Date();
+		ArrayList<Hashtable<String,Object>> chisasibiStr = importData("chisasibi");
+		ArrayList<Hashtable<String,Object>> chibougamouStr = importData("chibougamou");
 		//MailTool.sendMailText("CDIS Import Interface", chisasibiStr+"\n\n"+chibougamouStr, "radu@grvtech.ca");
+		//MailTool.sendMailInHtml("CDIS Import Interface", "Chisasibi<br><br>Chibougamou", "support@grvtech.ca");
+
+		Hashtable<String, Object> rez = new Hashtable<>();
+		rez.put("chisasibi", chisasibiStr);
+		rez.put("chibougamou", chibougamouStr);
+		result = json.toJson(rez);	
 		
-		MailTool.sendMailInHtml("CDIS Import Interface", chisasibiStr+"<br><br>"+chibougamouStr, "support@grvtech.ca");
-		
-		result = json.toJson(chisasibiStr+"\n"+chibougamouStr);	
+		String rf = "";
+		File reportFile = null;
+		Date today = new Date();
+        SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd-MM-yyyy");
+        String dateStr = DATE_FORMAT.format(today);
+		try {
+			ic = new InitialContext();
+			rf = (String) ic.lookup("reports-folder");
+			reportFile = new File(rf+System.getProperty("file.separator")+"import"+System.getProperty("file.separator")+"import_"+dateStr+".json");
+			if(!reportFile.exists())reportFile.createNewFile();
+			FileWriter fw =  new FileWriter(reportFile,true);
+			fw.write(result);
+			fw.close();
+		} catch (NamingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		Date anow = new Date();
 		return result;
 	}
 	
 	
-	private static String updateData(Object obj, String[] vars, Hashtable<String, String> dataLine, Patient pat){
+	private static ArrayList<Hashtable<String, String>> updateData(Object obj, String[] vars, Hashtable<String, String> dataLine, Patient pat){
+		ArrayList<Hashtable<String, String>> result = new ArrayList<>();
+		CdisDBridge db = new CdisDBridge();
+		SimpleDateFormat fileFormat = new SimpleDateFormat("MM/dd/yyyy");
+	    SimpleDateFormat dbFormat = new SimpleDateFormat("yyyy-MM-dd");
+	    String date = dataLine.get("collecteddate");
+	    String ramq = dataLine.get("ramq");
+	    Date fileDate = null;
+		try {
+			fileDate = fileFormat.parse(date);
+		} catch (ParseException e1) {
+			e1.printStackTrace();
+		}
+		String var = "";
+		for(int x=0;x<vars.length;x++){
+			if(vars[x].equals("Pcr")){
+				var = "pccmgmmol";
+			}else if(vars[x].equals("Pcrg")){
+				var = "pcconvgg";
+			}else{
+				var = vars[x];
+			}
+			
+			String value = dataLine.get(var.toLowerCase());
+			 
+			
+			if(value == null || value.equals("")){
+
+			}else{
+				double fileDoubleValue = 0;
+				try{
+					if(value.indexOf(">") >= 0){
+						value = value.replaceAll(">", "");
+						fileDoubleValue = Double.parseDouble(value) + 1;
+					}else if(value.indexOf("<") >= 0){
+						value = value.replaceAll("<", "");
+						fileDoubleValue = Double.parseDouble(value) - 1;
+					}else if(value.indexOf("non") >= 0){
+						
+					}else if(value.indexOf("*") >= 0){
+						
+					}else if(value.indexOf("re") >= 0){
+						
+					}else if(value.equals(".")){
+						
+					}else if(value.equals("-")){
+						
+					}else if(value.equals("\\.")){
+						
+					}else if(value.equals("cancel")){
+						
+					}else if(value.indexOf("ann") >= 0){
+						
+					}else{
+						fileDoubleValue = Double.parseDouble(value);
+					}
+				}catch(NumberFormatException ex){
+					ex.printStackTrace();
+				}
+				Class<?> cls =  obj.getClass();
+				Values vals = new Values();
+				try {
+					Method m = Class.forName(cls.getName()).getDeclaredMethod("get"+vars[x]);
+					vals = (Values) m.invoke(obj);
+				} catch (SecurityException e) {
+					e.printStackTrace();
+				} catch (NoSuchMethodException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				} catch (ClassNotFoundException e) {
+					e.printStackTrace();
+				}
+				boolean inBD = false;
+
+				if(vals != null ){
+					ArrayList<Value> listVals = vals.getValues();
+					
+					ArrayList<String> valuesDates = new ArrayList<>();
+					for(int s =0; s<listVals.size();s++){
+						Value v = listVals.get(s);
+						valuesDates.add(v.getDate());
+					}
+					if(valuesDates.contains(dbFormat.format(fileDate))){
+						//date is already in db should I update ????
+					}else{
+						//date is not in db
+						if(fileDoubleValue > 0){
+							
+							if(vars[x].toLowerCase().equals("hba1c")){
+								if(fileDoubleValue > 1){
+									fileDoubleValue = fileDoubleValue * 0.01;
+								}
+							}
+							Hashtable<String, String> insert = new Hashtable<>();
+							insert.put("namevalue", vars[x].toLowerCase());
+							insert.put("datevalue",dbFormat.format(fileDate));
+							insert.put("value", Double.toString(fileDoubleValue));
+							result.add(insert);
+							db.addValue(vars[x].toLowerCase(), Double.toString(fileDoubleValue), dbFormat.format(fileDate), Integer.toString(pat.getIdpatient()));
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+
+	
+	private static String updateDataBackup(Object obj, String[] vars, Hashtable<String, String> dataLine, Patient pat){
 		String result = "0";
 		CdisDBridge db = new CdisDBridge();
 		SimpleDateFormat fileFormat = new SimpleDateFormat("MM/dd/yyyy");
@@ -246,11 +385,11 @@ public class ImportProcessor {
 		
 		return result;
 	}
-
 	
-	public String importData(String place){
+	
+	public ArrayList<Hashtable<String,Object>> importData(String place){
 		Gson json = new Gson();
-		String result = place.toUpperCase() + "\n";
+		ArrayList<Hashtable<String,Object>> result = new ArrayList<>();
 		CdisDBridge db = new CdisDBridge();
 		//download file 
 		Date today = new Date();
@@ -281,6 +420,8 @@ public class ImportProcessor {
 		try {
 			File importFile = new File(rf+System.getProperty("file.separator")+"files"+System.getProperty("file.separator")+"import-"+place+"_"+dateStr+".csv");
 			if(FtpTool.getFile(importFile.getAbsolutePath(), place)){
+			//if(importFile.exists()){
+			/*this is for local testing*/	
 				fw.write("File download from "+place+" - SUCCES\n");
 				FileInputStream fstream = new FileInputStream(importFile);
 				BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
@@ -339,69 +480,86 @@ public class ImportProcessor {
 				
 				//Close the input stream
 				br.close();
-				result += "File lines : "+nolines+".\n";
 				String lastramq = "";
-				result += "Total activity for this file : \n";
-				int inserts = 0;
-				int updates = 0;
+
 				for(int j=0;j<ramqs.size();j++){
 					String ramqStr = ramqs.get(j);
 					fw.write("Patient:"+ramqStr+" - ");
 					ArrayList<Hashtable<String, String>> dls = data.get(ramqStr);
-					int pinsLab=0 , pinsLipid=0, pinsRenal=0, pupsLab=0, pupsLipid=0, pupsRenal = 0;
-					boolean inCDIS = true;
-					for(int jj=0;jj<dls.size();jj++){
-						Hashtable<String, String> dl = dls.get(jj);
-						if(!ramqStr.equals(lastramq)){
-							pat = db.getPatientByRamq(ramqStr);
-							ren = (Renal)db.getAllValues("Renal","REN", pat.getIdpatient(), "");
-							lab = (Lab)db.getAllValues("Lab","LAB", pat.getIdpatient(), "");
-							lip = (Lipid)db.getAllValues("Lipid","LIP", pat.getIdpatient(), "");
-							lastramq = ramqStr;
+					
+					
+					List<Hashtable<String,String>> labP = new ArrayList();
+					List<Hashtable<String,String>> lipP = new ArrayList();
+					List<Hashtable<String,String>> renP = new ArrayList();
+					boolean hasLabIns=false, hasLipIns=false, hasRenIns=false;
+					Hashtable<String,Object> r = new Hashtable<>();
+					pat = db.getPatientByRamq(ramqStr);
+					r.put("ramq", ramqStr);
+					
+					
+					if(pat.isValidPatient()){
+						r.put("idcommunity", pat.getIdcommunity());
+						
+						for(int jj=0;jj<dls.size();jj++){
+							Hashtable<String, String> dl = dls.get(jj);
+							
+							Date d = new Date();
+							Calendar c = Calendar.getInstance();
+					        c.setTime(d);
+					        // treat only data from last 3 years 
+					        c.add(Calendar.YEAR, -3);
+					        
+					        Date testDate = c.getTime();
+							Date lineDate = fileFormat.parse(dl.get("collecteddate"));
+							
+							if(lineDate.after(testDate)){
+								if(!ramqStr.equals(lastramq)){
+									
+									ren = (Renal)db.getAllValues("Renal","REN", pat.getIdpatient(), "");
+									lab = (Lab)db.getAllValues("Lab","LAB", pat.getIdpatient(), "");
+									lip = (Lipid)db.getAllValues("Lipid","LIP", pat.getIdpatient(), "");
+									lastramq = ramqStr;
+								}
+								if(pat.getIdpatient() != 0){
+									
+									ArrayList<Hashtable<String,String>> ulab = updateData(lab, labVars, dl, pat);
+									ArrayList<Hashtable<String,String>> ulip = updateData(lip, lipidVars, dl, pat);
+									ArrayList<Hashtable<String,String>> uren = updateData(ren, renalVars, dl, pat);
+									
+									if(ulab.size() > 0 ){
+										labP.addAll(ulab);
+									}
+									if(ulip.size() > 0 ){
+										lipP.addAll(ulip);
+									}
+									if(uren.size() >0){
+										renP.addAll(uren);
+									}
+									
+								}
+							}
+							
 						}
-						if(pat.getIdpatient() != 0){
-							
-							String labUpdate = updateData(lab, labVars, dl, pat);
-							int isLab = parseCount("insert", labUpdate);
-							int usLab = parseCount("update", labUpdate);
-							inserts += isLab;
-							updates += usLab;
-							pinsLab += isLab;
-							pupsLab += usLab;
-							
-							String lipidUpdate = updateData(lip, lipidVars, dl, pat);
-							int isLipid = parseCount("insert", lipidUpdate);
-							int usLipid = parseCount("update", lipidUpdate);
-							inserts += isLipid;
-							updates += usLipid;
-							pinsLipid += isLipid;
-							pupsLipid += usLipid;
-							
-							
-							String renalUpdate = updateData(ren, renalVars, dl, pat);
-							int isRenal = parseCount("insert", renalUpdate);
-							int usRenal = parseCount("update", renalUpdate);
-							inserts += isRenal;
-							updates += usRenal;
-							pinsRenal += isRenal;
-							pupsRenal += usRenal;
-							
-							
-						}else{
-							inCDIS = false;
-						}	
+						if(labP.size() > 0){
+							hasLabIns = true;
+							r.put("lab", labP);
+						}
+						if(lipP.size() > 0){
+							hasLipIns = true;
+							r.put("lipid", lipP);
+						}
+						if(renP.size() > 0){
+							hasRenIns = true;
+							r.put("renal", renP);
+						}
+						if(hasLabIns || hasLipIns || hasRenIns){
+							result.add(r);
+						}
 					}
-					if(inCDIS){
-						fw.write("LAB="+pinsLab+":"+pupsLab+" - LIPID="+pinsLipid+":"+pupsLipid+" - RENAL="+pinsRenal+":"+pupsRenal+ " - DONE\n");
-					}else{
-						fw.write(" NOT IN CDIS\n");
-					}
+					
+					
 				}
-				result += "Total new values added from "+place.toUpperCase()+ ": "+inserts+"\n";
-				result += "Total values modified from "+place.toUpperCase()+ ": "+updates+"\n";
-				result += place.toUpperCase() + " - File imported\n";
 			}
-			
 			
 		}catch(Exception ex){
 			ex.printStackTrace();
